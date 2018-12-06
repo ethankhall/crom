@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Ethan Hall <ethan@ehdev.io>"]
 edition = "2018"
 
+[lib]
+name = "common"
+path = "src/common/lib.rs"
+
 [dependencies]
 log = "0.4.1"
 fern = { version = "0.5", features = ["colored"] }

@@ -6,8 +6,8 @@ extern crate log;
 
 use std::process;
 
-use crom::logging::configure_logging;
-use crom::run_init;
+use common::logging::configure_logging;
+use common::run_init;
 
 fn main() {
     let matches = clap_app!(MyApp =>

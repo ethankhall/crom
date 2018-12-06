@@ -5,7 +5,7 @@ use std::env;
 
 use toml;
 
-use super::models::{CromConfig, CromError};
+use crate::models::{CromConfig, CromError};
 
 pub fn find_and_parse_config() -> Result<CromConfig, CromError> {
     let path = env::current_dir()?;

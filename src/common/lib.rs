@@ -10,10 +10,13 @@ pub static CONFIG_FILE: &'static str = ".crom.toml";
 pub mod logging;
 pub mod models;
 pub mod config;
-mod commands;
+pub mod commands;
+pub mod git;
 
 use clap::ArgMatches;
 use std::io::Write;
+
+pub use self::logging::configure_logging;
 
 pub fn run_init(args: &ArgMatches) -> Result<i32, models::CromError> {
     let path = std::env::current_dir()?.join(CONFIG_FILE);
