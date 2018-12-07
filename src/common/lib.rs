@@ -33,7 +33,7 @@ pub fn run_init(args: &ArgMatches) -> Result<i32, models::CromError> {
         }
     }
 
-    commands::write_default_config(pattern, path.clone())?;
+    commands::init::write_default_config(pattern, path.clone())?;
 
     info!("Created {:#?}. Please update it to match your project's specific needs.", path);
     return Ok(0);
