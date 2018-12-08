@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::vec::Vec;
 
 use git2::*;
-use crate::models::*;
+use crate::error::*;
 
 pub struct Repo {
     repo: Repository

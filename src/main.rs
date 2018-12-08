@@ -6,8 +6,7 @@ extern crate log;
 
 use std::process;
 
-use common::logging::configure_logging;
-use common::run_init;
+use common::configure_logging;
 
 fn main() {
     let matches = clap_app!(MyApp =>
@@ -76,23 +75,16 @@ fn main() {
     );
 
     let command_result = match matches.subcommand() {
-        ("init", Some(arg_matches)) => run_init(arg_matches),
-        ("get", Some(arg_matches)) => {
-            match arg_matches.subcommand() {
-                ("current_version", Some(run_matches)) => unimplemented!(),
-                ("next_version", Some(run_matches)) => unimplemented!(),
-                ("projects", Some(run_matches)) => unimplemented!(),
-                _ => unreachable!()
-            }
-        },
+        ("init", Some(arg_matches)) => common::commands::init::handle_init_command(arg_matches),
+        ("get", Some(arg_matches)) => common::commands::get::handle_get_command(arg_matches),
         ("set", Some(arg_matches)) => {
             match arg_matches.subcommand() {
-                ("version_pattern", Some(run_matches)) => unimplemented!(),
+                ("version-pattern", Some(run_matches)) => unimplemented!(),
                 _ => unreachable!()
             }
         },
-        ("claim_version", Some(arg_matches)) => run_init(arg_matches),
-        ("update_version", Some(arg_matches)) => run_init(arg_matches),
+        ("claim-version", Some(arg_matches)) => unimplemented!(),
+        ("update-version", Some(arg_matches)) => unimplemented!(),
         // ("time", Some(time_matches)) => do_time_command(time_matches),
         // ("har", Some(time_matches)) => do_har_command(time_matches),
         _           => unreachable!()
