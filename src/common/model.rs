@@ -11,14 +11,14 @@ pub struct Version {
 
 impl Version {
     fn new(parts: Vec<VersionComponent>, snapshot: bool) -> Version {
-        let is_only_static = parts.clone().into_iter().any(|x| {
+        let has_dynamic_version = parts.clone().into_iter().any(|x| {
             match x {
                 VersionComponent::Changing(_) => true,
                 VersionComponent::Static(_) => false
             }
         });
 
-        return Version { parts: parts, is_snapshot: snapshot, is_only_static: is_only_static }
+        return Version { parts: parts, is_snapshot: snapshot, is_only_static: !has_dynamic_version }
     }
 
     pub fn next_version(&self) -> Version {

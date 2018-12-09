@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-use toml;
 use toml_edit::{value, Document};
 
 use crate::error::*;
@@ -18,8 +17,7 @@ impl CargoUpdater {
         doc["package"]["version"] = value(version.to_string());
 
         let toml_string = doc.to_string();
-        let pretty_toml = toml::to_string_pretty(&toml_string)?;
-        let toml_bytes = pretty_toml.as_bytes();
+        let toml_bytes = toml_string.as_bytes();
 
         let mut file = File::create(path)?;
         file.write_all(toml_bytes)?;
