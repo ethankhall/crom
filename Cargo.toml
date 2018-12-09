@@ -9,7 +9,7 @@ name = "common"
 path = "src/common/lib.rs"
 
 [dependencies]
-log = "0.4.1"
+log = "0.4"
 fern = { version = "0.5", features = ["colored"] }
 clap = { version = "2.*", features = ["color"] }
 colored = "1.6"

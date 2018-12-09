@@ -29,6 +29,8 @@ impl Repo {
         let head = self.repo.head()?;
         let head_commit = head.peel_to_commit()?;
 
+        debug!("Comparing tag {:?} to head {:?}", tag_commit, head_commit);
+
         if tag_commit.id() != head_commit.id() {
             return Ok(false);
         }

@@ -45,13 +45,16 @@ fn print_version(args: &ArgMatches, modification: VersionModification) -> Result
             match repo.is_version_head(&latest_version) {
                 Ok(true) => latest_version,
                 Ok(false) => latest_version.next_snapshot(),
-                Err(_) => latest_version
+                Err(msg) => { 
+                    debug!("Unable to compair version to HEAD: {:?}", msg);
+                    latest_version
+                }
             }
         },
         VersionModification::OneMore => latest_version.next_version()
     };
 
-    println!("{}", return_version);
+    info!("{}", return_version);
 
     return Ok(0);
 }

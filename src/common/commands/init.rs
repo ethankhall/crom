@@ -12,7 +12,7 @@ use crate::config::*;
 pub fn handle_init_command(args: &ArgMatches) -> Result<i32, CromError> {
     let path = std::env::current_dir()?.join(crate::CONFIG_FILE);
     let pattern = match args.value_of("bumper").unwrap() {
-        "semver" => "0.1.%d",
+        "semver" => "v0.1.%d",
         "atomic" => "%d",
         _ => unimplemented!()
     };
