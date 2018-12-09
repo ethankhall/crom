@@ -15,7 +15,9 @@ pub fn find_and_parse_config() -> Result<(PathBuf, CromConfig), CromError> {
     for ancestor in path.ancestors() {
         let test_path = ancestor.join(".crom.toml");
         if test_path.exists() {
-            return Ok((test_path.to_owned(), parse_config(test_path)?));
+            let config = parse_config(test_path)?;
+            let project_path = ancestor.to_owned();
+            return Ok((project_path, config));
         }
     }
 
