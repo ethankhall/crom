@@ -19,4 +19,8 @@ impl Repo {
 
         return Ok(tags.iter().map(|x| x.unwrap().to_string()).collect());
     }
+
+    pub fn is_tag_current_change(self, version: String) -> Result<bool, CromError> {
+        return Ok(true);
+    }
 }

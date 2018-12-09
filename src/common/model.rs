@@ -1,0 +1,127 @@
+use std::fmt::{Display, Formatter, self};
+
+use crate::error::*;
+
+#[derive(Debug, Clone)]
+pub struct Version {
+    parts: Vec<VersionComponent>
+}
+
+impl Version {
+    pub fn next_version(&self) -> Version {
+        let parts: Vec<VersionComponent> = self.parts.clone().into_iter().map(|x| {
+            match x {
+                VersionComponent::Static(part) => VersionComponent::Static(part),
+                VersionComponent::Changing(part) => VersionComponent::Changing(part + 1)
+            }
+        }).collect();
+
+        return Version{ parts: parts };
+    }
+}
+
+#[derive(Debug, Clone)]
+enum VersionComponent {
+    Static(String),
+    Changing(i32)
+}
+
+impl Display for Version {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        let parts: Vec<String> = self.parts.clone().into_iter().map(|x| {
+            match x {
+                VersionComponent::Static(part) => part,
+                VersionComponent::Changing(part) => format!("{}", part)
+            }
+        }).collect();
+
+        let joined = parts.join(".");
+        write!(f, "{}", joined)
+    }
+}
+
+#[derive(Debug)]
+enum VersionMatchComponent {
+    Static(String),
+    Dynamic
+}
+
+#[derive(Debug)]
+pub struct VersionMatcher {
+    pattern: Vec<VersionMatchComponent>
+}
+
+impl VersionMatcher {
+    pub fn new(pattern: String) -> Result<Self, CromError> {
+        let split: Vec<&str> = pattern.split(".").collect();
+        let parts: Vec<VersionMatchComponent> = split.into_iter().map(|x| {
+            return match x {
+                "%d" => VersionMatchComponent::Dynamic,
+                _ => VersionMatchComponent::Static(x.to_string())
+            };
+        }).collect();
+
+        return Ok(VersionMatcher{ pattern: parts });
+    }
+
+    pub fn build_default_version(&self, default: i32) -> Version {
+        let pattern = &self.pattern;
+        let parts: Vec<VersionComponent> = pattern.into_iter().map(|x| {
+            match x {
+                VersionMatchComponent::Static(v) => VersionComponent::Static(s!(v)),
+                VersionMatchComponent::Dynamic => VersionComponent::Changing(default)
+            }
+        }).collect();
+
+        return Version { parts: parts };
+    }
+
+    pub fn match_version(&self, input: String) -> Option<Version> {
+        let split: Vec<&str> = input.split(".").collect();
+
+        if split.len() != self.pattern.len() {
+            return None;
+        }
+
+        let mut version_parts: Vec<VersionComponent> = Vec::new();
+
+        for i in 0..split.len() {
+            let pattern_part = self.pattern.get(i).unwrap();
+            let split_part = split.get(i).unwrap();
+
+            match pattern_part {
+                VersionMatchComponent::Static(value) => {
+                    if value != split_part { 
+                        return None 
+                    } else { 
+                        version_parts.push(VersionComponent::Static(s!(value)));
+                    }
+                },
+                VersionMatchComponent::Dynamic => {
+                    let parsed = match split_part.parse::<i32>() {
+                        Err(_) => return None,
+                        Ok(v) => v
+                    };
+
+                    version_parts.push(VersionComponent::Changing(parsed));
+                }
+            }
+        }
+
+        return Some(Version{ parts: version_parts });
+    }
+}
+
+#[test]
+fn parse_semver() {
+    let matcher = VersionMatcher::new(s!("1.2.%d")).unwrap();
+
+    assert_eq!(s!("1.2.3"), matcher.match_version(s!("1.2.3")).unwrap().to_string());
+    assert_ne!(s!("2.2.3"), matcher.match_version(s!("1.2.3")).unwrap().to_string());
+    assert!(matcher.match_version(s!("1.2")).is_none());
+    assert!(matcher.match_version(s!("1.2.3.4")).is_none());
+
+    let matcher = VersionMatcher::new(s!("a.b.%d")).unwrap();
+    
+    assert_eq!(s!("a.b.3"), matcher.match_version(s!("a.b.3")).unwrap().to_string());
+}

@@ -7,13 +7,20 @@ extern crate log;
 
 pub static CONFIG_FILE: &'static str = ".crom.toml";
 
+#[macro_export]
+macro_rules! s {
+    ($x:expr) => {
+        $x.to_string()
+    };
+}
+
 mod logging;
 pub mod error;
 mod config;
 pub mod commands;
 pub mod git;
+pub mod model;
 
-use clap::ArgMatches;
 use std::io::Write;
 
 pub use self::logging::configure_logging;
