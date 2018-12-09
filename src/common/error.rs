@@ -11,6 +11,8 @@ pub enum CromError {
     TomlSave(String),
     UnableToFindConfig(String),
     GitError(String),
+    GitTagNotFound,
+    GitWorkspaceNotClean,
     UserInput,
     ConfigError(String),
     ProjectNameNeeded,
@@ -24,9 +26,11 @@ impl From<CromError> for i32 {
             CromError::TomlSave(_) => 21,
             CromError::UnableToFindConfig(_) => 30,
             CromError::ProjectNameNeeded => 31,
-            CromError::GitError(_) => 35,
-            CromError::UserInput => 40,
-            CromError::ConfigError(_) => 41,
+            CromError::GitError(_) => 40,
+            CromError::GitTagNotFound => 41,
+            CromError::GitWorkspaceNotClean => 42,
+            CromError::UserInput => 50,
+            CromError::ConfigError(_) => 51,
         }
     }
 }

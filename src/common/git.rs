@@ -35,7 +35,24 @@ impl Repo {
             return Ok(false);
         }
 
+        return self.is_working_repo_clean();
+    }
+
+    pub fn is_working_repo_clean(&self) -> Result<bool, CromError> {
         let status = self.repo.statuses(Some(&mut StatusOptions::new()))?;
         return Ok(status.is_empty());
+    }
+
+    pub fn tag_version(&self, version: &Version) -> Result<bool, CromError> {
+        let head = self.repo.head()?.peel_to_commit()?;
+        let sig = git2::Signature::now("crom", "cli@crom.tech")?;
+        let message = format!("Crom is creating a version {}.", version);
+        
+        return match self.repo.tag(&format!("{}", version), head.as_object(), &sig, &message, false) {
+            Ok(_) => Ok(true),
+            Err(e) => {
+                return Err(CromError::GitError(e.to_string()));
+            }
+        };
     }
 }

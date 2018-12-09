@@ -52,8 +52,8 @@ fn main() {
                 (@arg project: -p --project +takes_value "Name of the project to operate on")
                 (@arg PATTERN:  +required +takes_value { |a| if a.contains("%d") { Ok(()) } else {Err(String::from("Must contain %d")) }} "Pattern to use for versions"))
         )
-        (@subcommand claim_version =>
-            (name: "claim-version")
+        (@subcommand tag_version =>
+            (name: "tag-version")
             (about: "Tags the current repo with the next version")
             (long_about: "Finds the most recent version in the tags, and set the version to be one more than that. When running this command we expect files to be consistant with the repo. That means that there are no changes to tracked files. This way we can ensure that a tag is for something `real`.")
             (@arg project: -p --project +takes_value "Name of the project to operate on")
@@ -83,7 +83,7 @@ fn main() {
                 _ => unreachable!()
             }
         },
-        ("claim-version", Some(arg_matches)) => unimplemented!(),
+        ("tag-version", Some(arg_matches)) => common::commands::exec::exec_claim_version(arg_matches),
         ("update-version", Some(arg_matches)) => unimplemented!(),
         // ("time", Some(time_matches)) => do_time_command(time_matches),
         // ("har", Some(time_matches)) => do_har_command(time_matches),

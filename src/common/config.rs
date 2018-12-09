@@ -8,6 +8,7 @@ use toml;
 
 use crate::error::CromError;
 use crate::model::*;
+use crate::git::*;
 
 pub fn find_and_parse_config() -> Result<(PathBuf, CromConfig), CromError> {
     let path = env::current_dir()?;
@@ -47,6 +48,19 @@ pub struct ProjectConfig {
 impl ProjectConfig {
     pub fn build_version_matcher(&self) -> Result<VersionMatcher, CromError> {
         return VersionMatcher::new(self.pattern.clone());
+    }
+
+    pub fn get_current_versions(&self, repo: &Repo) -> Result<Vec<Version>, CromError> {
+        let version_matcher = self.build_version_matcher()?;
+        let versions: Vec<Version> = repo.get_tags()?.into_iter()
+            .filter_map(|tag| version_matcher.match_version(tag))
+            .collect();
+
+        return Ok(versions);
+    }
+
+    pub fn build_default_version(&self) -> Result<Version, CromError> {
+        return Ok(self.build_version_matcher()?.build_default_version(0));
     }
 }
 
