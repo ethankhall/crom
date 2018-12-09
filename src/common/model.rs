@@ -5,11 +5,27 @@ use crate::error::*;
 #[derive(Debug, Clone)]
 pub struct Version {
     parts: Vec<VersionComponent>,
-    is_snapshot: bool
+    is_snapshot: bool,
+    is_only_static: bool
 }
 
 impl Version {
+    fn new(parts: Vec<VersionComponent>, snapshot: bool) -> Version {
+        let is_only_static = parts.clone().into_iter().any(|x| {
+            match x {
+                VersionComponent::Changing(_) => true,
+                VersionComponent::Static(_) => false
+            }
+        });
+
+        return Version { parts: parts, is_snapshot: snapshot, is_only_static: is_only_static }
+    }
+
     pub fn next_version(&self) -> Version {
+        if self.is_only_static {
+            warn!("Attempting to bump a static only version!");
+        }
+
         let parts: Vec<VersionComponent> = self.parts.clone().into_iter().map(|x| {
             match x {
                 VersionComponent::Static(part) => VersionComponent::Static(part),
@@ -17,7 +33,7 @@ impl Version {
             }
         }).collect();
 
-        return Version{ parts: parts, is_snapshot: false };
+        return Version::new(parts, false);
     }
 
     pub fn next_snapshot(&self) -> Version {
@@ -27,7 +43,13 @@ impl Version {
     }
 }
 
-#[derive(Debug, Clone)]
+impl From<String> for Version {
+    fn from(input: String) -> Self {
+        return Version::new(vec![VersionComponent::Static(input)], false);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 enum VersionComponent {
     Static(String),
     Changing(i32)
@@ -83,7 +105,7 @@ impl VersionMatcher {
             }
         }).collect();
 
-        return Version { parts: parts, is_snapshot: false };
+        return Version::new(parts, false);
     }
 
     pub fn match_version(&self, input: String) -> Option<Version> {
@@ -118,7 +140,7 @@ impl VersionMatcher {
             }
         }
 
-        return Some(Version { parts: version_parts, is_snapshot: false });
+        return Some(Version::new(version_parts, false));
     }
 }
 

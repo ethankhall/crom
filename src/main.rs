@@ -43,15 +43,16 @@ fn main() {
             (@subcommand projects =>
                 (about: "Lists projects avaliable"))
         )
-        (@subcommand set =>
-            (about: "Set config within the project")
-            (@setting SubcommandRequiredElseHelp)
-            (@subcommand version_pattern =>
-                (name: "version-pattern")
-                (about: "Sets the version pattern from this point on. It's required to have `%d` somewhere in the path")
-                (@arg project: -p --project +takes_value "Name of the project to operate on")
-                (@arg PATTERN:  +required +takes_value { |a| if a.contains("%d") { Ok(()) } else {Err(String::from("Must contain %d")) }} "Pattern to use for versions"))
-        )
+        // TODO: This would be nice, but not for now...
+        // (@subcommand set =>
+        //     (about: "Set config within the project")
+        //     (@setting SubcommandRequiredElseHelp)
+        //     (@subcommand version_pattern =>
+        //         (name: "version-pattern")
+        //         (about: "Sets the version pattern from this point on. It's required to have `%d` somewhere in the path")
+        //         (@arg project: -p --project +takes_value "Name of the project to operate on")
+        //         (@arg PATTERN:  +required +takes_value { |a| if a.contains("%d") { Ok(()) } else {Err(String::from("Must contain %d")) }} "Pattern to use for versions"))
+        // )
         (@subcommand tag_version =>
             (name: "tag-version")
             (about: "Tags the current repo with the next version")
@@ -64,7 +65,7 @@ fn main() {
             (about: "Set the version to be most recent from tags")
             (@arg project: -p --project +takes_value "Name of the project to operate on")
             // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits ")
-            (@arg version: --("override-version") +takes_value "Don't look at history, use this value instead"))
+            (@arg override_version: --("override-version") +takes_value "Don't look at history, use this value instead"))
         ).get_matches();
 
     
@@ -77,16 +78,8 @@ fn main() {
     let command_result = match matches.subcommand() {
         ("init", Some(arg_matches)) => common::commands::init::handle_init_command(arg_matches),
         ("get", Some(arg_matches)) => common::commands::get::handle_get_command(arg_matches),
-        ("set", Some(arg_matches)) => {
-            match arg_matches.subcommand() {
-                ("version-pattern", Some(_run_matches)) => unimplemented!(),
-                _ => unreachable!()
-            }
-        },
         ("tag-version", Some(arg_matches)) => common::commands::exec::exec_claim_version(arg_matches),
         ("update-version", Some(arg_matches)) => common::commands::exec::exec_update_version(arg_matches),
-        // ("time", Some(time_matches)) => do_time_command(time_matches),
-        // ("har", Some(time_matches)) => do_har_command(time_matches),
         _           => unreachable!()
     };
 

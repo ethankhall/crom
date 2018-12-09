@@ -19,7 +19,10 @@ pub fn exec_update_version(args: &ArgMatches) -> Result<i32, CromError> {
     };
 
     let repo = Repo::new(root_path.clone())?;
-    let latest_version = get_latest_version(&repo, &project_config, VersionModification::NoneOrSnapshot)?;
+    let latest_version = match args.value_of("override_version") {
+        Some(version) => Version::from(s!(version)),
+        None => get_latest_version(&repo, &project_config, VersionModification::NoneOrSnapshot)?
+    };
 
     if project_config.version_files.is_empty() {
         return Err(CromError::ConfigError(s!("No version files defined")));
