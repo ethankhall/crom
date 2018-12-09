@@ -4,7 +4,8 @@ use crate::error::*;
 
 #[derive(Debug, Clone)]
 pub struct Version {
-    parts: Vec<VersionComponent>
+    parts: Vec<VersionComponent>,
+    is_snapshot: bool
 }
 
 impl Version {
@@ -16,7 +17,13 @@ impl Version {
             }
         }).collect();
 
-        return Version{ parts: parts };
+        return Version{ parts: parts, is_snapshot: false };
+    }
+
+    pub fn next_snapshot(&self) -> Version {
+        let mut next_version = self.next_version();
+        next_version.is_snapshot = true;
+        return next_version;
     }
 }
 
@@ -36,7 +43,10 @@ impl Display for Version {
         }).collect();
 
         let joined = parts.join(".");
-        write!(f, "{}", joined)
+        match self.is_snapshot {
+            false => write!(f, "{}", joined),
+            true => write!(f, "{}-SNAPSHOT", joined)
+        }
     }
 }
 
@@ -73,7 +83,7 @@ impl VersionMatcher {
             }
         }).collect();
 
-        return Version { parts: parts };
+        return Version { parts: parts, is_snapshot: false };
     }
 
     pub fn match_version(&self, input: String) -> Option<Version> {
@@ -108,7 +118,7 @@ impl VersionMatcher {
             }
         }
 
-        return Some(Version{ parts: version_parts });
+        return Some(Version { parts: version_parts, is_snapshot: false });
     }
 }
 

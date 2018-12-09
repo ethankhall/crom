@@ -33,24 +33,30 @@ fn print_version(args: &ArgMatches, modification: VersionModification) -> Result
 
     let repo = Repo::new(root_path)?;
     let version_matcher = project_config.build_version_matcher()?;
-    let versions = get_current_version(repo, &version_matcher)?;
+    let versions = get_current_version(&repo, &version_matcher)?;
 
     let latest_version = match versions.last() {
         Some(v) => v.clone(),
         None => version_matcher.build_default_version(*DEFAULT_VERSION)
     };
 
-    let version_component = match modification {
-        VersionModification::NoneOrSnapshot => latest_version,
+    let return_version = match modification {
+        VersionModification::NoneOrSnapshot => {
+            match repo.is_version_head(&latest_version) {
+                Ok(true) => latest_version,
+                Ok(false) => latest_version.next_snapshot(),
+                Err(_) => latest_version
+            }
+        },
         VersionModification::OneMore => latest_version.next_version()
     };
 
-    println!("{}", version_component);
+    println!("{}", return_version);
 
     return Ok(0);
 }
 
-fn get_current_version(repo: Repo, version_matcher: &VersionMatcher) -> Result<Vec<Version>, CromError> {
+fn get_current_version(repo: &Repo, version_matcher: &VersionMatcher) -> Result<Vec<Version>, CromError> {
     let versions: Vec<Version> = repo.get_tags()?.into_iter()
         .filter_map(|tag| version_matcher.match_version(tag))
         .collect();
