@@ -32,14 +32,14 @@ fn main() {
                 (name: "current-version")
                 (about: "Geneated the current version number")
                 (long_about: "When the repo is unmodified, and pointing at a a tag, the tag name will be used, otherwise -SNAPSHOT will be appended after the lowest version bump part")
-                (@arg project: -p --project +takes_value "Name of the project to operate on")
-                (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits "))
+                (@arg project: -p --project +takes_value "Name of the project to operate on"))
+                // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits "))
             (@subcommand next_version =>
                 (name: "next-version")
                 (about: "Print what the next version will be")
                 (long_about: "Based on current config, what would the next version be for this project")
-                (@arg project: -p --project +takes_value "Name of the project to operate on")
-                (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits "))
+                (@arg project: -p --project +takes_value "Name of the project to operate on"))
+                // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits "))
             (@subcommand projects =>
                 (about: "Lists projects avaliable"))
         )
@@ -57,13 +57,13 @@ fn main() {
             (about: "Tags the current repo with the next version")
             (long_about: "Finds the most recent version in the tags, and set the version to be one more than that. When running this command we expect files to be consistant with the repo. That means that there are no changes to tracked files. This way we can ensure that a tag is for something `real`.")
             (@arg project: -p --project +takes_value "Name of the project to operate on")
-            (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits ")
+            // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits ")
             (@arg ignore_changes: --("ignore-changes") "Disables check for workspace changes"))
         (@subcommand update_version =>
             (name: "update-version")
             (about: "Set the version to be most recent from tags")
             (@arg project: -p --project +takes_value "Name of the project to operate on")
-            (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits ")
+            // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits ")
             (@arg version: --("override-version") +takes_value "Don't look at history, use this value instead"))
         ).get_matches();
 
@@ -79,12 +79,12 @@ fn main() {
         ("get", Some(arg_matches)) => common::commands::get::handle_get_command(arg_matches),
         ("set", Some(arg_matches)) => {
             match arg_matches.subcommand() {
-                ("version-pattern", Some(run_matches)) => unimplemented!(),
+                ("version-pattern", Some(_run_matches)) => unimplemented!(),
                 _ => unreachable!()
             }
         },
         ("tag-version", Some(arg_matches)) => common::commands::exec::exec_claim_version(arg_matches),
-        ("update-version", Some(arg_matches)) => unimplemented!(),
+        ("update-version", Some(arg_matches)) => common::commands::exec::exec_update_version(arg_matches),
         // ("time", Some(time_matches)) => do_time_command(time_matches),
         // ("har", Some(time_matches)) => do_har_command(time_matches),
         _           => unreachable!()
