@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::vec::Vec;
 
 use git2::*;
+use regex::Regex;
 
 use crate::error::*;
 use crate::model::*;
@@ -54,5 +55,31 @@ impl Repo {
                 return Err(CromError::GitError(e.to_string()));
             }
         };
+    }
+
+    pub fn get_head_sha(&self) -> Result<String, CromError> {
+        let head = self.repo.head()?.peel_to_commit()?;
+        let strs: Vec<String> = head.id()
+                .as_bytes()
+                .to_vec()
+                .iter()
+                .map(|x| format!("{:02x}", x))
+                .collect();
+        return Ok(strs.join(""));
+    }
+
+    pub fn get_owner_repo_info(&self) -> Result<(String, String), CromError> {
+        let config = self.repo.config()?;
+
+        let remote = config.get_string("remote.origin.url")?;
+
+        let re = Regex::new("(https://github.com/|git@github.com:)(?P<owner>.*?)/(?P<repo>.*?).git")?;
+
+        return match re.captures(&remote) {
+            Some(matches) => {
+                Ok((matches.name("owner").unwrap().as_str().to_string(), matches.name("repo").unwrap().as_str().to_string()))
+            },
+            None => Err(CromError::GitRemoteUnkown)
+        }
     }
 }

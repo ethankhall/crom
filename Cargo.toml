@@ -22,3 +22,5 @@ regex = "1.1"
 toml_edit = "0.1"
 rust-ini = "0.13"
 xmltree = "0.8"
+json = "*"
+mio_httpc = { version = "0.7", features = ["rtls"] }

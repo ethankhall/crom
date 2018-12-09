@@ -19,6 +19,8 @@ pub enum CromError {
     GitError(String),
     GitTagNotFound,
     GitWorkspaceNotClean,
+    GitRemoteUnkown,
+    GitHubError(String),
     UserInput,
     VersionFileNotFound,
     VersionFileFormatUnknown(String),
@@ -44,9 +46,17 @@ impl From<CromError> for i32 {
             CromError::GitError(_) => 40,
             CromError::GitTagNotFound => 41,
             CromError::GitWorkspaceNotClean => 42,
+            CromError::GitRemoteUnkown => 43,
+            CromError::GitHubError(_) => 44,
             CromError::UserInput => 50,
             CromError::ConfigError(_) => 51,
         }
+    }
+}
+
+impl From<mio_httpc::Error> for CromError {
+    fn from(error: mio_httpc::Error) -> Self {
+        CromError::GitHubError(format!("{}", error))
     }
 }
 

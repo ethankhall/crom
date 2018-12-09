@@ -1,9 +1,12 @@
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate json;
 extern crate toml;
 #[macro_use]
 extern crate log;
 extern crate xmltree;
+extern crate mio_httpc;
 
 pub static CONFIG_FILE: &'static str = ".crom.toml";
 
@@ -21,6 +24,7 @@ pub mod commands;
 pub mod git;
 pub mod model;
 pub mod updater;
+pub mod github;
 
 use std::io::Write;
 
