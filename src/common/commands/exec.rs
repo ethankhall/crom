@@ -6,6 +6,7 @@ use crate::error::*;
 use crate::git::*;
 use super::*;
 use crate::updater::*;
+use crate::github::*;
 
 pub fn exec_update_version(args: &ArgMatches) -> Result<i32, CromError> {
     let (root_path, configs) = crate::config::find_and_parse_config()?;
@@ -94,7 +95,13 @@ pub fn exec_claim_version(args: &ArgMatches) -> Result<i32, CromError> {
 
     let version = version.next_version();
 
-    match repo.tag_version(&version) {
+    let tag_result = match args.value_of("source").unwrap() {
+        "local" => repo.tag_version(&version),
+        "github" => GitHub::tag_version(&repo, &version),
+        _ => unreachable!()
+    };
+
+    match tag_result {
         Ok(true) => {
             info!("Created tag {}", version);
             return Ok(0);

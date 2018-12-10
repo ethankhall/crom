@@ -5,7 +5,7 @@ use crate::git::*;
 use crate::model::*;
 use crate::error::*;
 
-struct GitHub;
+pub struct GitHub;
 
 impl GitHub {
     pub fn tag_version(repo: &Repo, version: &Version) -> Result<bool, CromError> {
@@ -40,7 +40,7 @@ impl GitHub {
             .exec()?;
 
         if response_meta.status >= 300 {
-            error!("Response {} from GitHub was {}", response_meta.status, body.join(""));
+            error!("Response {} from GitHub was {}", response_meta.status, String::from_utf8(body)?);
             return Err(CromError::UnknownError(s!("Trouble talking to GitHub")));
         } else {
             return Ok(true);
