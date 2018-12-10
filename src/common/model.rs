@@ -1,6 +1,12 @@
 use std::fmt::{Display, Formatter, self};
+use std::path::PathBuf;
 
 use crate::error::*;
+
+pub struct Artifact {
+    pub name: String,
+    pub file_path: PathBuf
+}
 
 #[derive(Debug, Clone)]
 pub struct Version {

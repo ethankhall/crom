@@ -6,7 +6,8 @@ extern crate toml;
 #[macro_use]
 extern crate log;
 extern crate xmltree;
-extern crate mio_httpc;
+extern crate hyper;
+extern crate url;
 
 pub static CONFIG_FILE: &'static str = ".crom.toml";
 
