@@ -15,11 +15,10 @@ pub fn configure_logging(verbose: i32, warn: bool, quite: bool) {
     };
 
     let mut dispatch = Dispatch::new();
-    if level != Level::Trace || verbose + 2 < 5 {
-        dispatch = dispatch
-            .level_for("mio", Level::Warn.to_level_filter())
-            .level_for("tokio_core", Level::Warn.to_level_filter())
-            .level_for("hyper", Level::Warn.to_level_filter());
+    if verbose + 2 < 6 {
+        for library in vec!["want", "hyper", "mio", "rustls", "tokio_threadpool", "tokio_reactor"] {
+            dispatch = dispatch.level_for(library, Level::Warn.to_level_filter());
+        }
     }
 
     let result = configure_logging_output(level, dispatch)

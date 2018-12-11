@@ -6,8 +6,17 @@ use super::*;
 
 pub fn handle_get_command(args: &ArgMatches) -> Result<i32, CromError> {
     return match args.subcommand() {
-        ("current-version", Some(run_matches)) => print_version(run_matches, VersionModification::NoneOrSnapshot),
-        ("next-version", Some(run_matches)) => print_version(run_matches, VersionModification::OneMore),
+        ("current-version", Some(run_matches)) => {
+            let modifier = match run_matches.is_present("no_snapshot")  {
+                true => VersionModification::NoneOrOneMore,
+                false => VersionModification::NoneOrSnapshot
+            };
+
+            print_version(run_matches, modifier)
+        },
+        ("next-version", Some(run_matches)) => {
+            print_version(run_matches, VersionModification::OneMore)
+        },
         ("projects", Some(_run_matches)) => unimplemented!(),
         _ => unreachable!()
     }

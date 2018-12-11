@@ -22,6 +22,7 @@ pub enum CromError {
     GitWorkspaceNotClean,
     GitRemoteUnkown,
     GitHubError(String),
+    GitHubTokenMissing,
     UserInput,
     VersionFileNotFound,
     VersionFileFormatUnknown(String),
@@ -50,6 +51,7 @@ impl From<CromError> for i32 {
             CromError::GitWorkspaceNotClean => 42,
             CromError::GitRemoteUnkown => 43,
             CromError::GitHubError(_) => 44,
+            CromError::GitHubTokenMissing => 45,
             CromError::UserInput => 50,
             CromError::ConfigError(_) => 51,
         }
