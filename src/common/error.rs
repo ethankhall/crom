@@ -15,12 +15,14 @@ pub enum CromError {
     TomlSave(String),
     PomLoad,
     PomSave,
+    JsonLoad(String),
     UnableToFindConfig(String),
     GitError(String),
     GitTagNotFound,
     GitWorkspaceNotClean,
     GitRemoteUnkown,
     GitHubError(String),
+    GitHubTokenMissing,
     UserInput,
     VersionFileNotFound,
     VersionFileFormatUnknown(String),
@@ -39,6 +41,7 @@ impl From<CromError> for i32 {
             CromError::PropertySave(_) => 23,
             CromError::PomLoad => 24,
             CromError::PomSave => 25,
+            CromError::JsonLoad(_) => 26,
             CromError::UnableToFindConfig(_) => 30,
             CromError::ProjectNameNeeded => 31,
             CromError::VersionFileNotFound => 32,
@@ -48,15 +51,17 @@ impl From<CromError> for i32 {
             CromError::GitWorkspaceNotClean => 42,
             CromError::GitRemoteUnkown => 43,
             CromError::GitHubError(_) => 44,
+            CromError::GitHubTokenMissing => 45,
             CromError::UserInput => 50,
             CromError::ConfigError(_) => 51,
         }
     }
 }
 
-impl From<mio_httpc::Error> for CromError {
-    fn from(error: mio_httpc::Error) -> Self {
-        CromError::GitHubError(format!("{}", error))
+impl From<json::Error> for CromError {
+    fn from(error: json::Error) -> Self {
+        debug!("Error reading JONS: {}", error);
+        return CromError::JsonLoad(error.to_string());
     }
 }
 

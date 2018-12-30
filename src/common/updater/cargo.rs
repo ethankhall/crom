@@ -14,7 +14,13 @@ impl CargoUpdater {
     pub fn update_version(path: PathBuf, version: &Version) -> Result<(), CromError> {
         let text = read_file_to_string(&path)?;
         let mut doc = text.parse::<Document>().expect("invalid doc");
-        doc["package"]["version"] = value(version.to_string());
+        let mut version_str = s!(version);
+
+        if version_str.starts_with("v") {
+            version_str = version_str.replacen("v", "", 1);
+        }
+
+        doc["package"]["version"] = value(version_str);
 
         let toml_string = doc.to_string();
         let toml_bytes = toml_string.as_bytes();

@@ -1,6 +1,12 @@
 use std::fmt::{Display, Formatter, self};
+use std::path::PathBuf;
 
 use crate::error::*;
+
+pub struct Artifact {
+    pub name: String,
+    pub file_path: PathBuf
+}
 
 #[derive(Debug, Clone)]
 pub struct Version {
@@ -34,6 +40,10 @@ impl Version {
         }).collect();
 
         return Version::new(parts, false);
+    }
+
+    pub fn self_without_snapshot(&self) -> Version {
+        return Version::new(self.parts.clone(), false);
     }
 
     pub fn next_snapshot(&self) -> Version {
