@@ -36,7 +36,7 @@ jobs:
           curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
           $HOME/.cargo/bin/rustup target add x86_64-unknown-linux-musl
           sudo apt-get install -y cmake musl-tools
-          curl --location https://github.com/ethankhall/crom/releases/download/$(crom-version)/crom-linux -o ~/crom && chrom +x ~/crom
+          curl --location https://github.com/ethankhall/crom/releases/download/$(crom-version)/crom-linux -o ~/crom && chmod +x ~/crom
           ~/crom update-version --no-snapshot
 
           $HOME/.cargo/bin/cargo build --target=x86_64-unknown-linux-musl --release
@@ -53,7 +53,7 @@ jobs:
     steps:
       - script: |
           curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
-          curl --location https://github.com/ethankhall/crom/releases/download/$(crom-version)/crom-mac -o ~/crom && chrom +x ~/crom
+          curl --location https://github.com/ethankhall/crom/releases/download/$(crom-version)/crom-mac -o ~/crom && chmod +x ~/crom
           ~/crom update-version --no-snapshot
 
           $HOME/.cargo/bin/cargo test
@@ -79,7 +79,7 @@ jobs:
           downloadType: specific
           downloadPath: $(System.ArtifactsDirectory)/artifacts
       - script: |
-          cp SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-linux/crom ~/crom && chrom +x ~/crom
+          cp SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-linux/crom ~/crom && chmod +x ~/crom
           ~/crom tag-version --source local,github --ignore-changes
           ~/crom upload-artifacts \
             crom-windows.exe=$SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-windows/crom.exe \
