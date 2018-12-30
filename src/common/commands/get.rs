@@ -5,7 +5,7 @@ use crate::git::Repo;
 use super::*;
 
 pub fn handle_get_command(args: &ArgMatches) -> Result<i32, CromError> {
-    return match args.subcommand() {
+    match args.subcommand() {
         ("current-version", Some(run_matches)) => {
             let modifier = match run_matches.is_present("no_snapshot")  {
                 true => VersionModification::NoneOrOneMore,
@@ -17,9 +17,19 @@ pub fn handle_get_command(args: &ArgMatches) -> Result<i32, CromError> {
         ("next-version", Some(run_matches)) => {
             print_version(run_matches, VersionModification::OneMore)
         },
-        ("projects", Some(_run_matches)) => unimplemented!(),
-        _ => unreachable!()
+        ("projects", Some(_)) => unimplemented!(),
+        _ => print_projects()
     }
+}
+
+fn print_projects() -> Result<i32, CromError> {
+    let (_, configs) = crate::config::find_and_parse_config()?;
+
+    for key in configs.projects.keys() {
+        info!("- {}", key);
+    }
+
+    Ok(0)
 }
 
 fn print_version(args: &ArgMatches, modification: VersionModification) -> Result<i32, CromError> {
