@@ -32,7 +32,7 @@ fn main() {
                 (name: "current-version")
                 (about: "Geneated the current version number")
                 (long_about: "When the repo is unmodified, and pointing at a a tag, the tag name will be used, otherwise -SNAPSHOT will be appended after the lowest version bump part")
-                (@arg no_snapshot: --("no-snapshot") "Diable the `-SNAPSHOT` version postfix")
+                (@arg no_snapshot: --("no-snapshot") "Disable the `-SNAPSHOT` version postfix")
                 (@arg project: -p --project +takes_value "Name of the project to operate on"))
                 // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits "))
             (@subcommand next_version =>
@@ -67,7 +67,7 @@ fn main() {
             (about: "Set the version to be most recent from tags")
             (@arg project: -p --project +takes_value "Name of the project to operate on")
             // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits ")
-            (@arg no_snapshot: --("no-snapshot") "Diable the `-SNAPSHO` version postfix")
+            (@arg no_snapshot: --("no-snapshot") "Diable the `-SNAPSHOT` version postfix")
             (@arg override_version: --("override-version") +takes_value "Don't look at history, use this value instead"))
         (@subcommand upload_artifacts =>
             (name: "upload-artifacts")
