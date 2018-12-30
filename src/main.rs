@@ -60,7 +60,7 @@ fn main() {
             (long_about: "Finds the most recent version in the tags, and set the version to be one more than that. When running this command we expect files to be consistant with the repo. That means that there are no changes to tracked files. This way we can ensure that a tag is for something `real`.")
             (@arg project: -p --project +takes_value "Name of the project to operate on")
             // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits ")
-            (@arg source: --source +takes_value default_value[local] possible_value[local github] "Should the tag be created locally or on GitHub?")
+            (@arg source: --source +multiple +takes_value default_value[local] possible_value[local github] "Should the tag be created locally or on GitHub?")
             (@arg ignore_changes: --("ignore-changes") "Disables check for workspace changes"))
         (@subcommand update_version =>
             (name: "update-version")

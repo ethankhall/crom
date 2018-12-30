@@ -19,7 +19,7 @@ pub fn exec_update_version(args: &ArgMatches) -> Result<i32, CromError> {
     };
 
     let modifier = match args.is_present("no_snapshot")  {
-        true => VersionModification::NoneOrOneMore,
+        true => VersionModification::None,
         false => VersionModification::NoneOrSnapshot
     };
 
@@ -146,18 +146,20 @@ pub fn exec_claim_version(args: &ArgMatches) -> Result<i32, CromError> {
 
     let version = version.next_version();
 
-    let tag_result = match args.value_of("source").unwrap() {
-        "local" => repo.tag_version(&version),
-        "github" => GitHub::tag_version(&repo, &version),
-        _ => unreachable!()
-    };
+    for source in args.values_of("source").unwrap() {
+        let tag_result = match source {
+            "local" => repo.tag_version(&version),
+            "github" => GitHub::tag_version(&repo, &version),
+            _ => unreachable!()
+        };
+        
+        match tag_result {
+            Ok(true) => {},
+            Ok(false) => return Ok(1),
+            Err(err) => return Err(err)
+        };
+    }
 
-    match tag_result {
-        Ok(true) => {
-            info!("Created tag {}", version);
-            return Ok(0);
-        },
-        Ok(false) => return Ok(1),
-        Err(err) => return Err(err)
-    };
+    info!("Created tag {}", version);
+    Ok(0)
 }

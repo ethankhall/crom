@@ -42,6 +42,10 @@ impl Version {
         return Version::new(parts, false);
     }
 
+    pub fn self_without_snapshot(&self) -> Version {
+        return Version::new(self.parts.clone(), false);
+    }
+
     pub fn next_snapshot(&self) -> Version {
         let mut next_version = self.next_version();
         next_version.is_snapshot = true;

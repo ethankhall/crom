@@ -9,7 +9,7 @@ use crate::git::*;
 
 enum VersionModification {
     NoneOrSnapshot,
-    NoneOrOneMore,
+    None,
     OneMore
 }
 
@@ -32,10 +32,10 @@ fn get_latest_version(repo: &Repo, project_config: &ProjectConfig, modification:
                 }
             }
         },
-        VersionModification::NoneOrOneMore => {
+        VersionModification::None => {
             match repo.is_version_head(&latest_version) {
                 Ok(true) => latest_version,
-                Ok(false) => latest_version.next_version(),
+                Ok(false) => latest_version.self_without_snapshot(),
                 Err(msg) => { 
                     debug!("Unable to compair version to HEAD: {:?}", msg);
                     latest_version

@@ -79,12 +79,9 @@ jobs:
           downloadType: specific
           downloadPath: $(System.ArtifactsDirectory)/artifacts
       - script: |
-          curl --location https://github.com/ethankhall/release-manager/releases/download/v0.1.9/release-manager-linux -o ~/release-manager
-          chmod +x ~/release-manager
-          sudo apt-get install -y tree
-          tree $SYSTEM_ARTIFACTSDIRECTORY
-          ~/release-manager github release-and-bump
-          ~/release-manager github artifacts \
+          cp SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-linux/crom ~/crom && chrom +x ~/crom
+          ~/crom tag-version --source local,github --ignore-changes
+          ~/crom upload-artifacts \
             crom-windows.exe=$SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-windows/crom.exe \
             crom-mac=$SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-mac/crom \
             crom-linux=$SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-linux/crom

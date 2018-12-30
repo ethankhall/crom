@@ -8,7 +8,7 @@ pub fn handle_get_command(args: &ArgMatches) -> Result<i32, CromError> {
     match args.subcommand() {
         ("current-version", Some(run_matches)) => {
             let modifier = match run_matches.is_present("no_snapshot")  {
-                true => VersionModification::NoneOrOneMore,
+                true => VersionModification::None,
                 false => VersionModification::NoneOrSnapshot
             };
 
