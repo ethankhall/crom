@@ -1,6 +1,6 @@
 [package]
 name = "crom"
-version = "0.1.2"
+version = "999.9.9-SNAPSHOT"
 authors = ["Ethan Hall <ethan@ehdev.io>"]
 edition = "2018"
 
