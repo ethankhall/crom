@@ -19,10 +19,9 @@ use crate::model::*;
 pub struct GitHub;
 
 impl GitHub {
-    pub fn tag_version(repo: &Repo, version: &Version) -> Result<bool, CromError> {
+    pub fn tag_version(repo: &Repo, version: &Version, message: &str) -> Result<bool, CromError> {
         let head = repo.get_head_sha()?;
         let (owner, repo) = repo.get_owner_repo_info()?;
-        let message = format!("Crom is creating a version {}.", version);
 
         let url = format!(
             "https://api.github.com/repos/{owner}/{repo}/releases",
@@ -35,7 +34,7 @@ impl GitHub {
             "tag_name" => version.to_string(),
             "target_commitish" => head,
             "name" => version.to_string(),
-            "body" => message,
+            "body" => message.to_string(),
             "draft" => false,
             "prerelease" => false
         };

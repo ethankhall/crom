@@ -44,16 +44,15 @@ impl Repo {
         return Ok(status.is_empty());
     }
 
-    pub fn tag_version(&self, version: &Version) -> Result<bool, CromError> {
+    pub fn tag_version(&self, version: &Version, message: &str) -> Result<bool, CromError> {
         let head = self.repo.head()?.peel_to_commit()?;
         let sig = git2::Signature::now("crom", "cli@crom.tech")?;
-        let message = format!("Crom is creating a version {}.", version);
 
         return match self.repo.tag(
             &format!("{}", version),
             head.as_object(),
             &sig,
-            &message,
+            message,
             false,
         ) {
             Ok(_) => Ok(true),

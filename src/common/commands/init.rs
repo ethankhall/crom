@@ -38,6 +38,7 @@ fn write_default_config<P: AsRef<Path>>(default_format: &str, dest: P) -> Result
         pattern: format!("{}", default_format),
         version_files: vec![],
         included_paths: None,
+        message_template: None
     };
     let mut projects_map: HashMap<String, ProjectConfig> = HashMap::new();
     projects_map.insert(String::from("default"), project);

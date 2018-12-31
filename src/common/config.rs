@@ -44,6 +44,7 @@ pub struct ProjectConfig {
     pub pattern: String,
     pub version_files: Vec<String>,
     pub included_paths: Option<Vec<String>>,
+    pub message_template: Option<String>,
 }
 
 impl ProjectConfig {
@@ -64,6 +65,16 @@ impl ProjectConfig {
 
     pub fn build_default_version(&self) -> Result<Version, CromError> {
         return Ok(self.build_version_matcher()?.build_default_version(0));
+    }
+
+    pub fn make_message(&self, version: &Version) -> Result<String, CromError> {
+        let template = self.message_template.clone().unwrap_or(s!("Crom is creating a version {version}."));
+
+        if !template.contains("{version}") {
+            return Err(CromError::ConfigError(s!("The message_template didn't contain `{version}`.")))
+        }
+
+        Ok(template.replace("{version}", &version.to_string()))
     }
 }
 
@@ -86,6 +97,7 @@ mod test {
                     pattern: String::from("1.2.3.%d"),
                     version_files: vec![String::from("foo/bar")],
                     included_paths: None,
+                    message_template: None
                 };
                 assert_eq!(&project_config, config.projects.get("default").unwrap());
             }

@@ -178,11 +178,12 @@ pub fn exec_claim_version(args: &ArgMatches) -> Result<i32, CromError> {
     };
 
     let version = version.next_version();
+    let message = project_config.make_message(&version)?;
 
     for source in args.values_of("source").unwrap() {
         let tag_result = match source {
-            "local" => repo.tag_version(&version),
-            "github" => GitHub::tag_version(&repo, &version),
+            "local" => repo.tag_version(&version, &message),
+            "github" => GitHub::tag_version(&repo, &version, &message),
             _ => unreachable!(),
         };
 
