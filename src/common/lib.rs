@@ -5,9 +5,9 @@ extern crate json;
 extern crate toml;
 #[macro_use]
 extern crate log;
-extern crate xmltree;
 extern crate hyper;
 extern crate url;
+extern crate xmltree;
 
 pub static CONFIG_FILE: &'static str = ".crom.toml";
 
@@ -18,14 +18,14 @@ macro_rules! s {
     };
 }
 
-mod logging;
-pub mod error;
-mod config;
 pub mod commands;
+mod config;
+pub mod error;
 pub mod git;
+pub mod github;
+mod logging;
 pub mod model;
 pub mod updater;
-pub mod github;
 
 use std::io::Write;
 
@@ -44,5 +44,5 @@ fn are_you_sure(default: bool) -> Result<bool, CromError> {
             error!("Didn't understand. Please try again.");
             Err(CromError::UserInput)
         }
-    };    
+    };
 }

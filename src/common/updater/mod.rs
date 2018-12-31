@@ -3,8 +3,8 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 
 pub mod cargo;
-pub mod property;
 pub mod pom;
+pub mod property;
 
 use crate::error::*;
 

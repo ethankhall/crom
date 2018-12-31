@@ -1,14 +1,14 @@
+use std::collections::HashMap;
+use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
-use std::env;
-use std::collections::HashMap;
 
 use toml;
 
 use crate::error::CromError;
-use crate::model::*;
 use crate::git::*;
+use crate::model::*;
 
 pub fn find_and_parse_config() -> Result<(PathBuf, CromConfig), CromError> {
     let path = env::current_dir()?;
@@ -33,18 +33,17 @@ fn parse_config<P: AsRef<Path>>(path: P) -> Result<CromConfig, CromError> {
     return Ok(config);
 }
 
-
 #[derive(Serialize, Deserialize)]
 pub struct CromConfig {
     #[serde(flatten)]
-    pub projects: HashMap<String, ProjectConfig>
+    pub projects: HashMap<String, ProjectConfig>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ProjectConfig {
     pub pattern: String,
     pub version_files: Vec<String>,
-    pub included_paths: Option<Vec<String>>
+    pub included_paths: Option<Vec<String>>,
 }
 
 impl ProjectConfig {
@@ -54,7 +53,9 @@ impl ProjectConfig {
 
     pub fn get_current_versions(&self, repo: &Repo) -> Result<Vec<Version>, CromError> {
         let version_matcher = self.build_version_matcher()?;
-        let versions: Vec<Version> = repo.get_tags()?.into_iter()
+        let versions: Vec<Version> = repo
+            .get_tags()?
+            .into_iter()
             .filter_map(|tag| version_matcher.match_version(tag))
             .collect();
 
@@ -81,9 +82,13 @@ mod test {
         match parse_config(d) {
             Ok(config) => {
                 assert!(config.projects.contains_key("default"));
-                let project_config = ProjectConfig { pattern: String::from("1.2.3.%d"), version_files: vec![String::from("foo/bar")], included_paths:None };
+                let project_config = ProjectConfig {
+                    pattern: String::from("1.2.3.%d"),
+                    version_files: vec![String::from("foo/bar")],
+                    included_paths: None,
+                };
                 assert_eq!(&project_config, config.projects.get("default").unwrap());
-            },
+            }
             Err(err) => {
                 assert!(false, format!("{:?}", err));
             }

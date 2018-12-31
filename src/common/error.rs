@@ -1,9 +1,9 @@
 use std::io::Error as IoError;
 
-use toml::de::Error as DeTomlError;
-use toml::ser::Error as SeTomlError;
 use git2::Error as GitError;
 use ini::ini::ParseError as IniError;
+use toml::de::Error as DeTomlError;
+use toml::ser::Error as SeTomlError;
 
 #[derive(Debug)]
 pub enum CromError {

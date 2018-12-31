@@ -80,7 +80,6 @@ fn main() {
             (@arg FILE: +takes_value +multiple  +required "Files to be uploaded. Supports both `path`, and `name=path`. When name is omitted, the filename will be used"))
         ).get_matches();
 
-    
     configure_logging(
         matches.occurrences_of("debug") as i32,
         matches.is_present("warn"),
@@ -90,10 +89,16 @@ fn main() {
     let command_result = match matches.subcommand() {
         ("init", Some(arg_matches)) => common::commands::init::handle_init_command(arg_matches),
         ("get", Some(arg_matches)) => common::commands::get::handle_get_command(arg_matches),
-        ("tag-version", Some(arg_matches)) => common::commands::exec::exec_claim_version(arg_matches),
-        ("update-version", Some(arg_matches)) => common::commands::exec::exec_update_version(arg_matches),
-        ("upload-artifacts",  Some(arg_matches)) => common::commands::exec::exec_upload_artifacts(arg_matches),
-        _           => unreachable!()
+        ("tag-version", Some(arg_matches)) => {
+            common::commands::exec::exec_claim_version(arg_matches)
+        }
+        ("update-version", Some(arg_matches)) => {
+            common::commands::exec::exec_update_version(arg_matches)
+        }
+        ("upload-artifacts", Some(arg_matches)) => {
+            common::commands::exec::exec_upload_artifacts(arg_matches)
+        }
+        _ => unreachable!(),
     };
 
     let return_code = match command_result {

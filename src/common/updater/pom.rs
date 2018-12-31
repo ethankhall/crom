@@ -3,9 +3,9 @@ use std::path::PathBuf;
 
 use xmltree::{Element, EmitterConfig};
 
+use super::*;
 use crate::error::*;
 use crate::model::*;
-use super::*;
 
 pub struct PomUpdater;
 
@@ -19,7 +19,7 @@ impl PomUpdater {
             let config = EmitterConfig::new()
                 .perform_indent(true)
                 .normalize_empty_elements(false);
-            
+
             elements.write_with_config(File::create(path)?, config)?;
         }
         return Ok(());
