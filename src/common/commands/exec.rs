@@ -18,9 +18,11 @@ pub fn exec_update_version(args: &ArgMatches) -> Result<i32, CromError> {
         }
     };
 
-    let modifier = match args.is_present("no_snapshot")  {
-        true => VersionModification::None,
-        false => VersionModification::NoneOrSnapshot
+    let modifier = match args.value_of("pre_release").unwrap_or("snapshot").to_lowercase().as_str() {
+        "snapshot" => VersionModification::NoneOrSnapshot,
+        "none" => VersionModification::None,
+        "release" => VersionModification::NoneOrNext,
+        _ => unreachable!()
     };
 
     let repo = Repo::new(root_path.clone())?;

@@ -67,7 +67,7 @@ fn main() {
             (about: "Set the version to be most recent from tags")
             (@arg project: -p --project +takes_value "Name of the project to operate on")
             // (@arg repo: -r --repo +takes_value +multiple "Determine the project(s) to operate on based on provided commits ")
-            (@arg no_snapshot: --("no-snapshot") "Diable the `-SNAPSHOT` version postfix")
+            (@arg pre_release: --("pre-release") +takes_value default_value[snapshot] possible_value[snapshot release none] "If the version if pre-release, `snapshot` will append `-SNAPSHOT`, `release` will take the next version, `none` will omit it.")
             (@arg override_version: --("override-version") +takes_value "Don't look at history, use this value instead"))
         (@subcommand upload_artifacts =>
             (name: "upload-artifacts")
