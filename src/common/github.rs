@@ -24,7 +24,7 @@ impl GitHub {
         let (owner, repo) = repo.get_owner_repo_info()?;
         let message = format!("Crom is creating a version {}.", version);
 
-        let url = format!("https://api.github.com/repos/{owner}/{repo}/release", owner=owner, repo=repo);
+        let url = format!("https://api.github.com/repos/{owner}/{repo}/releases", owner=owner, repo=repo);
         debug!("URL to post to: {}", url);
 
         let body = object!{
