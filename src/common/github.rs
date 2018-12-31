@@ -1,20 +1,20 @@
-use std::path::PathBuf;
 use std::fs::File;
+use std::path::PathBuf;
 
-use std::io::prelude::*;
-use json::{self, JsonValue};
-use hyper::{Client, Request};
 use hyper::body::Body;
+use hyper::header::{ACCEPT, AUTHORIZATION, CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT};
 use hyper::rt::{Future, Stream};
+use hyper::{Client, Request};
 use indicatif::{ProgressBar, ProgressStyle};
-use hyper::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, CONTENT_LENGTH, USER_AGENT};
-use url::Url;
+use json::{self, JsonValue};
 use mime::Mime;
 use mime_guess::guess_mime_type;
+use std::io::prelude::*;
+use url::Url;
 
+use crate::error::*;
 use crate::git::*;
 use crate::model::*;
-use crate::error::*;
 
 pub struct GitHub;
 
@@ -24,7 +24,11 @@ impl GitHub {
         let (owner, repo) = repo.get_owner_repo_info()?;
         let message = format!("Crom is creating a version {}.", version);
 
-        let url = format!("https://api.github.com/repos/{owner}/{repo}/releases", owner=owner, repo=repo);
+        let url = format!(
+            "https://api.github.com/repos/{owner}/{repo}/releases",
+            owner = owner,
+            repo = repo
+        );
         debug!("URL to post to: {}", url);
 
         let body = object!{
@@ -62,16 +66,26 @@ impl GitHub {
         }
     }
 
-    pub fn publish_artifact(repo: &Repo, version: &Version, files: Vec<Artifact>) -> Result<(), CromError> {
+    pub fn publish_artifact(
+        repo: &Repo,
+        version: &Version,
+        files: Vec<Artifact>,
+    ) -> Result<(), CromError> {
         let (owner, repo) = repo.get_owner_repo_info()?;
-        let release_url = format!("https://api.github.com/repos/{owner}/{repo}/releases/tags/{version}", 
-            owner=owner, repo=repo, version=version);
+        let release_url = format!(
+            "https://api.github.com/repos/{owner}/{repo}/releases/tags/{version}",
+            owner = owner,
+            repo = repo,
+            version = version
+        );
 
         let spinner = ProgressBar::new_spinner();
-        spinner.set_style(ProgressStyle::default_spinner()
-            .tick_chars("/|\\- ")
-            .template("{spinner:.dim.bold} Processing request to {wide_msg}"));
-        
+        spinner.set_style(
+            ProgressStyle::default_spinner()
+                .tick_chars("/|\\- ")
+                .template("{spinner:.dim.bold} Processing request to {wide_msg}"),
+        );
+
         if !log_enabled!(log::Level::Trace) {
             spinner.enable_steady_tick(100);
             spinner.tick();
@@ -98,7 +112,7 @@ impl GitHub {
                         return Err(CromError::from(err));
                     }
                 }
-            },
+            }
             Err(err) => {
                 error!("Unable to access response from GitHub.");
                 return Err(CromError::GitHubError(err.to_string()));
@@ -109,7 +123,9 @@ impl GitHub {
             JsonValue::Object(obj) => obj,
             _ => {
                 error!("GitHub gave back a strange type.");
-                return Err(CromError::GitHubError(s!("GitHub gave back a strange type.")));
+                return Err(CromError::GitHubError(s!(
+                    "GitHub gave back a strange type."
+                )));
             }
         };
 
@@ -131,12 +147,15 @@ impl GitHub {
                     debug!("Failed Upload: {}", body_text);
                 }
                 error!("Failed to upload {} to GitHub", artifact.name);
-                return Err(CromError::UnknownError(format!("Unable to upload {}", artifact.name)))
+                return Err(CromError::UnknownError(format!(
+                    "Unable to upload {}",
+                    artifact.name
+                )));
             }
         }
 
         spinner.finish_and_clear();
-  
+
         return Ok(());
     }
 }
@@ -144,11 +163,15 @@ impl GitHub {
 fn find_api_token() -> Result<String, CromError> {
     return match std::env::var("GITHUB_TOKEN") {
         Ok(value) => Ok(format!("token {}", value)),
-        Err(_) => return Err(CromError::GitHubTokenMissing)
+        Err(_) => return Err(CromError::GitHubTokenMissing),
     };
 }
 
-fn make_file_upload_request(url: &str, expected_name: &str, file_path: PathBuf) -> Result<Request<Body>, CromError> {
+fn make_file_upload_request(
+    url: &str,
+    expected_name: &str,
+    file_path: PathBuf,
+) -> Result<Request<Body>, CromError> {
     let mut uri = Url::parse(&url).expect("Url to be valid");
     {
         let mut path = uri.path_segments_mut().expect("Cannot get path");

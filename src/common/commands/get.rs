@@ -1,24 +1,24 @@
 use clap::ArgMatches;
 
+use super::*;
 use crate::error::*;
 use crate::git::Repo;
-use super::*;
 
 pub fn handle_get_command(args: &ArgMatches) -> Result<i32, CromError> {
     match args.subcommand() {
         ("current-version", Some(run_matches)) => {
-            let modifier = match run_matches.is_present("no_snapshot")  {
+            let modifier = match run_matches.is_present("no_snapshot") {
                 true => VersionModification::None,
-                false => VersionModification::NoneOrSnapshot
+                false => VersionModification::NoneOrSnapshot,
             };
 
             print_version(run_matches, modifier)
-        },
+        }
         ("next-version", Some(run_matches)) => {
             print_version(run_matches, VersionModification::OneMore)
-        },
+        }
         ("projects", Some(_)) => unimplemented!(),
-        _ => print_projects()
+        _ => print_projects(),
     }
 }
 
@@ -39,7 +39,10 @@ fn print_version(args: &ArgMatches, modification: VersionModification) -> Result
     let project_config = match configs.projects.get(project_name) {
         Some(config) => config,
         None => {
-            return Err(CromError::ConfigError(format!("Unable to find project {}", project_name)));
+            return Err(CromError::ConfigError(format!(
+                "Unable to find project {}",
+                project_name
+            )));
         }
     };
 

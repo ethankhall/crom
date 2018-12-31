@@ -4,9 +4,9 @@ use std::path::PathBuf;
 
 use toml_edit::{value, Document};
 
+use super::*;
 use crate::error::*;
 use crate::model::*;
-use super::*;
 
 pub struct CargoUpdater;
 

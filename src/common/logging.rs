@@ -1,8 +1,8 @@
 use chrono::Local;
 use std::io::{stderr, stdout};
 
-use fern::Dispatch;
 use fern::colors::{Color, ColoredLevelConfig};
+use fern::Dispatch;
 use log::Level;
 
 pub fn configure_logging(verbose: i32, warn: bool, quite: bool) {
@@ -16,7 +16,14 @@ pub fn configure_logging(verbose: i32, warn: bool, quite: bool) {
 
     let mut dispatch = Dispatch::new();
     if verbose + 2 < 6 {
-        for library in vec!["want", "hyper", "mio", "rustls", "tokio_threadpool", "tokio_reactor"] {
+        for library in vec![
+            "want",
+            "hyper",
+            "mio",
+            "rustls",
+            "tokio_threadpool",
+            "tokio_reactor",
+        ] {
             dispatch = dispatch.level_for(library, Level::Warn.to_level_filter());
         }
     }

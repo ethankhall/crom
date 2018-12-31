@@ -8,7 +8,7 @@ use crate::error::*;
 use crate::model::*;
 
 pub struct Repo {
-    repo: Repository
+    repo: Repository,
 }
 
 impl Repo {
@@ -48,8 +48,14 @@ impl Repo {
         let head = self.repo.head()?.peel_to_commit()?;
         let sig = git2::Signature::now("crom", "cli@crom.tech")?;
         let message = format!("Crom is creating a version {}.", version);
-        
-        return match self.repo.tag(&format!("{}", version), head.as_object(), &sig, &message, false) {
+
+        return match self.repo.tag(
+            &format!("{}", version),
+            head.as_object(),
+            &sig,
+            &message,
+            false,
+        ) {
             Ok(_) => Ok(true),
             Err(e) => {
                 return Err(CromError::GitError(e.to_string()));
@@ -59,12 +65,13 @@ impl Repo {
 
     pub fn get_head_sha(&self) -> Result<String, CromError> {
         let head = self.repo.head()?.peel_to_commit()?;
-        let strs: Vec<String> = head.id()
-                .as_bytes()
-                .to_vec()
-                .iter()
-                .map(|x| format!("{:02x}", x))
-                .collect();
+        let strs: Vec<String> = head
+            .id()
+            .as_bytes()
+            .to_vec()
+            .iter()
+            .map(|x| format!("{:02x}", x))
+            .collect();
         return Ok(strs.join(""));
     }
 
@@ -78,14 +85,16 @@ impl Repo {
 }
 
 fn parse_remote(remote: &str) -> Result<(String, String), CromError> {
-    let re = Regex::new("^(https://github.com/|git@github.com:)(?P<owner>.+?)/(?P<repo>.+?)(\\.git)?$")?;
+    let re =
+        Regex::new("^(https://github.com/|git@github.com:)(?P<owner>.+?)/(?P<repo>.+?)(\\.git)?$")?;
 
     return match re.captures(remote) {
-        Some(matches) => {
-            Ok((matches.name("owner").unwrap().as_str().to_string(), matches.name("repo").unwrap().as_str().to_string()))
-        },
-        None => Err(CromError::GitRemoteUnkown(remote.to_string()))
-    }
+        Some(matches) => Ok((
+            matches.name("owner").unwrap().as_str().to_string(),
+            matches.name("repo").unwrap().as_str().to_string(),
+        )),
+        None => Err(CromError::GitRemoteUnkown(remote.to_string())),
+    };
 }
 
 #[test]
@@ -95,19 +104,19 @@ fn test_parse_remote_https() {
         Ok((owner, repo)) => {
             assert_eq!("ethankhall", owner);
             assert_eq!("crom", repo);
-        },
-        Err(_) => assert!(false)
+        }
+        Err(_) => assert!(false),
     };
 }
 
 #[test]
 fn test_parse_remote_git() {
     let https = parse_remote("git@github.com:ethankhall/crom.git");
-       match https {
+    match https {
         Ok((owner, repo)) => {
             assert_eq!("ethankhall", owner);
             assert_eq!("crom", repo);
-        },
-        Err(_) => assert!(false)
+        }
+        Err(_) => assert!(false),
     };
 }
