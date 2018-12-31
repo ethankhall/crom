@@ -1,5 +1,5 @@
 variables:
-  crom-version: v0.1.0
+  crom-version: v0.1.1
 
 trigger:
   branches:
