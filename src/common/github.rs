@@ -55,7 +55,7 @@ impl GitHub {
                 }
             };
 
-            error!("Response {} from GitHub was {}", status, body);
+            error!("Response {} from GitHub ({}) was {}", status, url, body);
             return Err(CromError::UnknownError(s!("Trouble talking to GitHub")));
         } else {
             return Ok(true);
