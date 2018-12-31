@@ -73,13 +73,41 @@ impl Repo {
 
         let remote = config.get_string("remote.origin.url")?;
 
-        let re = Regex::new("(https://github.com/|git@github.com:)(?P<owner>.*?)/(?P<repo>.*?).git")?;
-
-        return match re.captures(&remote) {
-            Some(matches) => {
-                Ok((matches.name("owner").unwrap().as_str().to_string(), matches.name("repo").unwrap().as_str().to_string()))
-            },
-            None => Err(CromError::GitRemoteUnkown)
-        }
+        parse_remote(&remote)
     }
+}
+
+fn parse_remote(remote: &str) -> Result<(String, String), CromError> {
+    let re = Regex::new("^(https://github.com/|git@github.com:)(?P<owner>.+?)/(?P<repo>.+?)(\\.git)?$")?;
+
+    return match re.captures(remote) {
+        Some(matches) => {
+            Ok((matches.name("owner").unwrap().as_str().to_string(), matches.name("repo").unwrap().as_str().to_string()))
+        },
+        None => Err(CromError::GitRemoteUnkown(remote.to_string()))
+    }
+}
+
+#[test]
+fn test_parse_remote_https() {
+    let https = parse_remote("https://github.com/ethankhall/crom");
+    match https {
+        Ok((owner, repo)) => {
+            assert_eq!("ethankhall", owner);
+            assert_eq!("crom", repo);
+        },
+        Err(_) => assert!(false)
+    };
+}
+
+#[test]
+fn test_parse_remote_git() {
+    let https = parse_remote("git@github.com:ethankhall/crom.git");
+       match https {
+        Ok((owner, repo)) => {
+            assert_eq!("ethankhall", owner);
+            assert_eq!("crom", repo);
+        },
+        Err(_) => assert!(false)
+    };
 }

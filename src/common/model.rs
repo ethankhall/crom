@@ -53,6 +53,15 @@ impl Version {
     }
 }
 
+#[test]
+fn test_next_version() {
+    let matcher = VersionMatcher::new(s!("1.2.3.%d")).unwrap();
+    let version = matcher.match_version(s!("1.2.3.5")).unwrap();
+
+    assert_eq!("1.2.3.5", version.to_string());
+    assert_eq!("1.2.3.6", version.next_version().to_string());
+}
+
 impl From<String> for Version {
     fn from(input: String) -> Self {
         return Version::new(vec![VersionComponent::Static(input)], false);

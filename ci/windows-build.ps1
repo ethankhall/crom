@@ -4,5 +4,5 @@ invoke-restmethod -usebasicparsing 'https://static.rust-lang.org/rustup/dist/i68
 remove-item rustup-init.exe
 invoke-restmethod -usebasicparsing 'https://github.com/ethankhall/crom/releases/download/v0.1.0/crom-windows.exe' -outfile 'crom.exe'
 ./crom.exe update-version --no-snapshot
-& "$env:USERPROFILE/.cargo/bin/cargo.exe" +nightly-x86_64-pc-windows-msvc test
 & "$env:USERPROFILE/.cargo/bin/cargo.exe" +nightly-x86_64-pc-windows-msvc build --release
+& "$env:USERPROFILE/.cargo/bin/cargo.exe" +nightly-x86_64-pc-windows-msvc test --release
