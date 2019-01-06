@@ -171,13 +171,10 @@ pub fn exec_claim_version(args: &ArgMatches) -> Result<i32, CromError> {
     let versions = project_config.get_current_versions(&repo)?;
 
     let version = match versions.last() {
-        Some(v) => v,
-        None => {
-            return Err(CromError::GitTagNotFound);
-        }
+        Some(v) => v.next_version(),
+        None => project_config.build_default_version()?
     };
 
-    let version = version.next_version();
     let message = project_config.make_message(&version)?;
 
     for source in args.values_of("source").unwrap() {

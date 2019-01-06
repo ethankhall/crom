@@ -9,8 +9,6 @@ trigger:
     exclude:
       - README.md
       - docs
-      - version.properties
-      - Cargo.toml
 
 jobs:
   - job: Windows_Build
@@ -33,6 +31,7 @@ jobs:
       vmImage: 'ubuntu-16.04'
     steps:
       - script: |
+          set -e
           curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
           $HOME/.cargo/bin/rustup target add x86_64-unknown-linux-musl
           sudo apt-get install -y cmake musl-tools
@@ -52,6 +51,7 @@ jobs:
       vmImage: 'macOS-10.13'
     steps:
       - script: |
+          set -e
           curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
           curl --location https://github.com/ethankhall/crom/releases/download/$(crom-version)/crom-mac -o ~/crom && chmod +x ~/crom
           ~/crom update-version --pre-release release
@@ -79,6 +79,7 @@ jobs:
           downloadType: specific
           downloadPath: $(System.ArtifactsDirectory)/artifacts
       - script: |
+          set -e
           cp $SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-linux/crom ~/crom && chmod +x ~/crom
           ~/crom tag-version --source local,github --ignore-changes
           ~/crom upload-artifacts \
