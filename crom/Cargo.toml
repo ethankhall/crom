@@ -1,0 +1,34 @@
+[package]
+name = "crom"
+version = "999.9.9-SNAPSHOT"
+authors = ["Ethan Hall <ethan@ehdev.io>"]
+edition = "2018"
+
+[lib]
+name = "common"
+path = "src/common/lib.rs"
+
+[dependencies]
+log = "0.4"
+fern = { version = "0.5", features = ["colored"] }
+clap = { version = "2.*", features = ["color"] }
+colored = "1.6"
+git2 = { version = "0.7", default-features = false }
+chrono = "0.4"
+serde = "1.0"
+serde_derive = "1.0"
+toml = "0.4"
+regex = "1.1"
+toml_edit = "0.1"
+rust-ini = "0.13"
+xmltree = "0.8"
+json = "*"
+hyper-rustls = "0.15"
+hyper = "0.12"
+indicatif = "0.10"
+http = "0.1"
+tokio = "0.1"
+mime_guess = "2.0.0-alpha.6"
+mime = "0.3.5"
+futures = "0.1.25"
+url = "1.7"
