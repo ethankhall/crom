@@ -5,13 +5,12 @@ use std::path::PathBuf;
 use toml_edit::{value, Document};
 
 use super::*;
-use crate::error::*;
-use crate::model::*;
+use crate::Version;
 
 pub struct CargoUpdater;
 
 impl CargoUpdater {
-    pub fn update_version(path: PathBuf, version: &Version) -> Result<(), CromError> {
+    pub fn update_version(path: PathBuf, version: &Version) -> Result<(), UpdaterError> {
         let text = read_file_to_string(&path)?;
         let mut doc = text.parse::<Document>().expect("invalid doc");
         let mut version_str = s!(version);

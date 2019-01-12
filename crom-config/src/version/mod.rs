@@ -4,7 +4,7 @@ pub enum VersionComponent {
     Changing(i32),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Version {
     parts: Vec<VersionComponent>,
     is_snapshot: bool,
@@ -16,7 +16,15 @@ pub struct VersionMatcher {
     pattern: Vec<VersionComponent>,
 }
 
-pub enum CromVersionError {
+pub enum VersionModification {
+    NoneOrSnapshot,
+    None,
+    NoneOrNext,
+    OneMore,
+}
+
+#[derive(Debug)]
+pub enum VersionError {
 
 }
 

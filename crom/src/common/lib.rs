@@ -8,32 +8,24 @@ extern crate log;
 extern crate hyper;
 extern crate url;
 extern crate xmltree;
-
-pub static CONFIG_FILE: &'static str = ".crom.toml";
-
-#[macro_export]
-macro_rules! s {
-    ($x:expr) => {
-        $x.to_string()
-    };
-}
+#[macro_use]
+extern crate crom_config;
 
 pub mod commands;
-mod config;
 pub mod error;
-pub mod git;
-pub mod github;
 mod logging;
-pub mod model;
-pub mod updater;
 
 use std::io::Write;
+use clap::ArgMatches;
 
 pub use self::logging::configure_logging;
 
 use self::error::*;
+use crom_config::*;
 
-fn are_you_sure(default: bool) -> Result<bool, CromError> {
+type CromResult<T> = Result<T, CromError>;
+
+fn are_you_sure(default: bool) -> CromResult<bool> {
     std::io::stdout().flush()?;
     let mut input = String::new();
     std::io::stdin().read_line(&mut input)?;
@@ -45,4 +37,18 @@ fn are_you_sure(default: bool) -> Result<bool, CromError> {
             Err(CromError::UserInput)
         }
     };
+}
+
+pub fn parse_pre_release(args: &ArgMatches) -> crom_config::VersionModification {
+    match args
+        .value_of("pre_release")
+        .unwrap_or("snapshot")
+        .to_lowercase()
+        .as_str()
+    {
+        "snapshot" => VersionModification::NoneOrSnapshot,
+        "none" => VersionModification::None,
+        "release" => VersionModification::NoneOrNext,
+        _ => unreachable!(),
+    }
 }

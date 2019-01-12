@@ -13,11 +13,24 @@ macro_rules! s {
 mod version;
 mod config;
 mod repo;
+mod error;
+mod artifact;
+mod updater;
 
-pub use crate::version::Version;
+pub use crate::version::{Version, VersionModification, VersionError};
+pub use crate::config::{ConfigError, ParsedProjectConfig};
+pub use crate::repo::{RepoError, TagTarget};
+pub use crate::error::SharedError;
 
 pub static CONFIG_FILE: &'static str = ".crom.toml";
 
-trait Project {
-    fn find_latest_version() -> Version;
+pub trait Project {
+    fn find_latest_version(&self, version_mod: VersionModification) -> Version;
+    fn update_versions(&self, version: &Version) -> Result<(), SharedError>;
+    fn publish(&self, version: &Version, names: Vec<String>) -> Result<(), SharedError>;
+    fn tag_version(&self, version: &Version, targets: Vec<TagTarget>, allow_dirty_repo: bool) -> Result<(), SharedError>;
+}
+
+pub fn make_project() -> Result<impl Project, error::SharedError> {
+    ParsedProjectConfig::new()
 }

@@ -6,21 +6,12 @@ use git2::*;
 use regex::Regex;
 use regex::Error as RegexError;
 
-use crate::version::*;
 use super::*;
-use crate::config::*;
 
 type Result<T> = std::result::Result<T, RepoError>;
 
-impl ParsedProjectConfig {
-    pub fn repo(&self) -> Result<RepoDetails> {
-        let matcher = VersionMatcher::new(&self.project_config.pattern);
-        return RepoDetails::new(&self.project_path, matcher);
-    }
-}
-
 impl RepoDetails {
-    pub fn new(path: &PathBuf, matcher: VersionMatcher) -> Result<Self> {
+    pub fn new(path: &PathBuf, matcher: VersionMatcher) -> Result<RepoDetails> {
         let repo = Repository::discover(path)?;
 
         let tags = get_tags(&repo, matcher)?;

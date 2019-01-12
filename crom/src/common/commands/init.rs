@@ -6,7 +6,6 @@ use std::path::Path;
 use clap::ArgMatches;
 use toml;
 
-use crate::config::*;
 use crate::error::*;
 
 pub fn handle_init_command(args: &ArgMatches) -> Result<i32, CromError> {

@@ -1,5 +1,6 @@
 use std::io::Error as IoError;
 
+use crom_config::SharedError;
 use git2::Error as GitError;
 use ini::ini::ParseError as IniError;
 use toml::de::Error as DeTomlError;
@@ -28,6 +29,13 @@ pub enum CromError {
     VersionFileFormatUnknown(String),
     ConfigError(String),
     ProjectNameNeeded,
+    SharedError(SharedError)
+}
+
+impl From<SharedError> for CromError {
+    fn from(e: SharedError) -> CromError {
+        CromError::SharedError(e)
+    }
 }
 
 impl From<CromError> for i32 {

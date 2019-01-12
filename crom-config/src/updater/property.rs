@@ -6,12 +6,12 @@ use ini::Ini;
 
 use super::*;
 use crate::error::*;
-use crate::model::*;
+use crate::Version;
 
 pub struct PropertyUpdater;
 
 impl PropertyUpdater {
-    pub fn update_version(path: PathBuf, version: &Version) -> Result<(), CromError> {
+    pub fn update_version(path: PathBuf, version: &Version) -> Result<(), UpdaterError> {
         let text = read_file_to_string(&path)?;
 
         let mut conf: Ini = Ini::load_from_str(&text)?;
