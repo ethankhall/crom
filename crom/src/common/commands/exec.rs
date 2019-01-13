@@ -1,11 +1,12 @@
 use clap::ArgMatches;
-use std::path::{Path, PathBuf};
 
 use crate::*;
 use crate::error::*;
 use crom_config::*;
 
-pub fn exec_update_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
+pub fn exec_update_version(args: &ArgMatches) -> Result<i32, CromError> {
+    let project = make_project()?;
+    
     let modifier = parse_pre_release(args);
 
     let latest_version = match args.value_of("override_version") {
@@ -18,7 +19,9 @@ pub fn exec_update_version(args: &ArgMatches, project: &dyn Project) -> Result<i
     return Ok(0);
 }
 
-pub fn exec_upload_artifacts(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
+pub fn exec_upload_artifacts(args: &ArgMatches) -> Result<i32, CromError> {
+    let project = make_project()?;
+    
     let names = args.values_of("NAMES").unwrap().map(|x| s!(x)).collect();
 
     let version = project.find_latest_version(VersionModification::None);
@@ -28,7 +31,9 @@ pub fn exec_upload_artifacts(args: &ArgMatches, project: &dyn Project) -> Result
     return Ok(0);
 }
 
-pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
+pub fn exec_claim_version(args: &ArgMatches) -> Result<i32, CromError> {
+    let project = make_project()?;
+
     let allow_dirty_repo = if !args.is_present("ignore_changes") {
         true
     } else {
@@ -38,11 +43,11 @@ pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i3
 
     let version = project.find_latest_version(VersionModification::OneMore);
 
-    let targets: Vec<String> args.values_of("source").into_iter().collect();
-    let targets: Vec<TagTarget> = targets.map(|x| {
-        match x.to_lower_case() {
+    let targets: Vec<String> = args.values_of("source").unwrap().map(|x| s!(x)).collect();
+    let targets: Vec<TagTarget> = targets.into_iter().map(|x| {
+        match x.to_lowercase().as_str() {
             "local" => TagTarget::Local,
-            "github" => TagTarget::GitHub
+            "github" => TagTarget::GitHub,
             _ => unreachable!(),
         }
     }).collect();

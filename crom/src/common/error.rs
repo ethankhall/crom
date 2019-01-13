@@ -62,6 +62,7 @@ impl From<CromError> for i32 {
             CromError::GitHubTokenMissing => 45,
             CromError::UserInput => 50,
             CromError::ConfigError(_) => 51,
+            CromError::SharedError(_) => 52,
         }
     }
 }

@@ -39,8 +39,6 @@ fn main() {
                 (name: "next-version")
                 (about: "Print what the next version will be")
                 (long_about: "Based on current config, what would the next version be for this project"))
-            (@subcommand projects =>
-                (about: "Lists projects avaliable"))
         )
         // TODO: This would be nice, but not for now...
         // (@subcommand set =>
@@ -76,8 +74,6 @@ fn main() {
         matches.is_present("warn"),
         matches.is_present("quite"),
     );
-
-    let project = make_project();
 
     let command_result = match matches.subcommand() {
         ("init", Some(arg_matches)) => common::commands::init::handle_init_command(arg_matches),

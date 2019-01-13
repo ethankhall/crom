@@ -1,11 +1,7 @@
-use crate::version::*;
+use std::path::PathBuf;
 
-#[derive(Debug)]
-pub enum RepoError {
-    GitError(String),
-    GitRemoteUnkown(String),
-    RegexError(String)
-}
+use crate::version::*;
+use crate::error::*;
 
 pub enum RepoRemote {
     GitHub(String, String)
@@ -22,6 +18,7 @@ pub struct RepoDetails {
     pub head_version: Option<Version>,
     pub head_ref: String,
     pub remote: RepoRemote,
+    pub path: PathBuf
 }
 
 impl RepoDetails {
@@ -33,4 +30,16 @@ impl RepoDetails {
     }
 }
 
+pub fn tag_repo(details: &RepoDetails, version: &Version, message: &str, targets: Vec<TagTarget>) -> Result<i32, ErrorContainer> {
+    for target in targets {
+        match target {
+            TagTarget::GitHub => github::tag_version(details, version, message)?,
+            TagTarget::Local => git::tag_version(details, version, message)?,
+        };
+    }
+
+    return Ok(1);
+}
+
 pub mod git;
+pub mod github;

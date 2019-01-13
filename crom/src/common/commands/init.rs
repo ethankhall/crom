@@ -4,9 +4,10 @@ use std::io::prelude::*;
 use std::path::Path;
 
 use clap::ArgMatches;
-use toml;
 
 use crate::error::*;
+
+use crom_config::*;
 
 pub fn handle_init_command(args: &ArgMatches) -> Result<i32, CromError> {
     let path = std::env::current_dir()?.join(crate::CONFIG_FILE);
@@ -33,20 +34,9 @@ pub fn handle_init_command(args: &ArgMatches) -> Result<i32, CromError> {
 }
 
 fn write_default_config<P: AsRef<Path>>(default_format: &str, dest: P) -> Result<(), CromError> {
-    let project = ProjectConfig {
-        pattern: format!("{}", default_format),
-        version_files: vec![],
-        included_paths: None,
-        message_template: None
-    };
-    let mut projects_map: HashMap<String, ProjectConfig> = HashMap::new();
-    projects_map.insert(String::from("default"), project);
-
-    let crom_config = CromConfig {
-        projects: projects_map,
-    };
+    let default_config = build_default_config(default_format);
 
     let mut file = File::create(dest)?;
-    file.write_all(toml::to_string_pretty(&crom_config)?.as_bytes())?;
+    file.write_all(default_config.as_bytes())?;
     Ok(())
 }

@@ -6,10 +6,10 @@ use std::io::Read;
 
 use super::*;
 use super::file::*;
-use crate::error::SharedError;
+use crate::error::ErrorContainer;
 
 impl ParsedProjectConfig {
-    pub fn new() -> Result<Self, SharedError> {
+    pub fn new() -> Result<Self, ErrorContainer> {
         let (path, config) = find_and_parse_config()?;
 
         let project_config = config.project;

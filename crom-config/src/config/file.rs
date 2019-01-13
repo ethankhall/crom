@@ -11,15 +11,28 @@ pub struct CromConfig {
 #[serde(rename_all = "kebab-case")]
 pub struct ProjectConfig {
     pub pattern: String,
-    pub version_files: Vec<String>,
-    pub included_paths: Option<Vec<String>>,
+    pub version_files: Vec<VersionFormat>,
     pub message_template: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub enum ProjectArtifactWrapper {
+#[serde(rename_all = "kebab-case")]
+pub enum VersionFormat {
+    Cargo,
+    Property,
+    Maven
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub enum ProjectArtifactCompressionFormat {
     ZIP,
     TGZ
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct ProjectArtifactWrapper {
+    name: String,
+    format: ProjectArtifactCompressionFormat
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -30,9 +43,7 @@ pub enum ProjectArtifactTarget {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "kebab-case")]
 pub struct ProjectArtifacts {
-    paths: HashMap<String, String>,
-    artifact_name: String,
-    wrap_format: Option<ProjectArtifactWrapper>,
-    target: ProjectArtifactTarget
-
+    pub paths: HashMap<String, String>,
+    pub compress: Option<ProjectArtifactWrapper>,
+    pub target: ProjectArtifactTarget
 }

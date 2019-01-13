@@ -5,13 +5,15 @@ use std::path::PathBuf;
 use ini::Ini;
 
 use super::*;
-use crate::error::*;
-use crate::Version;
+use crate::{Version, read_file_to_string};
 
 pub struct PropertyUpdater;
 
 impl PropertyUpdater {
-    pub fn update_version(path: PathBuf, version: &Version) -> Result<(), UpdaterError> {
+    pub fn update_version(root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
+        let mut path = root_path.clone();
+        path.push(crate::VERSION_PROPERTIES);
+
         let text = read_file_to_string(&path)?;
 
         let mut conf: Ini = Ini::load_from_str(&text)?;

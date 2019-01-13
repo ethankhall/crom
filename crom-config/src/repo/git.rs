@@ -7,6 +7,7 @@ use regex::Regex;
 use regex::Error as RegexError;
 
 use super::*;
+use crate::error::*;
 
 type Result<T> = std::result::Result<T, RepoError>;
 
@@ -24,11 +25,34 @@ impl RepoDetails {
             is_workspace_clean: is_working_repo_clean,
             head_version: None,
             head_ref,
-            remote
+            remote,
+            path: path.clone()
         };
 
         return Ok(details);
     }
+}
+
+pub fn tag_version(repo_details: &RepoDetails, version: &Version, message: &str) -> Result<()> {
+    let repo = Repository::discover(repo_details.path.clone())?;
+
+    let head = format!("{}", repo_details.head_ref);
+    let sig = git2::Signature::now("crom", "cli@crom.tech")?;
+
+    let head_obj = repo.find_object(Oid::from_str(&head)?, Some(ObjectType::Commit))?;
+
+        return match repo.tag(
+            &format!("{}", version),
+            &head_obj,
+            &sig,
+            message,
+            false,
+        ) {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                return Err(RepoError::UnableToTagRepo(e.to_string()));
+            }
+        };
 }
 
 fn get_tags(repo: &Repository, matcher: VersionMatcher) -> Result<Vec<Version>> {
@@ -99,7 +123,6 @@ fn test_parse_remote_git() {
         Err(_) => assert!(false),
     };
 }
-
 
 impl From<GitError> for RepoError {
     fn from(error: GitError) -> Self {

@@ -23,10 +23,5 @@ pub enum VersionModification {
     OneMore,
 }
 
-#[derive(Debug)]
-pub enum VersionError {
-
-}
-
 mod version;
 mod version_parser;
