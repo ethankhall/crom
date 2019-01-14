@@ -19,7 +19,7 @@ impl ParsedProjectConfig {
         let matcher = VersionMatcher::new(&project_config.pattern);
         let repo_details = RepoDetails::new(&path, matcher)?;
 
-        Ok(ParsedProjectConfig { project_config, project_path: path, repo_details })
+        Ok(ParsedProjectConfig { project_config, project_path: path, repo_details, artifacts: config.artifact })
     }
 }
 

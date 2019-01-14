@@ -1,18 +1,13 @@
-use std::fs::File;
 use std::path::PathBuf;
 use std::error::Error;
+use std::collections::HashMap;
 
-use hyper::header::{ACCEPT, AUTHORIZATION, CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT};
 use hyper::rt::{Future, Stream};
-use hyper::{Client, Response, Body};
+use hyper::{Client, Response, Body, Request};
 use hyper::client::HttpConnector;
 use hyper_rustls::HttpsConnector;
 
-use indicatif::{ProgressBar, ProgressStyle};
 use json::{self, JsonValue};
-use mime::Mime;
-use mime_guess::guess_mime_type;
-use std::io::prelude::*;
 use url::Url;
 
 use crate::repo::*;
@@ -21,12 +16,12 @@ use crate::config::file::*;
 use crate::version::Version;
 use crate::http::*;
 
-pub fn publish_artifact(
+use super::ArtifactContainer;
+
+pub fn make_upload_request(
     details: &RepoDetails,
     version: &Version,
-    artifacts: ProjectArtifacts,
-    spinner: &ProgressBar
-) -> Result<(), ErrorContainer> {
+    artifacts: ProjectArtifacts) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
     
     let (owner, repo) = match &details.remote {
         RepoRemote::GitHub(owner, repo) => (owner, repo)
@@ -39,9 +34,7 @@ pub fn publish_artifact(
         version = version
     );
 
-    spinner.set_message(&format!("{}", release_url));
-
-    let https = HttpsConnector::new(4);
+    let https = HttpsConnector::new(1);
     let client: Client<HttpsConnector<HttpConnector>> = Client::builder().build(https);
 
     let mut rt = tokio::runtime::Runtime::new().unwrap();
@@ -52,46 +45,62 @@ pub fn publish_artifact(
     let res = rt.block_on(client.request(request)).unwrap();
     let upload_url = extract_upload_url(res)?;
 
-    match artifacts.compress {
-        Some(compression) => unimplemented!(),
-        None => upload_each_artifact(&upload_url, details.path.clone(), artifacts, spinner)?
-    }
+    let upload_requests = match artifacts.compress {
+        Some(compression) => compress_artifact(&upload_url, details.path.clone(), &artifacts.paths, &compression),
+        None => build_artifact_containers(&upload_url, details.path.clone(), &artifacts.paths)
+    };
 
-    return Ok(());
+    return upload_requests;
 }
 
-fn upload_each_artifact(upload_url: &Url,
-    root_path: PathBuf, artifacts: ProjectArtifacts, 
-    spinner:& ProgressBar) -> Result<(), ErrorContainer> {   
+fn compress_artifact(upload_url: &Url,
+    root_path: PathBuf,
+    artifacts: &HashMap<String, String>,
+    compresion: &ProjectArtifactWrapper) -> Result<Vec<ArtifactContainer>, ErrorContainer> { 
 
-    let https = HttpsConnector::new(4);
-    let client: Client<HttpsConnector<HttpConnector>> = Client::builder().build(https);
+    let compressed_name = format!("{}", compresion.name);
+    let file = tempfile::NamedTempFile::new()?;
+    
+    super::compress::compress_files(&file, root_path, &artifacts, &compresion.format)?;
+    let request = build_request(upload_url, &compressed_name, file.path().to_path_buf())?;
+    file.close()?;
 
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
+    let container = ArtifactContainer::new(request, compressed_name);
+    return Ok(vec![container]);
+}
 
-    for (name, art_path) in artifacts.paths {
+fn build_artifact_containers(upload_url: &Url,
+    root_path: PathBuf,
+    artifacts: &HashMap<String, String>) -> Result<Vec<ArtifactContainer>, ErrorContainer> { 
+
+    let mut upload_requests = Vec::new();  
+
+    for (name, art_path) in artifacts {
         let mut path = root_path.clone();
         path.push(art_path);
 
-        spinner.set_message(&format!("Uploading {}", name));
-        let request = make_file_upload_request(upload_url, path, make_github_auth_headers()?)?;
-        trace!("Request for GitHub: {:?}", request);
-        let res = rt.block_on(client.request(request)).unwrap();
-        let status = res.status();
-        if !status.is_success() {
-            if let Ok(body) = res.into_body().concat2().wait() {
-                let body_text = &String::from_utf8(body.to_vec())?;
-                debug!("Failed Upload: {}", body_text);
-            }
-            error!("Failed to upload {} to GitHub", name);
-            return Err(ErrorContainer::GitHub(GitHubError::UploadFailed(format!(
-                "Unable to upload {}",
-                name
-            ))));
-        }
+        let request = build_request(upload_url, &name, path)?;
+        upload_requests.push(ArtifactContainer::new(request, name.to_string()));
     }
 
-    return Ok(());
+    return Ok(upload_requests);
+}
+
+fn build_request(upload_url: &Url, file_name: &str, file: PathBuf) -> Result<Request<Body>, ErrorContainer> {
+    let mut uri = upload_url.clone();
+    {
+        let mut path = uri.path_segments_mut().expect("Cannot get path");
+        path.pop();
+        path.push("assets");
+    }
+
+    {
+        let mut query = uri.query_pairs_mut();
+        query.clear();
+        query.append_pair("name", file_name);
+    }
+
+    return make_file_upload_request(&uri, file, make_github_auth_headers()?);
 }
 
 fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {

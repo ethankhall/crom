@@ -12,12 +12,26 @@ pub enum ErrorContainer {
     Updater(UpdaterError),
     GitHub(GitHubError),
     IOError(String),
-    State(StateError)
+    State(StateError),
+    Artifact(ArtifactError),
+    Compress(CompressError)
+}
+
+#[derive(Debug)]
+pub enum CompressError {
+    ZipFailure(String),
+    ZipFileNameErr(String)
+}
+
+#[derive(Debug)]
+pub enum ArtifactError {
+    FailedUpload
 }
 
 #[derive(Debug)]
 pub enum StateError{
-    RepoNotClean
+    RepoNotClean,
+    ArtifactNotFound(String)
 }
 
 #[derive(Debug)]
@@ -57,6 +71,12 @@ pub enum UpdaterError {
     PropertyLoad(String),
     UnableToUpdateConfig,
     Unsupported
+}
+
+impl From<zip::result::ZipError> for ErrorContainer {
+    fn from(err: zip::result::ZipError) -> ErrorContainer {
+        ErrorContainer::Compress(CompressError::ZipFailure(err.description().to_string()))
+    }
 }
 
 impl From<IniError> for ErrorContainer {

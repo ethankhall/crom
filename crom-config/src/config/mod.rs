@@ -17,6 +17,7 @@ use crate::error::*;
 
 pub struct ParsedProjectConfig {
     pub project_config: Rc<file::ProjectConfig>,
+    pub artifacts: HashMap<String, ProjectArtifacts>,
     pub project_path: PathBuf,
     pub repo_details: RepoDetails
 }
@@ -43,22 +44,15 @@ impl Project for ParsedProjectConfig {
     }
 
     fn publish(&self, version: &Version, names: Vec<String>) -> Result<(), ErrorContainer> {
-        let spinner = ProgressBar::new_spinner();
-        spinner.set_style(
-            ProgressStyle::default_spinner()
-                .tick_chars("/|\\- ")
-                .template("{spinner:.dim.bold} Processing request to {wide_msg}"),
-        );
-
-        if !log_enabled!(log::Level::Trace) {
-            spinner.enable_steady_tick(100);
-            spinner.tick();
+        let mut artifacts: Vec<ProjectArtifacts> = Vec::new();
+        for name in names {
+            match self.artifacts.get(&name) {
+                Some(value) => artifacts.push(value.clone()),
+                None => return Err(ErrorContainer::State(StateError::ArtifactNotFound(name)))
+            }
         }
 
-        //TODO...
-
-        spinner.finish_and_clear();
-        return Ok(());
+        crate::artifact::upload_artifacts(&self.repo_details, version, artifacts)
     }
 
     fn tag_version(&self, version: &Version, targets: Vec<TagTarget>, allow_dirty_repo: bool) -> Result<(), ErrorContainer> {

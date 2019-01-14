@@ -31,8 +31,8 @@ pub enum ProjectArtifactCompressionFormat {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct ProjectArtifactWrapper {
-    name: String,
-    format: ProjectArtifactCompressionFormat
+    pub name: String,
+    pub format: ProjectArtifactCompressionFormat
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]

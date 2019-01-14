@@ -4,6 +4,9 @@ extern crate log;
 extern crate serde_derive;
 #[macro_use]
 extern crate json;
+extern crate zip;
+extern crate libflate;
+extern crate tempfile;
 
 use std::fs::File;
 use std::io::prelude::*;
