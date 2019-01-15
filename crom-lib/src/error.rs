@@ -14,24 +14,24 @@ pub enum ErrorContainer {
     IOError(String),
     State(StateError),
     Artifact(ArtifactError),
-    Compress(CompressError)
+    Compress(CompressError),
 }
 
 #[derive(Debug)]
 pub enum CompressError {
     ZipFailure(String),
-    ZipFileNameErr(String)
+    ZipFileNameErr(String),
 }
 
 #[derive(Debug)]
 pub enum ArtifactError {
-    FailedUpload
+    FailedUpload,
 }
 
 #[derive(Debug)]
-pub enum StateError{
+pub enum StateError {
     RepoNotClean,
-    ArtifactNotFound(String)
+    ArtifactNotFound(String),
 }
 
 #[derive(Debug)]
@@ -41,19 +41,20 @@ pub enum GitHubError {
     TokenMissing,
     TokenInvalid(String),
     UploadFailed(String),
-    UnableToGetUploadUrl(String)
+    UnableToGetUploadUrl(String),
 }
 
 #[derive(Debug)]
-pub enum VersionError {
-}
+pub enum VersionError {}
 
 #[derive(Debug)]
 pub enum ConfigError {
     UnableToFindConfig(PathBuf),
     IoError(String),
     ProjectNameNotDefined(String),
-    MissingVersionDefinition
+    ParseError(String),
+    InvalidVersionType(String),
+    MissingVersionDefinition,
 }
 
 #[derive(Debug)]
@@ -61,7 +62,7 @@ pub enum RepoError {
     GitError(String),
     GitRemoteUnkown(String),
     RegexError(String),
-    UnableToTagRepo(String)
+    UnableToTagRepo(String),
 }
 
 #[derive(Debug)]
@@ -70,7 +71,8 @@ pub enum UpdaterError {
     PropertySave(String),
     PropertyLoad(String),
     UnableToUpdateConfig,
-    Unsupported
+    Unsupported,
+    CargoTomlNotValid(String)
 }
 
 impl From<zip::result::ZipError> for ErrorContainer {

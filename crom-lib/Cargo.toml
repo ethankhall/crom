@@ -1,5 +1,5 @@
 [package]
-name = "crom-config"
+name = "crom-lib"
 version = "999.9.9-SNAPSHOT"
 authors = ["Ethan Hall <ethan@ehdev.io>"]
 edition = "2018"

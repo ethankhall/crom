@@ -1,21 +1,21 @@
-use indicatif::{ProgressBar, ProgressStyle};
-use hyper::{Client, Body, Request};
 use hyper::client::HttpConnector;
 use hyper::rt::{Future, Stream};
+use hyper::{Body, Client, Request};
 use hyper_rustls::HttpsConnector;
+use indicatif::{ProgressBar, ProgressStyle};
 
-use crate::repo::*;
-use crate::error::*;
 use crate::config::file::*;
+use crate::error::*;
+use crate::repo::*;
 use crate::version::Version;
 
-mod github;
 mod compress;
+mod github;
 
 #[derive(Debug)]
 pub struct ArtifactContainer {
     request: Request<Body>,
-    name: String
+    name: String,
 }
 
 impl ArtifactContainer {
@@ -24,25 +24,24 @@ impl ArtifactContainer {
     }
 }
 
-pub fn upload_artifacts(details: &RepoDetails,
+pub fn upload_artifacts(
+    details: &RepoDetails,
     version: &Version,
-    artifacts: Vec<ProjectArtifacts>) -> Result<(), ErrorContainer> {
-
+    artifacts: Vec<ProjectArtifacts>,
+) -> Result<(), ErrorContainer> {
     let mut upload_requests: Vec<ArtifactContainer> = Vec::new();
 
     for art in artifacts {
         let res = match art.target {
-            ProjectArtifactTarget::GitHub => github::make_upload_request(details, version, art)
+            ProjectArtifactTarget::GitHub => github::make_upload_request(details, version, art),
         };
 
         match res {
             Err(e) => {
                 error!("Error while uploading artifact: {:?}", e);
                 return Err(ErrorContainer::Artifact(ArtifactError::FailedUpload));
-            },
-            Ok(bodys) => {
-                upload_requests.extend(bodys)
             }
+            Ok(bodys) => upload_requests.extend(bodys),
         }
     }
 
@@ -50,11 +49,10 @@ pub fn upload_artifacts(details: &RepoDetails,
 }
 
 fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
-
     let https = hyper_rustls::HttpsConnector::new(4);
     let client = Client::builder().build(https);
 
-    let mut rt = tokio::runtime::Runtime::new().unwrap();    
+    let mut rt = tokio::runtime::Runtime::new().unwrap();
 
     let spinner = ProgressBar::new(requests.len() as u64);
     spinner.set_style(
@@ -80,7 +78,11 @@ fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
     return Ok(());
 }
 
-fn do_transfer(container: ArtifactContainer, rt: &mut tokio::runtime::Runtime, client: &Client<HttpsConnector<HttpConnector>>) -> Result<(), ErrorContainer> {
+fn do_transfer(
+    container: ArtifactContainer,
+    rt: &mut tokio::runtime::Runtime,
+    client: &Client<HttpsConnector<HttpConnector>>,
+) -> Result<(), ErrorContainer> {
     trace!("Request: {:?}", container);
     let res = rt.block_on(client.request(container.request)).unwrap();
     let status = res.status();
@@ -91,7 +93,8 @@ fn do_transfer(container: ArtifactContainer, rt: &mut tokio::runtime::Runtime, c
         }
         error!("Failed to upload to {}", container.name);
         return Err(ErrorContainer::GitHub(GitHubError::UploadFailed(format!(
-            "Failed Upload to {}", container.name
+            "Failed Upload to {}",
+            container.name
         ))));
     }
 

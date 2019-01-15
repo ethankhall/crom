@@ -1,12 +1,13 @@
+use std::collections::HashMap;
+use std::error::Error;
 use std::fs::File;
 use std::path::PathBuf;
-use std::collections::HashMap;
-use std::str::FromStr;
-use std::error::Error;
 
 use hyper::body::Body;
-use hyper::header::{ACCEPT, AUTHORIZATION, CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT, HeaderName, HeaderValue};
-use hyper::{Request};
+use hyper::header::{
+    HeaderName, HeaderValue, ACCEPT, AUTHORIZATION, CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT,
+};
+use hyper::Request;
 
 use mime::Mime;
 use mime_guess::guess_mime_type;
@@ -47,9 +48,10 @@ pub fn make_file_upload_request(
         .unwrap());
 }
 
-pub fn make_get_request(url: &str,
-        headers: HashMap<HeaderName, HeaderValue>,) -> Result<Request<Body>, ErrorContainer> {
-
+pub fn make_get_request(
+    url: &str,
+    headers: HashMap<HeaderName, HeaderValue>,
+) -> Result<Request<Body>, ErrorContainer> {
     let mut builder = Request::builder();
     let builder = builder.method("GET").uri(url);
 
@@ -57,16 +59,19 @@ pub fn make_get_request(url: &str,
         builder.header(key, value);
     }
 
-    return Ok(builder.uri(url)
+    return Ok(builder
+        .uri(url)
         .header(USER_AGENT, format!("crom/{}", env!("CARGO_PKG_VERSION")))
         .header(ACCEPT, "application/vnd.github.v3+json")
         .body(Body::empty())
         .unwrap());
 }
 
-pub fn make_post(url: &str, 
-headers: HashMap<HeaderName, HeaderValue>,
-body_content: String) -> Result<Request<Body>, ErrorContainer> {
+pub fn make_post(
+    url: &str,
+    headers: HashMap<HeaderName, HeaderValue>,
+    body_content: String,
+) -> Result<Request<Body>, ErrorContainer> {
     let mut builder = Request::builder();
     let builder = builder.method("GET").uri(url);
 
@@ -74,7 +79,8 @@ body_content: String) -> Result<Request<Body>, ErrorContainer> {
         builder.header(key, value);
     }
 
-    return Ok(builder.uri(url)
+    return Ok(builder
+        .uri(url)
         .header(USER_AGENT, format!("crom/{}", env!("CARGO_PKG_VERSION")))
         .header(ACCEPT, "application/vnd.github.v3+json")
         .body(body_content.into())
@@ -89,7 +95,11 @@ pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, Er
 
     let value = match HeaderValue::from_str(&token) {
         Ok(it) => it,
-        Err(err) =>  return Err(ErrorContainer::GitHub(GitHubError::TokenInvalid(err.description().to_string())))
+        Err(err) => {
+            return Err(ErrorContainer::GitHub(GitHubError::TokenInvalid(
+                err.description().to_string(),
+            )));
+        }
     };
 
     let mut map: HashMap<HeaderName, HeaderValue> = HashMap::new();

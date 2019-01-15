@@ -1,30 +1,30 @@
-use std::path::PathBuf;
-use std::error::Error;
 use std::collections::HashMap;
+use std::error::Error;
+use std::path::PathBuf;
 
-use hyper::rt::{Future, Stream};
-use hyper::{Client, Response, Body, Request};
 use hyper::client::HttpConnector;
+use hyper::rt::{Future, Stream};
+use hyper::{Body, Client, Request, Response};
 use hyper_rustls::HttpsConnector;
 
 use json::{self, JsonValue};
 use url::Url;
 
-use crate::repo::*;
-use crate::error::*;
 use crate::config::file::*;
-use crate::version::Version;
+use crate::error::*;
 use crate::http::*;
+use crate::repo::*;
+use crate::version::Version;
 
 use super::ArtifactContainer;
 
 pub fn make_upload_request(
     details: &RepoDetails,
     version: &Version,
-    artifacts: ProjectArtifacts) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
-    
+    artifacts: ProjectArtifacts,
+) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
     let (owner, repo) = match &details.remote {
-        RepoRemote::GitHub(owner, repo) => (owner, repo)
+        RepoRemote::GitHub(owner, repo) => (owner, repo),
     };
 
     let release_url = format!(
@@ -46,21 +46,27 @@ pub fn make_upload_request(
     let upload_url = extract_upload_url(res)?;
 
     let upload_requests = match artifacts.compress {
-        Some(compression) => compress_artifact(&upload_url, details.path.clone(), &artifacts.paths, &compression),
-        None => build_artifact_containers(&upload_url, details.path.clone(), &artifacts.paths)
+        Some(compression) => compress_artifact(
+            &upload_url,
+            details.path.clone(),
+            &artifacts.paths,
+            &compression,
+        ),
+        None => build_artifact_containers(&upload_url, details.path.clone(), &artifacts.paths),
     };
 
     return upload_requests;
 }
 
-fn compress_artifact(upload_url: &Url,
+fn compress_artifact(
+    upload_url: &Url,
     root_path: PathBuf,
     artifacts: &HashMap<String, String>,
-    compresion: &ProjectArtifactWrapper) -> Result<Vec<ArtifactContainer>, ErrorContainer> { 
-
+    compresion: &ProjectArtifactWrapper,
+) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
     let compressed_name = format!("{}", compresion.name);
     let file = tempfile::NamedTempFile::new()?;
-    
+
     super::compress::compress_files(&file, root_path, &artifacts, &compresion.format)?;
     let request = build_request(upload_url, &compressed_name, file.path().to_path_buf())?;
     file.close()?;
@@ -69,11 +75,12 @@ fn compress_artifact(upload_url: &Url,
     return Ok(vec![container]);
 }
 
-fn build_artifact_containers(upload_url: &Url,
+fn build_artifact_containers(
+    upload_url: &Url,
     root_path: PathBuf,
-    artifacts: &HashMap<String, String>) -> Result<Vec<ArtifactContainer>, ErrorContainer> { 
-
-    let mut upload_requests = Vec::new();  
+    artifacts: &HashMap<String, String>,
+) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
+    let mut upload_requests = Vec::new();
 
     for (name, art_path) in artifacts {
         let mut path = root_path.clone();
@@ -86,7 +93,11 @@ fn build_artifact_containers(upload_url: &Url,
     return Ok(upload_requests);
 }
 
-fn build_request(upload_url: &Url, file_name: &str, file: PathBuf) -> Result<Request<Body>, ErrorContainer> {
+fn build_request(
+    upload_url: &Url,
+    file_name: &str,
+    file: PathBuf,
+) -> Result<Request<Body>, ErrorContainer> {
     let mut uri = upload_url.clone();
     {
         let mut path = uri.path_segments_mut().expect("Cannot get path");
@@ -104,7 +115,6 @@ fn build_request(upload_url: &Url, file_name: &str, file: PathBuf) -> Result<Req
 }
 
 fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {
-    
     let json_body = match res.into_body().concat2().wait() {
         Ok(body) => {
             let body_text = &String::from_utf8(body.to_vec())?;
@@ -112,13 +122,17 @@ fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {
                 Ok(value) => value,
                 Err(err) => {
                     debug!("Body was: {}", body_text);
-                    return Err(ErrorContainer::GitHub(GitHubError::UnkownCommunicationError(err.description().to_lowercase())));
+                    return Err(ErrorContainer::GitHub(
+                        GitHubError::UnkownCommunicationError(err.description().to_lowercase()),
+                    ));
                 }
             }
         }
         Err(err) => {
             error!("Unable to access response from GitHub.");
-            return Err(ErrorContainer::GitHub(GitHubError::UnkownCommunicationError(err.to_string())));
+            return Err(ErrorContainer::GitHub(
+                GitHubError::UnkownCommunicationError(err.to_string()),
+            ));
         }
     };
 
@@ -126,9 +140,9 @@ fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {
         JsonValue::Object(obj) => obj,
         _ => {
             error!("GitHub gave back a strange type.");
-            return Err(ErrorContainer::GitHub(GitHubError::UnkownCommunicationError(s!(
-                "GitHub gave back a strange type."
-            ))));
+            return Err(ErrorContainer::GitHub(
+                GitHubError::UnkownCommunicationError(s!("GitHub gave back a strange type.")),
+            ));
         }
     };
 
@@ -139,6 +153,8 @@ fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {
     let upload_url = obj.get("upload_url").unwrap().as_str().unwrap();
     match Url::parse(upload_url) {
         Ok(it) => Ok(it),
-        Err(e) => Err(ErrorContainer::GitHub(GitHubError::UnableToGetUploadUrl(e.description().to_string())))
+        Err(e) => Err(ErrorContainer::GitHub(GitHubError::UnableToGetUploadUrl(
+            e.description().to_string(),
+        ))),
     }
 }

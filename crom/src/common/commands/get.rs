@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
-use crom_config::*;
 use crate::error::CromError;
+use crom_lib::*;
 
 pub fn handle_get_command(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
     match args.subcommand() {
@@ -20,7 +20,10 @@ pub fn handle_get_command(args: &ArgMatches, project: &dyn Project) -> Result<i3
     }
 }
 
-fn print_version(project: &dyn Project, modification: VersionModification) -> Result<i32, CromError> {
+fn print_version(
+    project: &dyn Project,
+    modification: VersionModification,
+) -> Result<i32, CromError> {
     let latest_version = project.find_latest_version(modification);
 
     info!("{}", latest_version);

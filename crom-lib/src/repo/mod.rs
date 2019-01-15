@@ -1,15 +1,15 @@
 use std::path::PathBuf;
 
-use crate::version::*;
 use crate::error::*;
+use crate::version::*;
 
 pub enum RepoRemote {
-    GitHub(String, String)
+    GitHub(String, String),
 }
 
 pub enum TagTarget {
     GitHub,
-    Local
+    Local,
 }
 
 pub struct RepoDetails {
@@ -18,19 +18,24 @@ pub struct RepoDetails {
     pub head_version: Option<Version>,
     pub head_ref: String,
     pub remote: RepoRemote,
-    pub path: PathBuf
+    pub path: PathBuf,
 }
 
 impl RepoDetails {
     pub fn is_version_head(&self, version: &Version) -> bool {
-        match &self.head_version { 
+        match &self.head_version {
             None => false,
-            Some(v) => version == v
+            Some(v) => version == v,
         }
     }
 }
 
-pub fn tag_repo(details: &RepoDetails, version: &Version, message: &str, targets: Vec<TagTarget>) -> Result<i32, ErrorContainer> {
+pub fn tag_repo(
+    details: &RepoDetails,
+    version: &Version,
+    message: &str,
+    targets: Vec<TagTarget>,
+) -> Result<i32, ErrorContainer> {
     for target in targets {
         match target {
             TagTarget::GitHub => github::tag_version(details, version, message)?,

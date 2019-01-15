@@ -1,6 +1,4 @@
-#[macro_use]
 extern crate serde_derive;
-#[macro_use]
 extern crate json;
 extern crate toml;
 #[macro_use]
@@ -8,20 +6,19 @@ extern crate log;
 extern crate hyper;
 extern crate url;
 extern crate xmltree;
-#[macro_use]
-extern crate crom_config;
+extern crate crom_lib;
 
 pub mod commands;
 pub mod error;
 mod logging;
 
-use std::io::Write;
 use clap::ArgMatches;
+use std::io::Write;
 
 pub use self::logging::configure_logging;
 
 use self::error::*;
-use crom_config::*;
+use crom_lib::*;
 
 type CromResult<T> = Result<T, CromError>;
 
@@ -39,7 +36,7 @@ fn are_you_sure(default: bool) -> CromResult<bool> {
     };
 }
 
-pub fn parse_pre_release(args: &ArgMatches) -> crom_config::VersionModification {
+pub fn parse_pre_release(args: &ArgMatches) -> crom_lib::VersionModification {
     match args
         .value_of("pre_release")
         .unwrap_or("snapshot")

@@ -1,8 +1,8 @@
 use clap::ArgMatches;
 
-use crate::*;
 use crate::error::*;
-use crom_config::*;
+use crate::*;
+use crom_lib::*;
 
 pub fn exec_update_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
     let modifier = parse_pre_release(args);
@@ -38,13 +38,14 @@ pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i3
     let version = project.find_latest_version(VersionModification::OneMore);
 
     let targets: Vec<String> = args.values_of("source").unwrap().map(|x| s!(x)).collect();
-    let targets: Vec<TagTarget> = targets.into_iter().map(|x| {
-        match x.to_lowercase().as_str() {
+    let targets: Vec<TagTarget> = targets
+        .into_iter()
+        .map(|x| match x.to_lowercase().as_str() {
             "local" => TagTarget::Local,
             "github" => TagTarget::GitHub,
             _ => unreachable!(),
-        }
-    }).collect();
+        })
+        .collect();
 
     project.tag_version(&version, targets, allow_dirty_repo)?;
 

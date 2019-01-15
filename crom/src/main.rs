@@ -3,14 +3,14 @@ extern crate clap;
 extern crate chrono;
 #[macro_use]
 extern crate log;
-extern crate crom_config;
+extern crate crom_lib;
 
 use std::process;
 
-use common::configure_logging;
-use crom_config::make_project;
 use clap::ArgMatches;
+use common::configure_logging;
 use common::error::*;
+use crom_lib::make_project;
 
 fn main() {
     let matches = clap_app!(MyApp =>
@@ -95,7 +95,9 @@ fn exec_commad(matches: &ArgMatches) -> Result<i32, CromError> {
 
     return match matches.subcommand() {
         ("init", Some(arg_matches)) => common::commands::init::handle_init_command(arg_matches),
-        ("get", Some(arg_matches)) => common::commands::get::handle_get_command(arg_matches, &project?),
+        ("get", Some(arg_matches)) => {
+            common::commands::get::handle_get_command(arg_matches, &project?)
+        }
         ("tag-version", Some(arg_matches)) => {
             common::commands::exec::exec_claim_version(arg_matches, &project?)
         }
@@ -107,5 +109,4 @@ fn exec_commad(matches: &ArgMatches) -> Result<i32, CromError> {
         }
         _ => unreachable!(),
     };
-
 }

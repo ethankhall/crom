@@ -52,10 +52,9 @@ impl VersionMatcher {
     }
 }
 
-
 #[test]
 fn parse_semver() {
-    let matcher = VersionMatcher::new(s!("1.2.%d"));
+    let matcher = VersionMatcher::new("1.2.%d");
 
     assert_eq!(
         s!("1.2.3"),
@@ -68,7 +67,7 @@ fn parse_semver() {
     assert!(matcher.match_version(s!("1.2")).is_none());
     assert!(matcher.match_version(s!("1.2.3.4")).is_none());
 
-    let matcher = VersionMatcher::new(s!("a.b.%d"));
+    let matcher = VersionMatcher::new("a.b.%d");
 
     assert_eq!(
         s!("a.b.3"),

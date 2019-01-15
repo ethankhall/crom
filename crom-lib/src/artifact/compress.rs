@@ -1,36 +1,45 @@
-use std::path::PathBuf;
-use std::io::prelude::*;
-use std::fs::File;
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::PathBuf;
 
-use tempfile::NamedTempFile;
-use tar::Builder as TarBuilder;
-use std::io::Write;
 use libflate::gzip::Encoder;
+use std::io::Write;
+use tar::Builder as TarBuilder;
+use tempfile::NamedTempFile;
 
-use crate::error::*;
 use crate::config::file::*;
+use crate::error::*;
 
-pub fn compress_files(output_file: &NamedTempFile, 
+pub fn compress_files(
+    output_file: &NamedTempFile,
     root_path: PathBuf,
     artifacts: &HashMap<String, String>,
-    format: &ProjectArtifactCompressionFormat) -> Result<(), ErrorContainer> {
+    format: &ProjectArtifactCompressionFormat,
+) -> Result<(), ErrorContainer> {
     return match format {
         ProjectArtifactCompressionFormat::ZIP => zip(output_file, root_path, artifacts),
-        ProjectArtifactCompressionFormat::TGZ => tgz(output_file, root_path, artifacts)
-    }
+        ProjectArtifactCompressionFormat::TGZ => tgz(output_file, root_path, artifacts),
+    };
 }
 
-fn zip(output_file: &NamedTempFile, root_path: PathBuf, artifacts: &HashMap<String, String>) -> Result<(), ErrorContainer> {
+fn zip(
+    output_file: &NamedTempFile,
+    root_path: PathBuf,
+    artifacts: &HashMap<String, String>,
+) -> Result<(), ErrorContainer> {
     use std::io::Write;
 
     let mut zip = zip::ZipWriter::new(output_file);
 
     for (name, path) in artifacts {
         let name = format!("{}", name);
-        let options = zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
-        if let Err(e) = zip.start_file(name.clone(), options) {
-            return Err(ErrorContainer::Compress(CompressError::ZipFileNameErr(name)))
+        let options =
+            zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
+        if let Err(_e) = zip.start_file(name.clone(), options) {
+            return Err(ErrorContainer::Compress(CompressError::ZipFileNameErr(
+                name,
+            )));
         }
 
         let mut art_path = root_path.clone();
@@ -49,7 +58,11 @@ fn zip(output_file: &NamedTempFile, root_path: PathBuf, artifacts: &HashMap<Stri
     return Ok(());
 }
 
-fn tgz(output_file: &NamedTempFile, root_path: PathBuf, artifacts: &HashMap<String, String>) -> Result<(), ErrorContainer> {
+fn tgz(
+    output_file: &NamedTempFile,
+    root_path: PathBuf,
+    artifacts: &HashMap<String, String>,
+) -> Result<(), ErrorContainer> {
     let mut ar = TarBuilder::new(Vec::new());
 
     for (name, path) in artifacts {

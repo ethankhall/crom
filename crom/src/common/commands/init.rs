@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -7,7 +6,7 @@ use clap::ArgMatches;
 
 use crate::error::*;
 
-use crom_config::*;
+use crom_lib::*;
 
 pub fn handle_init_command(args: &ArgMatches) -> Result<i32, CromError> {
     let path = std::env::current_dir()?.join(crate::CONFIG_FILE);

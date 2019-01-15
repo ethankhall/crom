@@ -9,7 +9,7 @@ name = "common"
 path = "src/common/lib.rs"
 
 [dependencies]
-crom-config = { path = "../crom-config" }
+crom-lib = { path = "../crom-lib" }
 log = "0.4"
 fern = { version = "0.5", features = ["colored"] }
 clap = { version = "2.*", features = ["color"] }

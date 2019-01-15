@@ -1,4 +1,4 @@
-use std::fmt::{Formatter, Display};
+use std::fmt::{Display, Formatter};
 
 use super::*;
 
@@ -45,7 +45,6 @@ impl Version {
     }
 }
 
-
 impl From<String> for Version {
     fn from(input: String) -> Self {
         return Version::new(vec![VersionComponent::Static(input)], false);
@@ -74,7 +73,7 @@ impl Display for Version {
 
 #[test]
 fn test_next_version() {
-    let matcher = VersionMatcher::new(s!("1.2.3.%d"));
+    let matcher = VersionMatcher::new("1.2.3.%d");
     let version = matcher.match_version(s!("1.2.3.5")).unwrap();
 
     assert_eq!("1.2.3.5", version.to_string());

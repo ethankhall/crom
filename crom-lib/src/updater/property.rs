@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use ini::Ini;
 
 use super::*;
-use crate::{Version, read_file_to_string};
+use crate::{read_file_to_string, Version};
 
 pub struct PropertyUpdater;
 

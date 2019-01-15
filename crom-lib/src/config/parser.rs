@@ -1,16 +1,19 @@
 use std::env;
 use std::error::Error;
-use std::path::Path;
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 
-use super::*;
 use super::file::*;
+use super::*;
 use crate::error::ErrorContainer;
 
 impl ParsedProjectConfig {
     pub fn new() -> Result<Self, ErrorContainer> {
         let (path, config) = find_and_parse_config()?;
+
+        debug!("Parsed config: {:?}", config);
+        debug!("Root path: {:?}", path);
 
         let project_config = config.project;
 
@@ -19,7 +22,12 @@ impl ParsedProjectConfig {
         let matcher = VersionMatcher::new(&project_config.pattern);
         let repo_details = RepoDetails::new(&path, matcher)?;
 
-        Ok(ParsedProjectConfig { project_config, project_path: path, repo_details, artifacts: config.artifact })
+        Ok(ParsedProjectConfig {
+            project_config,
+            project_path: path,
+            repo_details,
+            artifacts: config.artifact,
+        })
     }
 }
 
@@ -28,6 +36,7 @@ fn find_and_parse_config() -> Result<(PathBuf, CromConfig), ConfigError> {
     for ancestor in path.ancestors() {
         let test_path = ancestor.join(crate::CONFIG_FILE);
         if test_path.exists() {
+            debug!("Found config file at {:?}", test_path);
             let config = parse_config(test_path)?;
             let project_path = ancestor.to_owned();
             return Ok((project_path, config));
@@ -42,8 +51,10 @@ fn parse_config<P: AsRef<Path>>(path: P) -> Result<CromConfig, ConfigError> {
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
-    let config: CromConfig = toml::from_str(&contents)?;
-    return Ok(config);
+    match toml::from_str::<CromConfig>(&contents) {
+        Ok(config) => Ok(config),
+        Err(e) => Err(ConfigError::ParseError(e.to_string())),
+    }
 }
 
 impl From<std::io::Error> for ConfigError {
