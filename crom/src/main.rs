@@ -9,6 +9,8 @@ use std::process;
 
 use common::configure_logging;
 use crom_config::make_project;
+use clap::ArgMatches;
+use common::error::*;
 
 fn main() {
     let matches = clap_app!(MyApp =>
@@ -75,20 +77,7 @@ fn main() {
         matches.is_present("quite"),
     );
 
-    let command_result = match matches.subcommand() {
-        ("init", Some(arg_matches)) => common::commands::init::handle_init_command(arg_matches),
-        ("get", Some(arg_matches)) => common::commands::get::handle_get_command(arg_matches, project?),
-        ("tag-version", Some(arg_matches)) => {
-            common::commands::exec::exec_claim_version(arg_matches, project?)
-        }
-        ("update-version", Some(arg_matches)) => {
-            common::commands::exec::exec_update_version(arg_matches, project?)
-        }
-        ("upload-artifacts", Some(arg_matches)) => {
-            common::commands::exec::exec_upload_artifacts(arg_matches, project?)
-        }
-        _ => unreachable!(),
-    };
+    let command_result = exec_commad(&matches);
 
     let return_code = match command_result {
         Ok(v) => v,
@@ -99,4 +88,24 @@ fn main() {
     };
 
     process::exit(return_code);
+}
+
+fn exec_commad(matches: &ArgMatches) -> Result<i32, CromError> {
+    let project = make_project();
+
+    return match matches.subcommand() {
+        ("init", Some(arg_matches)) => common::commands::init::handle_init_command(arg_matches),
+        ("get", Some(arg_matches)) => common::commands::get::handle_get_command(arg_matches, &project?),
+        ("tag-version", Some(arg_matches)) => {
+            common::commands::exec::exec_claim_version(arg_matches, &project?)
+        }
+        ("update-version", Some(arg_matches)) => {
+            common::commands::exec::exec_update_version(arg_matches, &project?)
+        }
+        ("upload-artifacts", Some(arg_matches)) => {
+            common::commands::exec::exec_upload_artifacts(arg_matches, &project?)
+        }
+        _ => unreachable!(),
+    };
+
 }

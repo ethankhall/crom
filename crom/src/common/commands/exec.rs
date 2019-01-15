@@ -4,9 +4,7 @@ use crate::*;
 use crate::error::*;
 use crom_config::*;
 
-pub fn exec_update_version(args: &ArgMatches) -> Result<i32, CromError> {
-    let project = make_project()?;
-    
+pub fn exec_update_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
     let modifier = parse_pre_release(args);
 
     let latest_version = match args.value_of("override_version") {
@@ -19,9 +17,7 @@ pub fn exec_update_version(args: &ArgMatches) -> Result<i32, CromError> {
     return Ok(0);
 }
 
-pub fn exec_upload_artifacts(args: &ArgMatches) -> Result<i32, CromError> {
-    let project = make_project()?;
-    
+pub fn exec_upload_artifacts(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
     let names = args.values_of("NAMES").unwrap().map(|x| s!(x)).collect();
 
     let version = project.find_latest_version(VersionModification::None);
@@ -31,9 +27,7 @@ pub fn exec_upload_artifacts(args: &ArgMatches) -> Result<i32, CromError> {
     return Ok(0);
 }
 
-pub fn exec_claim_version(args: &ArgMatches) -> Result<i32, CromError> {
-    let project = make_project()?;
-
+pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
     let allow_dirty_repo = if !args.is_present("ignore_changes") {
         true
     } else {
