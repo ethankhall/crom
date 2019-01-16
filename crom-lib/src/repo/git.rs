@@ -50,11 +50,14 @@ pub fn tag_version(repo_details: &RepoDetails, version: &Version, message: &str)
 
 fn get_tags(repo: &Repository, matcher: VersionMatcher) -> Result<Vec<Version>> {
     let tags = repo.tag_names(None)?;
-    Ok(tags
+    let mut tags: Vec<Version> = tags
         .iter()
         .map(|x| x.unwrap().to_string())
         .flat_map(|version| matcher.match_version(version))
-        .collect())
+        .collect();
+
+    tags.sort();
+    Ok(tags)
 }
 
 pub fn is_working_repo_clean(repo: &Repository) -> Result<bool> {

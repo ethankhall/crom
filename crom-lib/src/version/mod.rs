@@ -4,7 +4,7 @@ pub enum VersionComponent {
     Changing(i32),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Version {
     parts: Vec<VersionComponent>,
     is_snapshot: bool,
