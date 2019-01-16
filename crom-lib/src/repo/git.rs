@@ -14,19 +14,26 @@ impl RepoDetails {
     pub fn new(path: &PathBuf, matcher: VersionMatcher) -> Result<RepoDetails> {
         let repo = Repository::discover(path)?;
 
-        let tags = get_tags(&repo, matcher)?;
+        let tags = get_tags(&repo, &matcher)?;
         let is_working_repo_clean = is_working_repo_clean(&repo)?;
         let head_ref = get_head_sha(&repo)?;
         let remote = get_owner_repo_info(&repo)?;
 
+        let head_version = match is_working_repo_clean {
+            true => get_head_version(&repo, matcher),
+            false => None
+        };
+
         let details = RepoDetails {
             known_versions: tags,
             is_workspace_clean: is_working_repo_clean,
-            head_version: None,
+            head_version: head_version,
             head_ref,
             remote,
             path: path.clone(),
         };
+
+        debug!("Repo Details for run: {:?}", details);
 
         return Ok(details);
     }
@@ -48,7 +55,7 @@ pub fn tag_version(repo_details: &RepoDetails, version: &Version, message: &str)
     };
 }
 
-fn get_tags(repo: &Repository, matcher: VersionMatcher) -> Result<Vec<Version>> {
+fn get_tags(repo: &Repository, matcher: &VersionMatcher) -> Result<Vec<Version>> {
     let tags = repo.tag_names(None)?;
     let mut tags: Vec<Version> = tags
         .iter()
@@ -57,12 +64,54 @@ fn get_tags(repo: &Repository, matcher: VersionMatcher) -> Result<Vec<Version>> 
         .collect();
 
     tags.sort();
+
+    debug!("Tags discovered: {:?}", tags);
     Ok(tags)
 }
 
 pub fn is_working_repo_clean(repo: &Repository) -> Result<bool> {
-    let status = repo.statuses(Some(&mut StatusOptions::new()))?;
+    let status = repo.statuses(None)?;
     return Ok(status.is_empty());
+}
+
+fn get_head_version(repo: &Repository, matcher: VersionMatcher) -> Option<Version> {
+    let head = match repo.head() {
+        Err(_) => return None,
+        Ok(head) => head
+    };
+
+    let head_commit = match head.peel_to_commit() {
+        Err(_) => return None,
+        Ok(commit) => commit
+    };
+
+    let tags = match repo.tag_names(None) {
+        Err(_) => return None,
+        Ok(it) => it
+    };
+
+    let tags: Vec<Reference> = tags
+        .iter()
+        .map(|x| x.unwrap().to_string())
+        .flat_map(|version| {
+            repo.find_reference(&format!("refs/tags/{}", version))
+        })
+        .collect();
+
+    for tag in tags {
+        match tag.peel_to_commit() {
+            Err(_) => continue,
+            Ok(it) => {
+                if it.id() == head_commit.id() {
+                    let tag_name = tag.name().unwrap();
+                    trace!("HEAD points to {}", tag_name);
+                    return matcher.match_version(tag_name.to_string());
+                }
+            }
+        }
+    }
+
+    return None;
 }
 
 pub fn get_head_sha(repo: &Repository) -> Result<String> {

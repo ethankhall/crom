@@ -33,3 +33,8 @@ mime_guess = "2.0.0-alpha.6"
 mime = "0.3.5"
 futures = "0.1.25"
 url = "1.7"
+
+[dev-dependencies]
+assert_cmd = "0.10"
+tempdir = "0.3"
+predicates = "1.0"

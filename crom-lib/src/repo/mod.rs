@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use crate::error::*;
 use crate::version::*;
 
+#[derive(Debug)]
 pub enum RepoRemote {
     GitHub(String, String),
 }
@@ -12,6 +13,7 @@ pub enum TagTarget {
     Local,
 }
 
+#[derive(Debug)]
 pub struct RepoDetails {
     pub known_versions: Vec<Version>,
     pub is_workspace_clean: bool,
@@ -23,6 +25,10 @@ pub struct RepoDetails {
 
 impl RepoDetails {
     pub fn is_version_head(&self, version: &Version) -> bool {
+        if !self.is_workspace_clean {
+            return false;
+        }
+
         match &self.head_version {
             None => false,
             Some(v) => version == v,

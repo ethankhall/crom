@@ -8,6 +8,8 @@ use crate::error::*;
 pub struct CromConfig {
     #[serde(flatten)]
     pub project: ProjectConfig,
+
+    #[serde(default)]
     pub artifact: HashMap<String, ProjectArtifacts>,
 }
 
