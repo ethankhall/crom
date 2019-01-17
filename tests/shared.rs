@@ -2,9 +2,9 @@ use std::process::Command;
 use std::fs;
 use std::path::PathBuf;
 
-pub const CURRENT_VERSION: &str = "v0.1.3";
-pub const NEXT_SNAPSHOT_VERSION: &str = "v0.1.4-SNAPSHOT";
-pub const NEXT_VERSION: &str = "v0.1.4";
+pub const CURRENT_VERSION: &str = "v0.1.4";
+pub const NEXT_SNAPSHOT_VERSION: &str = "v0.1.5-SNAPSHOT";
+pub const NEXT_VERSION: &str = "v0.1.5";
 
 pub fn checkout_repo(path: PathBuf) {
     println!("Cloning from test repo");

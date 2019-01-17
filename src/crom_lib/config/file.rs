@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::fmt;
+
+use serde::de::{self, Deserialize, Deserializer};
 
 use crate::crom_lib::error::*;
 
@@ -21,7 +24,7 @@ pub struct ProjectConfig {
     pub message_template: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[derive(Serialize, Debug, PartialEq, Clone)]
 pub enum VersionType {
     Cargo,
     Property,
@@ -62,5 +65,25 @@ impl FromStr for VersionType {
             "cargo" | "rust" => Ok(VersionType::Cargo),
             _ => Err(ConfigError::InvalidVersionType(s.to_string())),
         }
+    }
+}
+
+impl<'de> Deserialize<'de> for VersionType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+        struct Visitor;
+
+        impl<'de> de::Visitor<'de> for Visitor {
+            type Value = VersionType;
+
+            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                write!(f, "a string")
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> where E: de::Error {
+                return VersionType::from_str(v).map_err(|x| de::Error::custom(format!("{:?}", x)));
+            }
+        }
+
+        deserializer.deserialize_any(Visitor)
     }
 }
