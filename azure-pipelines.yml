@@ -36,7 +36,7 @@ jobs:
           $HOME/.cargo/bin/rustup target add x86_64-unknown-linux-musl
           sudo apt-get install -y cmake musl-tools
           $HOME/.cargo/bin/cargo build --target=x86_64-unknown-linux-musl
-          ./target/x86_64-unknown-linux-musl/release/crom update-version --pre-release release
+          ./target/x86_64-unknown-linux-musl/debug/crom update-version --pre-release release
 
           $HOME/.cargo/bin/cargo test --target=x86_64-unknown-linux-musl
           $HOME/.cargo/bin/cargo build --target=x86_64-unknown-linux-musl --release
@@ -55,7 +55,7 @@ jobs:
           set -e
           curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
           $HOME/.cargo/bin/cargo build
-          ./target/release/crom update-version --pre-release release
+          ./target/debug/crom update-version --pre-release release
 
           $HOME/.cargo/bin/cargo test
           $HOME/.cargo/bin/cargo build --release
