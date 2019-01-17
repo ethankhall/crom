@@ -12,6 +12,7 @@ use tempdir::TempDir;
 use mockito::mock;
 
 #[test] 
+#[cfg(unix)]
 fn can_tag_version() {
     let mock = mock("POST", "/repos/ethankhall/crom-examples/releases")
         .match_header("accept", "application/vnd.github.v3+json")
