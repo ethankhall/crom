@@ -1,5 +1,4 @@
 #![feature(try_from)]
-#![feature(uniform_paths)]
 
 #[macro_use]
 extern crate clap;
