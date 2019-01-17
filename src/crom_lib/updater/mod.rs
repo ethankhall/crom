@@ -32,5 +32,5 @@ pub fn update(
         }
     }
 
-    return Ok(());
+    Ok(())
 }

@@ -6,9 +6,10 @@ use crate::crom_lib::*;
 pub fn handle_get_command(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
     match args.subcommand() {
         ("current-version", Some(run_matches)) => {
-            let modifier = match run_matches.is_present("no_snapshot") {
-                true => VersionModification::None,
-                false => VersionModification::NoneOrSnapshot,
+            let modifier = if run_matches.is_present("no_snapshot") {
+                VersionModification::None
+            } else {
+                VersionModification::NoneOrSnapshot
             };
 
             print_version(project, modifier)
@@ -28,5 +29,5 @@ fn print_version(
 
     info!("{}", latest_version);
 
-    return Ok(0);
+    Ok(0)
 }

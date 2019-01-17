@@ -16,14 +16,14 @@ fn are_you_sure(default: bool) -> CromResult<bool> {
     std::io::stdout().flush()?;
     let mut input = String::new();
     std::io::stdin().read_line(&mut input)?;
-    return match input.trim().to_lowercase().as_str() {
+    match input.trim().to_lowercase().as_str() {
         "y" => Ok(default),
         "n" => Ok(!default),
         _ => {
             error!("Didn't understand. Please try again.");
             Err(CromError::UserInput)
         }
-    };
+    }
 }
 
 pub fn parse_pre_release(args: &ArgMatches) -> crate::crom_lib::VersionModification {

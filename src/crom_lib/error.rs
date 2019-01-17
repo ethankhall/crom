@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use ini::ini::ParseError as IniError;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ErrorContainer {
     Repo(RepoError),
     Version(VersionError),
@@ -17,24 +17,24 @@ pub enum ErrorContainer {
     Compress(CompressError),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum CompressError {
     ZipFailure(String),
     ZipFileNameErr(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ArtifactError {
     FailedUpload,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum StateError {
     RepoNotClean,
     ArtifactNotFound(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum GitHubError {
     AccessError(String),
     UnkownCommunicationError(String),
@@ -44,10 +44,10 @@ pub enum GitHubError {
     UnableToGetUploadUrl(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum VersionError {}
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ConfigError {
     UnableToFindConfig(PathBuf),
     IoError(String),
@@ -55,9 +55,11 @@ pub enum ConfigError {
     ParseError(String),
     InvalidVersionType(String),
     MissingVersionDefinition,
+    InvalidCompressionType(String),
+    InvalidArtifactTarget(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum RepoError {
     GitError(String),
     GitRemoteUnkown(String),
@@ -65,14 +67,14 @@ pub enum RepoError {
     UnableToTagRepo(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum UpdaterError {
     IOError(String),
     PropertySave(String),
     PropertyLoad(String),
     UnableToUpdateConfig,
     Unsupported,
-    CargoTomlNotValid(String)
+    CargoTomlNotValid(String),
 }
 
 impl From<zip::result::ZipError> for ErrorContainer {

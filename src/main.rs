@@ -11,10 +11,10 @@ extern crate toml;
 #[macro_use]
 extern crate log;
 extern crate hyper;
-extern crate url;
-extern crate xmltree;
 extern crate libflate;
 extern crate tempfile;
+extern crate url;
+extern crate xmltree;
 extern crate zip;
 
 #[macro_export]
@@ -27,8 +27,8 @@ macro_rules! s {
 mod common;
 mod crom_lib;
 
-use std::process;
 use clap::ArgMatches;
+use std::process;
 
 use common::configure_logging;
 use common::error::*;
@@ -115,7 +115,7 @@ fn main() {
 fn exec_commad(matches: &ArgMatches) -> Result<i32, CromError> {
     let project = make_project();
 
-    return match matches.subcommand() {
+    match matches.subcommand() {
         ("init", Some(arg_matches)) => common::commands::init::handle_init_command(arg_matches),
         ("get", Some(arg_matches)) => {
             common::commands::get::handle_get_command(arg_matches, &project?)
@@ -130,5 +130,5 @@ fn exec_commad(matches: &ArgMatches) -> Result<i32, CromError> {
             common::commands::exec::exec_upload_artifacts(arg_matches, &project?)
         }
         _ => unreachable!(),
-    };
+    }
 }

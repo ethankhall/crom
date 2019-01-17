@@ -49,7 +49,7 @@ pub fn tag_repo(
         };
     }
 
-    return Ok(1);
+    Ok(1)
 }
 
 pub mod git;

@@ -46,7 +46,7 @@ pub fn make_upload_request(
     let res = rt.block_on(client.request(request)).unwrap();
     let upload_url = extract_upload_url(res)?;
 
-    let upload_requests = match artifacts.compress {
+    match artifacts.compress {
         Some(compression) => compress_artifact(
             &upload_url,
             details.path.clone(),
@@ -54,9 +54,7 @@ pub fn make_upload_request(
             &compression,
         ),
         None => build_artifact_containers(&upload_url, details.path.clone(), &artifacts.paths),
-    };
-
-    return upload_requests;
+    }
 }
 
 fn compress_artifact(
@@ -65,7 +63,7 @@ fn compress_artifact(
     artifacts: &HashMap<String, String>,
     compresion: &ProjectArtifactWrapper,
 ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
-    let compressed_name = format!("{}", compresion.name);
+    let compressed_name = compresion.name.to_string();
     let file = tempfile::NamedTempFile::new()?;
 
     super::compress::compress_files(&file, root_path, &artifacts, &compresion.format)?;
@@ -73,7 +71,7 @@ fn compress_artifact(
     file.close()?;
 
     let container = ArtifactContainer::new(request, compressed_name);
-    return Ok(vec![container]);
+    Ok(vec![container])
 }
 
 fn build_artifact_containers(
@@ -91,7 +89,7 @@ fn build_artifact_containers(
         upload_requests.push(ArtifactContainer::new(request, name.to_string()));
     }
 
-    return Ok(upload_requests);
+    Ok(upload_requests)
 }
 
 fn build_request(
@@ -112,7 +110,7 @@ fn build_request(
         query.append_pair("name", file_name);
     }
 
-    return make_file_upload_request(&uri, file, make_github_auth_headers()?);
+    make_file_upload_request(&uri, file, make_github_auth_headers()?)
 }
 
 fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {

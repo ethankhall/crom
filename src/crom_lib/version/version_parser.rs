@@ -2,26 +2,24 @@ use super::*;
 
 impl VersionMatcher {
     pub fn new(pattern: &str) -> Self {
-        let split: Vec<&str> = pattern.split(".").collect();
+        let split: Vec<&str> = pattern.split('.').collect();
         let parts: Vec<VersionComponent> = split
             .into_iter()
-            .map(|x| {
-                return match x {
-                    "%d" => VersionComponent::Changing(0),
-                    _ => VersionComponent::Static(x.to_string()),
-                };
+            .map(|x| match x {
+                "%d" => VersionComponent::Changing(0),
+                _ => VersionComponent::Static(x.to_string()),
             })
             .collect();
 
-        return VersionMatcher { pattern: parts };
+        VersionMatcher { pattern: parts }
     }
 
     pub fn build_default_version(&self) -> Version {
-        return Version::new(self.pattern.clone(), false);
+        Version::new(self.pattern.clone(), false)
     }
 
     pub fn match_version(&self, input: String) -> Option<Version> {
-        let split: Vec<&str> = input.split(".").collect();
+        let split: Vec<&str> = input.split('.').collect();
 
         if split.len() != self.pattern.len() {
             return None;
@@ -29,9 +27,8 @@ impl VersionMatcher {
 
         let mut version_parts: Vec<VersionComponent> = Vec::new();
 
-        for i in 0..split.len() {
-            let pattern_part = self.pattern.get(i).unwrap();
-            let split_part = split.get(i).unwrap();
+        for (i, split_part) in split.iter().enumerate() {
+            let pattern_part = &self.pattern[i];
 
             match pattern_part {
                 VersionComponent::Static(value) => {
@@ -48,7 +45,7 @@ impl VersionMatcher {
             }
         }
 
-        return Some(Version::new(version_parts, false));
+        Some(Version::new(version_parts, false))
     }
 }
 

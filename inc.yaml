@@ -6,6 +6,8 @@ exec:
   build:
     commands:
       - cargo build
+      - cargo fmt
+      - cargo clippy
     description: Run a normal debug build
   format:
     commands:

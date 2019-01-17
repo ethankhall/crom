@@ -19,15 +19,16 @@ impl RepoDetails {
         let head_ref = get_head_sha(&repo)?;
         let remote = get_owner_repo_info(&repo)?;
 
-        let head_version = match is_working_repo_clean {
-            true => get_head_version(&repo, matcher),
-            false => None
+        let head_version = if is_working_repo_clean {
+            get_head_version(&repo, matcher)
+        } else {
+            None
         };
 
         let details = RepoDetails {
             known_versions: tags,
             is_workspace_clean: is_working_repo_clean,
-            head_version: head_version,
+            head_version,
             head_ref,
             remote,
             path: path.clone(),
@@ -35,24 +36,22 @@ impl RepoDetails {
 
         debug!("Repo Details for run: {:?}", details);
 
-        return Ok(details);
+        Ok(details)
     }
 }
 
 pub fn tag_version(repo_details: &RepoDetails, version: &Version, message: &str) -> Result<()> {
     let repo = Repository::discover(repo_details.path.clone())?;
 
-    let head = format!("{}", repo_details.head_ref);
+    let head = repo_details.head_ref.to_string();
     let sig = git2::Signature::now("crom", "cli@crom.tech")?;
 
     let head_obj = repo.find_object(Oid::from_str(&head)?, Some(ObjectType::Commit))?;
 
-    return match repo.tag(&format!("{}", version), &head_obj, &sig, message, false) {
+    match repo.tag(&format!("{}", version), &head_obj, &sig, message, false) {
         Ok(_) => Ok(()),
-        Err(e) => {
-            return Err(RepoError::UnableToTagRepo(e.to_string()));
-        }
-    };
+        Err(e) => Err(RepoError::UnableToTagRepo(e.to_string())),
+    }
 }
 
 fn get_tags(repo: &Repository, matcher: &VersionMatcher) -> Result<Vec<Version>> {
@@ -71,31 +70,29 @@ fn get_tags(repo: &Repository, matcher: &VersionMatcher) -> Result<Vec<Version>>
 
 pub fn is_working_repo_clean(repo: &Repository) -> Result<bool> {
     let status = repo.statuses(None)?;
-    return Ok(status.is_empty());
+    Ok(status.is_empty())
 }
 
 fn get_head_version(repo: &Repository, matcher: VersionMatcher) -> Option<Version> {
     let head = match repo.head() {
         Err(_) => return None,
-        Ok(head) => head
+        Ok(head) => head,
     };
 
     let head_commit = match head.peel_to_commit() {
         Err(_) => return None,
-        Ok(commit) => commit
+        Ok(commit) => commit,
     };
 
     let tags = match repo.tag_names(None) {
         Err(_) => return None,
-        Ok(it) => it
+        Ok(it) => it,
     };
 
     let tags: Vec<Reference> = tags
         .iter()
         .map(|x| x.unwrap().to_string())
-        .flat_map(|version| {
-            repo.find_reference(&format!("refs/tags/{}", version))
-        })
+        .flat_map(|version| repo.find_reference(&format!("refs/tags/{}", version)))
         .collect();
 
     for tag in tags {
@@ -111,7 +108,7 @@ fn get_head_version(repo: &Repository, matcher: VersionMatcher) -> Option<Versio
         }
     }
 
-    return None;
+    None
 }
 
 pub fn get_head_sha(repo: &Repository) -> Result<String> {
@@ -123,7 +120,7 @@ pub fn get_head_sha(repo: &Repository) -> Result<String> {
         .iter()
         .map(|x| format!("{:02x}", x))
         .collect();
-    return Ok(strs.join(""));
+    Ok(strs.join(""))
 }
 
 fn get_owner_repo_info(repo: &Repository) -> Result<RepoRemote> {
@@ -138,7 +135,7 @@ fn parse_remote(remote: &str) -> Result<RepoRemote> {
     let re =
         Regex::new("^(https://github.com/|git@github.com:)(?P<owner>.+?)/(?P<repo>.+?)(\\.git)?$")?;
 
-    return match re.captures(remote) {
+    match re.captures(remote) {
         Some(matches) => {
             let owner = matches.name("owner").unwrap().as_str().to_string();
             let repo = matches.name("repo").unwrap().as_str().to_string();
@@ -146,7 +143,7 @@ fn parse_remote(remote: &str) -> Result<RepoRemote> {
             Ok(RepoRemote::GitHub(owner, repo))
         }
         None => Err(RepoError::GitRemoteUnkown(remote.to_string())),
-    };
+    }
 }
 
 #[test]

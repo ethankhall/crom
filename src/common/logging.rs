@@ -16,7 +16,7 @@ pub fn configure_logging(verbose: i32, warn: bool, quite: bool) {
 
     let mut dispatch = Dispatch::new();
     if verbose + 2 < 6 {
-        for library in vec![
+        for library in &[
             "want",
             "hyper",
             "mio",
@@ -24,7 +24,7 @@ pub fn configure_logging(verbose: i32, warn: bool, quite: bool) {
             "tokio_threadpool",
             "tokio_reactor",
         ] {
-            dispatch = dispatch.level_for(library, Level::Warn.to_level_filter());
+            dispatch = dispatch.level_for(*library, Level::Warn.to_level_filter());
         }
     }
 
@@ -48,13 +48,13 @@ pub fn configure_logging(verbose: i32, warn: bool, quite: bool) {
 }
 
 fn log_level(number_of_verbose: i32) -> Level {
-    return match number_of_verbose {
+    match number_of_verbose {
         0 => Level::Error,
         1 => Level::Warn,
         2 => Level::Info,
         3 => Level::Debug,
         4 | _ => Level::Trace,
-    };
+    }
 }
 
 fn configure_logging_output(logging_level: Level, dispatch: Dispatch) -> Dispatch {
@@ -65,7 +65,7 @@ fn configure_logging_output(logging_level: Level, dispatch: Dispatch) -> Dispatc
         .debug(Color::Blue);
 
     if logging_level == Level::Trace || logging_level == Level::Debug {
-        return dispatch.format(move |out, message, record| {
+        dispatch.format(move |out, message, record| {
             out.finish(format_args!(
                 "{}[{}][{}] {}",
                 Local::now().format("[%Y-%m-%d - %H:%M:%S]"),
@@ -73,9 +73,9 @@ fn configure_logging_output(logging_level: Level, dispatch: Dispatch) -> Dispatc
                 colors.color(record.level()),
                 message
             ))
-        });
+        })
     } else {
-        return dispatch.format(move |out, message, record| {
+        dispatch.format(move |out, message, record| {
             if record.level() == Level::Error {
                 out.finish(format_args!(
                     "[{}] {}",
@@ -85,6 +85,6 @@ fn configure_logging_output(logging_level: Level, dispatch: Dispatch) -> Dispatc
             } else {
                 out.finish(format_args!("{}", message));
             }
-        });
+        })
     }
 }

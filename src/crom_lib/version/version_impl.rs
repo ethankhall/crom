@@ -1,5 +1,5 @@
+use std::cmp::{min, Ord, Ordering};
 use std::fmt::{Display, Formatter};
-use std::cmp::{Ord, Ordering, min};
 
 use super::*;
 
@@ -8,27 +8,27 @@ impl Ord for Version {
         let self_str = self.to_string();
         let other_str = other.to_string();
 
-        let self_parts: Vec<&str> = self_str.split(".").collect();
-        let other_parts: Vec<&str> = other_str.split(".").collect();
-        
+        let self_parts: Vec<&str> = self_str.split('.').collect();
+        let other_parts: Vec<&str> = other_str.split('.').collect();
+
         let end = min(self_parts.len(), other_parts.len());
         for i in 0..end {
-            let other_part = other_parts.get(i).unwrap();
-            let self_part = self_parts.get(i).unwrap();
+            let other_part = other_parts[i];
+            let self_part = self_parts[i];
 
             match other_part.cmp(&self_part) {
                 Ordering::Equal => continue,
                 Ordering::Less => return Ordering::Greater,
-                Ordering::Greater => return Ordering::Less
+                Ordering::Greater => return Ordering::Less,
             }
         }
 
         if other.parts.len() == self.parts.len() {
-            return Ordering::Equal;
+            Ordering::Equal
         } else if other.parts.len() > self.parts.len() {
-            return Ordering::Less;
+            Ordering::Less
         } else {
-            return Ordering::Greater;
+            Ordering::Greater
         }
     }
 }
@@ -45,7 +45,7 @@ impl PartialEq for Version {
     }
 }
 
-impl Eq for Version { }
+impl Eq for Version {}
 
 impl Version {
     pub fn new(parts: Vec<VersionComponent>, snapshot: bool) -> Version {
@@ -54,11 +54,11 @@ impl Version {
             VersionComponent::Static(_) => false,
         });
 
-        return Version {
-            parts: parts,
+        Version {
+            parts,
             is_snapshot: snapshot,
             is_only_static: !has_dynamic_version,
-        };
+        }
     }
 
     pub fn next_version(&self) -> Version {
@@ -76,23 +76,23 @@ impl Version {
             })
             .collect();
 
-        return Version::new(parts, false);
+        Version::new(parts, false)
     }
 
     pub fn self_without_snapshot(&self) -> Version {
-        return Version::new(self.parts.clone(), false);
+        Version::new(self.parts.clone(), false)
     }
 
     pub fn next_snapshot(&self) -> Version {
         let mut next_version = self.next_version();
         next_version.is_snapshot = true;
-        return next_version;
+        next_version
     }
 }
 
 impl From<String> for Version {
     fn from(input: String) -> Self {
-        return Version::new(vec![VersionComponent::Static(input)], false);
+        Version::new(vec![VersionComponent::Static(input)], false)
     }
 }
 
@@ -109,9 +109,10 @@ impl Display for Version {
             .collect();
 
         let joined = parts.join(".");
-        match self.is_snapshot {
-            false => write!(f, "{}", joined),
-            true => write!(f, "{}-SNAPSHOT", joined),
+        if self.is_snapshot {
+            write!(f, "{}-SNAPSHOT", joined)
+        } else {
+            write!(f, "{}", joined)
         }
     }
 }
@@ -131,7 +132,7 @@ fn test_version_comparison() {
 
     let version_3 = matcher.match_version(s!("1.2.3")).unwrap();
     let version_4 = matcher.match_version(s!("1.2.4")).unwrap();
-    
+
     let matcher_dot = VersionMatcher::new("1.2.3.%d");
     let version_3_3 = matcher_dot.match_version(s!("1.2.3.3")).unwrap();
 

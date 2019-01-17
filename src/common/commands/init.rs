@@ -29,7 +29,7 @@ pub fn handle_init_command(args: &ArgMatches) -> Result<i32, CromError> {
         "Created {:#?}. Please update it to match your project's specific needs.",
         path
     );
-    return Ok(0);
+    Ok(0)
 }
 
 fn write_default_config<P: AsRef<Path>>(default_format: &str, dest: P) -> Result<(), CromError> {

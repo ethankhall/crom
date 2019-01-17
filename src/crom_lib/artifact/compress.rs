@@ -17,10 +17,10 @@ pub fn compress_files(
     artifacts: &HashMap<String, String>,
     format: &ProjectArtifactCompressionFormat,
 ) -> Result<(), ErrorContainer> {
-    return match format {
+    match format {
         ProjectArtifactCompressionFormat::ZIP => zip(output_file, root_path, artifacts),
         ProjectArtifactCompressionFormat::TGZ => tgz(output_file, root_path, artifacts),
-    };
+    }
 }
 
 fn zip(
@@ -33,7 +33,7 @@ fn zip(
     let mut zip = zip::ZipWriter::new(output_file);
 
     for (name, path) in artifacts {
-        let name = format!("{}", name);
+        let name = name.to_string();
         let options =
             zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
         if let Err(_e) = zip.start_file(name.clone(), options) {
@@ -49,13 +49,13 @@ fn zip(
         let mut contents: Vec<u8> = Vec::new();
         file.read_to_end(&mut contents)?;
 
-        zip.write(&contents)?;
+        zip.write_all(&contents)?;
     }
 
     // Optionally finish the zip. (this is also done on drop)
     zip.finish()?;
 
-    return Ok(());
+    Ok(())
 }
 
 fn tgz(
@@ -78,5 +78,5 @@ fn tgz(
     encoder.write_all(&data)?;
     encoder.finish().into_result()?;
 
-    return Ok(());
+    Ok(())
 }

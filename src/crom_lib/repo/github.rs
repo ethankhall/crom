@@ -9,7 +9,7 @@ pub fn tag_version(
     version: &Version,
     message: &str,
 ) -> Result<(), ErrorContainer> {
-    let head = format!("{}", details.head_ref);
+    let head = details.head_ref.to_string();
     let (owner, repo) = match &details.remote {
         RepoRemote::GitHub(owner, repo) => (owner, repo),
     };
@@ -48,7 +48,10 @@ pub fn tag_version(
         let body = match res.into_body().concat2().wait() {
             Ok(body) => String::from_utf8(body.to_vec())?,
             Err(err) => {
-                error!("Unable to access response from GitHub. Status was {}", status);
+                error!(
+                    "Unable to access response from GitHub. Status was {}",
+                    status
+                );
                 return Err(ErrorContainer::GitHub(GitHubError::AccessError(
                     err.to_string(),
                 )));
@@ -56,10 +59,10 @@ pub fn tag_version(
         };
 
         error!("Response {} from GitHub ({}) was {}", status, url, body);
-        return Err(ErrorContainer::GitHub(
+        Err(ErrorContainer::GitHub(
             GitHubError::UnkownCommunicationError(s!("Trouble talking to GitHub")),
-        ));
+        ))
     } else {
-        return Ok(());
+        Ok(())
     }
 }

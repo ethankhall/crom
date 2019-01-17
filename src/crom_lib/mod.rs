@@ -40,6 +40,5 @@ pub fn read_file_to_string(path: &PathBuf) -> Result<String, ErrorContainer> {
     let mut file = File::open(path)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
-    return Ok(contents);
+    Ok(contents)
 }
-

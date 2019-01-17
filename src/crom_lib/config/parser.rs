@@ -43,7 +43,7 @@ fn find_and_parse_config() -> Result<(PathBuf, CromConfig), ConfigError> {
         }
     }
 
-    return Err(ConfigError::UnableToFindConfig(path));
+    Err(ConfigError::UnableToFindConfig(path))
 }
 
 fn parse_config<P: AsRef<Path>>(path: P) -> Result<CromConfig, ConfigError> {

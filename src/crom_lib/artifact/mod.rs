@@ -45,7 +45,7 @@ pub fn upload_artifacts(
         }
     }
 
-    return do_request(upload_requests);
+    do_request(upload_requests)
 }
 
 fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
@@ -75,7 +75,7 @@ fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
 
     spinner.finish_and_clear();
 
-    return Ok(());
+    Ok(())
 }
 
 fn do_transfer(
@@ -98,5 +98,5 @@ fn do_transfer(
         ))));
     }
 
-    return Ok(());
+    Ok(())
 }

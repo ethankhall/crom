@@ -3,16 +3,15 @@ extern crate predicates;
 
 mod shared;
 
-use std::process::Command;
 use std::fs::File;
+use std::process::Command;
 
 use assert_cmd::prelude::*;
 use predicates::prelude::*;
 use tempdir::TempDir;
 
-#[test] 
+#[test]
 fn can_list_current_version() {
-
     let tmp_dir = TempDir::new("test-dir").expect("temp dir should be created");
     let tmp_dir = tmp_dir.path().to_owned();
     shared::checkout_repo(tmp_dir.clone());
@@ -29,7 +28,10 @@ fn can_list_current_version() {
         .current_dir(builder.clone())
         .assert();
 
-    assert.success().stdout(predicate::str::similar(format!("{}\n", shared::CURRENT_VERSION)));
+    assert.success().stdout(predicate::str::similar(format!(
+        "{}\n",
+        shared::CURRENT_VERSION
+    )));
 
     let foo_txt = builder.with_file_name("foo.txt");
     File::create(&foo_txt).expect(&format!("Should be able to create foo file: {:?}", foo_txt));
@@ -41,5 +43,8 @@ fn can_list_current_version() {
         .current_dir(builder.clone())
         .assert();
 
-    assert.success().stdout(predicate::str::similar(format!("{}\n", shared::NEXT_SNAPSHOT_VERSION)));
+    assert.success().stdout(predicate::str::similar(format!(
+        "{}\n",
+        shared::NEXT_SNAPSHOT_VERSION
+    )));
 }

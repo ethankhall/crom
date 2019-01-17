@@ -1,17 +1,17 @@
 extern crate assert_cmd;
-extern crate predicates;
 extern crate mockito;
+extern crate predicates;
 
 mod shared;
 
 use std::process::Command;
 
 use assert_cmd::prelude::*;
+use mockito::mock;
 use predicates::prelude::*;
 use tempdir::TempDir;
-use mockito::mock;
 
-#[test] 
+#[test]
 #[cfg(unix)]
 fn can_tag_version() {
     let mock = mock("POST", "/repos/ethankhall/crom-examples/releases")
@@ -40,7 +40,10 @@ fn can_tag_version() {
         .current_dir(builder.clone())
         .assert();
 
-    println!("{}", std::str::from_utf8(&assert.success().get_output().stdout).unwrap());
+    println!(
+        "{}",
+        std::str::from_utf8(&assert.success().get_output().stdout).unwrap()
+    );
 
     mock.assert();
 
@@ -51,5 +54,8 @@ fn can_tag_version() {
         .current_dir(builder.clone())
         .assert();
 
-    assert.success().stdout(predicate::str::similar(format!("{}\n", shared::NEXT_VERSION)));
+    assert.success().stdout(predicate::str::similar(format!(
+        "{}\n",
+        shared::NEXT_VERSION
+    )));
 }

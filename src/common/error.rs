@@ -70,21 +70,21 @@ impl From<CromError> for i32 {
 impl From<json::Error> for CromError {
     fn from(error: json::Error) -> Self {
         debug!("Error reading JONS: {}", error);
-        return CromError::JsonLoad(error.to_string());
+        CromError::JsonLoad(error.to_string())
     }
 }
 
 impl From<xmltree::Error> for CromError {
     fn from(error: xmltree::Error) -> Self {
         debug!("Error writing POM file: {}", error);
-        return CromError::PomSave;
+        CromError::PomSave
     }
 }
 
 impl From<xmltree::ParseError> for CromError {
     fn from(error: xmltree::ParseError) -> Self {
         debug!("Error loading POM file: {}", error);
-        return CromError::PomLoad;
+        CromError::PomLoad
     }
 }
 

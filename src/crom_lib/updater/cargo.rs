@@ -19,7 +19,7 @@ impl CargoUpdater {
         let doc = text.parse::<Document>().expect("invalid doc");
 
         if doc["workspace"].is_none() {
-            return update_version_in_cargo_toml(path, version);
+            update_version_in_cargo_toml(path, version)
         } else {
             match doc["workspace"]["members"].as_array() {
                 Some(arr) => {
@@ -27,10 +27,11 @@ impl CargoUpdater {
                         let name = match item.as_str() {
                             Some(s) => s,
                             None => {
-                                return Err(
-                                    ErrorContainer::Updater(
-                                        UpdaterError::CargoTomlNotValid(
-                                            s!("Cargo.toml for workspace.members was not a string."))));
+                                return Err(ErrorContainer::Updater(
+                                    UpdaterError::CargoTomlNotValid(s!(
+                                        "Cargo.toml for workspace.members was not a string."
+                                    )),
+                                ));
                             }
                         };
 
@@ -39,16 +40,15 @@ impl CargoUpdater {
                         my_path.push(crate::crom_lib::CARGO_TOML);
                         update_version_in_cargo_toml(my_path, version)?;
                     }
-                },
+                }
                 None => {
-                    return Err(
-                        ErrorContainer::Updater(
-                            UpdaterError::CargoTomlNotValid(
-                                s!("Cargo.toml for workspace was missing members."))));
+                    return Err(ErrorContainer::Updater(UpdaterError::CargoTomlNotValid(
+                        s!("Cargo.toml for workspace was missing members."),
+                    )));
                 }
             }
 
-            return Ok(());
+            Ok(())
         }
     }
 }
@@ -59,8 +59,8 @@ fn update_version_in_cargo_toml(path: PathBuf, version: &Version) -> Result<(), 
 
     let mut version_str = s!(version);
 
-    if version_str.starts_with("v") {
-        version_str = version_str.replacen("v", "", 1);
+    if version_str.starts_with('v') {
+        version_str = version_str.replacen('v', "", 1);
     }
 
     doc["package"]["version"] = value(version_str);

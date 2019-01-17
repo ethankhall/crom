@@ -23,5 +23,5 @@ pub enum VersionModification {
     OneMore,
 }
 
-mod version;
+mod version_impl;
 mod version_parser;

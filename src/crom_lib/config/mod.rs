@@ -32,7 +32,7 @@ pub fn build_default_config(version_format: &str) -> String {
         artifact: HashMap::new(),
     };
 
-    return toml::to_string_pretty(&crom_lib).expect("That toml should be serializer.");
+    toml::to_string_pretty(&crom_lib).expect("That toml should be serializer.")
 }
 
 impl Project for ParsedProjectConfig {
@@ -44,11 +44,11 @@ impl Project for ParsedProjectConfig {
     }
 
     fn update_versions(&self, version: &Version) -> Result<(), ErrorContainer> {
-        return crate::crom_lib::updater::update(
+        crate::crom_lib::updater::update(
             self.project_path.clone(),
             version,
             self.project_config.types.clone(),
-        );
+        )
     }
 
     fn publish(&self, version: &Version, names: Vec<String>) -> Result<(), ErrorContainer> {
@@ -81,7 +81,7 @@ impl Project for ParsedProjectConfig {
 
         crate::crom_lib::repo::tag_repo(&self.repo_details, version, &message, targets)?;
 
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -91,7 +91,7 @@ pub fn make_message(
 ) -> Result<String, ErrorContainer> {
     let template = message_template
         .clone()
-        .unwrap_or(s!("Crom is creating a version {version}."));
+        .unwrap_or_else(|| s!("Crom is creating a version {version}."));
 
     if !template.contains("{version}") {
         return Err(ErrorContainer::Config(
@@ -107,23 +107,28 @@ fn get_latest_version(
     latest_version: Version,
     modification: VersionModification,
 ) -> Version {
-    let return_version = match modification {
+    match modification {
         VersionModification::NoneOrSnapshot => {
-            match repo_details.is_version_head(&latest_version) {
-                true => latest_version,
-                false => latest_version.next_snapshot(),
+            if repo_details.is_version_head(&latest_version) {
+                latest_version
+            } else {
+                latest_version.next_snapshot()
             }
         }
-        VersionModification::None => match repo_details.is_version_head(&latest_version) {
-            true => latest_version,
-            false => latest_version.self_without_snapshot(),
-        },
-        VersionModification::NoneOrNext => match repo_details.is_version_head(&latest_version) {
-            true => latest_version,
-            false => latest_version.next_version(),
-        },
+        VersionModification::None => {
+            if repo_details.is_version_head(&latest_version) {
+                latest_version
+            } else {
+                latest_version.self_without_snapshot()
+            }
+        }
+        VersionModification::NoneOrNext => {
+            if repo_details.is_version_head(&latest_version) {
+                latest_version
+            } else {
+                latest_version.next_version()
+            }
+        }
         VersionModification::OneMore => latest_version.next_version(),
-    };
-
-    return return_version;
+    }
 }

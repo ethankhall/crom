@@ -14,7 +14,7 @@ pub fn exec_update_version(args: &ArgMatches, project: &dyn Project) -> Result<i
 
     project.update_versions(&latest_version)?;
 
-    return Ok(0);
+    Ok(0)
 }
 
 pub fn exec_upload_artifacts(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
@@ -24,7 +24,7 @@ pub fn exec_upload_artifacts(args: &ArgMatches, project: &dyn Project) -> Result
 
     project.publish(&version, names)?;
 
-    return Ok(0);
+    Ok(0)
 }
 
 pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
