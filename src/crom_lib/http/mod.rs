@@ -35,9 +35,7 @@ pub fn make_file_upload_request(
         builder.header(key, value);
     }
 
-    Ok(Request::builder()
-        .method("POST")
-        .uri(url.as_str())
+    Ok(builder
         .header(USER_AGENT, format!("crom/{}", env!("CARGO_PKG_VERSION")))
         .header(CONTENT_TYPE, mime.to_string())
         .header(CONTENT_LENGTH, size)
@@ -86,6 +84,7 @@ pub fn make_post(
 
 #[cfg(test)]
 pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, ErrorContainer> {
+    warn!("Using debug GITHUB headers!");
     Ok(HashMap::new())
 }
 

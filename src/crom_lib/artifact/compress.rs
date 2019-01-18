@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 
 use libflate::gzip::Encoder;
 use std::io::Write;
@@ -33,6 +33,7 @@ fn zip(
     let mut zip = zip::ZipWriter::new(output_file);
 
     for (name, path) in artifacts {
+        debug!("Compressing {} located at {}", name, path);
         let name = name.to_string();
         let options =
             zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
@@ -43,7 +44,11 @@ fn zip(
         }
 
         let mut art_path = root_path.clone();
-        art_path.push(path);
+        art_path.push(Path::new(path));
+
+        if !art_path.exists() {
+            return Err(ErrorContainer::Compress(CompressError::UnableToFindArtifact(art_path.to_str().unwrap().to_string())));
+        }
 
         let mut file = File::open(art_path)?;
         let mut contents: Vec<u8> = Vec::new();
@@ -69,8 +74,8 @@ fn tgz(
         let mut art_path = root_path.clone();
         art_path.push(path);
 
-        let mut f = File::open(art_path).unwrap();
-        ar.append_file(name, &mut f).unwrap();
+        let mut f = File::open(art_path)?;
+        ar.append_file(name, &mut f)?;
     }
 
     let mut encoder = Encoder::new(output_file)?;

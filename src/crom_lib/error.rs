@@ -21,6 +21,8 @@ pub enum ErrorContainer {
 pub enum CompressError {
     ZipFailure(String),
     ZipFileNameErr(String),
+    UnableToFindArtifact(String),
+    UnableToCompressArtifacts(String),
 }
 
 #[derive(Debug, PartialEq)]

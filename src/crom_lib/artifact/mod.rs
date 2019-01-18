@@ -41,7 +41,7 @@ pub fn upload_artifacts(
 
         match res {
             Err(e) => {
-                error!("Error while uploading artifact: {:?}", e);
+                error!("Error while building upload request: {:?}", e);
                 return Err(ErrorContainer::Artifact(ArtifactError::FailedUpload));
             }
             Ok(bodys) => upload_requests.extend(bodys),
