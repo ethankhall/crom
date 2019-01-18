@@ -11,6 +11,7 @@ use predicates::prelude::*;
 use tempdir::TempDir;
 
 #[test]
+#[cfg(unix)]
 fn can_list_current_version() {
     let tmp_dir = TempDir::new("test-dir").expect("temp dir should be created");
     let tmp_dir = tmp_dir.path().to_owned();

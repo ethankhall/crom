@@ -22,7 +22,9 @@ pub fn make_upload_request(
     details: &RepoDetails,
     version: &Version,
     artifacts: ProjectArtifacts,
+    root_artifact_path: Option<PathBuf>,
 ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
+
     let (owner, repo) = match &details.remote {
         RepoRemote::GitHub(owner, repo) => (owner, repo),
     };
@@ -46,14 +48,16 @@ pub fn make_upload_request(
     let res = rt.block_on(client.request(request)).unwrap();
     let upload_url = extract_upload_url(res)?;
 
+    let root_path = root_artifact_path.unwrap_or(details.path.clone());
+
     match artifacts.compress {
         Some(compression) => compress_artifact(
             &upload_url,
-            details.path.clone(),
+            root_path,
             &artifacts.paths,
             &compression,
         ),
-        None => build_artifact_containers(&upload_url, details.path.clone(), &artifacts.paths),
+        None => build_artifact_containers(&upload_url, root_path, &artifacts.paths),
     }
 }
 

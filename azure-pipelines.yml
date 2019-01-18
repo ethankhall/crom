@@ -83,7 +83,4 @@ jobs:
           set -e
           cp $SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-linux/crom ~/crom && chmod +x ~/crom
           ~/crom tag-version --source local,github --ignore-changes
-          ~/crom upload-artifacts \
-            crom-windows.exe=$SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-windows/crom.exe \
-            crom-mac=$SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-mac/crom \
-            crom-linux=$SYSTEM_ARTIFACTSDIRECTORY/artifacts/crom-linux/crom
+          ~/crom upload-artifacts --root-artifact-path=$SYSTEM_ARTIFACTSDIRECTORY linux mac windows

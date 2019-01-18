@@ -89,8 +89,9 @@ fn main() {
             (name: "upload-artifacts")
             (alias: "upload-artifact")
             (about: "Upload artifacts to store")
+            (@arg root_artifact_path: --("root-artifact-path") -a +takes_value "Path to the root artifact dir")
             (@arg override_version: --("override-version") +takes_value "Don't look at history, use this value instead")
-            (@arg NAMES: +takes_value +multiple +required "Artifact names from `.crom.toml` to publish"))
+            (@arg NAMES: +takes_value +use_delimiter +multiple +required "Artifact names from `.crom.toml` to publish"))
         ).get_matches();
 
     configure_logging(

@@ -23,7 +23,7 @@ pub static CARGO_TOML: &'static str = "Cargo.toml";
 pub trait Project {
     fn find_latest_version(&self, version_mod: VersionModification) -> Version;
     fn update_versions(&self, version: &Version) -> Result<(), ErrorContainer>;
-    fn publish(&self, version: &Version, names: Vec<String>) -> Result<(), ErrorContainer>;
+    fn publish(&self, version: &Version, names: Vec<String>, root_artifact_path: Option<PathBuf>) -> Result<(), ErrorContainer>;
     fn tag_version(
         &self,
         version: &Version,

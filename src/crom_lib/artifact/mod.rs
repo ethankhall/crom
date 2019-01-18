@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use hyper::client::HttpConnector;
 use hyper::rt::{Future, Stream};
 use hyper::{Body, Client, Request};
@@ -28,12 +30,13 @@ pub fn upload_artifacts(
     details: &RepoDetails,
     version: &Version,
     artifacts: Vec<ProjectArtifacts>,
+    root_artifact_path: Option<PathBuf>,
 ) -> Result<(), ErrorContainer> {
     let mut upload_requests: Vec<ArtifactContainer> = Vec::new();
 
     for art in artifacts {
         let res = match art.target {
-            ProjectArtifactTarget::GitHub => github::make_upload_request(details, version, art),
+            ProjectArtifactTarget::GitHub => github::make_upload_request(details, version, art, root_artifact_path.clone()),
         };
 
         match res {

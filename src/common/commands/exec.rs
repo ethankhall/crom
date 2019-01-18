@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap::ArgMatches;
 
 use crate::common::error::*;
@@ -22,7 +24,8 @@ pub fn exec_upload_artifacts(args: &ArgMatches, project: &dyn Project) -> Result
 
     let version = project.find_latest_version(VersionModification::None);
 
-    project.publish(&version, names)?;
+    let root_artifact_path = args.value_of("root_artifact_path").map(|x| PathBuf::from(x));
+    project.publish(&version, names, root_artifact_path)?;
 
     Ok(0)
 }
