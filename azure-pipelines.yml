@@ -35,9 +35,10 @@ jobs:
           curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
           $HOME/.cargo/bin/rustup target add x86_64-unknown-linux-musl
           sudo apt-get install -y cmake musl-tools
-          curl --location https://github.com/ethankhall/crom/releases/download/$(crom-version)/crom-linux -o ~/crom && chmod +x ~/crom
-          ~/crom update-version --pre-release release
+          $HOME/.cargo/bin/cargo build --target=x86_64-unknown-linux-musl
+          ./target/x86_64-unknown-linux-musl/debug/crom update-version --pre-release release
 
+          $HOME/.cargo/bin/cargo test --target=x86_64-unknown-linux-musl
           $HOME/.cargo/bin/cargo build --target=x86_64-unknown-linux-musl --release
       - task: PublishBuildArtifacts@1
         displayName: "Publish Artifact: Release Build"
@@ -53,8 +54,8 @@ jobs:
       - script: |
           set -e
           curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
-          curl --location https://github.com/ethankhall/crom/releases/download/$(crom-version)/crom-mac -o ~/crom && chmod +x ~/crom
-          ~/crom update-version --pre-release release
+          $HOME/.cargo/bin/cargo build
+          ./target/debug/crom update-version --pre-release release
 
           $HOME/.cargo/bin/cargo test
           $HOME/.cargo/bin/cargo build --release

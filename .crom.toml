@@ -1,4 +1,18 @@
-[default]
 pattern = 'v0.1.%d'
-version_files = ["Cargo.toml"]
-message_template = "Created {version} for release."
+types = ["Cargo"]
+message-template = "Created {version} for release."
+
+[artifact.windows]
+paths = { "crom.exe" = "artifacts/crom-windows/crom.exe" }
+compress = { name = "crom-windows.zip", format = "zip" }
+target = "GitHub"
+
+[artifact.mac]
+paths = {crom = "artifacts/crom-mac/crom"}
+compress = { name = "crom-mac.tar.gz", format = "tgz" }
+target = "GitHub"
+
+[artifact.linux]
+paths = {crom = "artifacts/crom-linux/crom"}
+compress = { name = "crom-linux-musl.zip", format = "zip" }
+target = "GitHub"

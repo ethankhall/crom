@@ -1,55 +1,33 @@
 use clap::ArgMatches;
 
-use super::*;
-use crate::error::*;
-use crate::git::Repo;
+use crate::common::error::CromError;
+use crate::crom_lib::*;
 
-pub fn handle_get_command(args: &ArgMatches) -> Result<i32, CromError> {
+pub fn handle_get_command(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
     match args.subcommand() {
         ("current-version", Some(run_matches)) => {
-            let modifier = match run_matches.is_present("no_snapshot") {
-                true => VersionModification::None,
-                false => VersionModification::NoneOrSnapshot,
+            let modifier = if run_matches.is_present("no_snapshot") {
+                VersionModification::None
+            } else {
+                VersionModification::NoneOrSnapshot
             };
 
-            print_version(run_matches, modifier)
+            print_version(project, modifier)
         }
-        ("next-version", Some(run_matches)) => {
-            print_version(run_matches, VersionModification::OneMore)
+        ("next-version", Some(_run_matches)) => {
+            print_version(project, VersionModification::OneMore)
         }
-        ("projects", Some(_)) => unimplemented!(),
-        _ => print_projects(),
+        _ => unimplemented!(),
     }
 }
 
-fn print_projects() -> Result<i32, CromError> {
-    let (_, configs) = crate::config::find_and_parse_config()?;
-
-    for key in configs.projects.keys() {
-        info!("- {}", key);
-    }
-
-    Ok(0)
-}
-
-fn print_version(args: &ArgMatches, modification: VersionModification) -> Result<i32, CromError> {
-    let (root_path, configs) = crate::config::find_and_parse_config()?;
-
-    let project_name = args.value_of("project").unwrap_or("default");
-    let project_config = match configs.projects.get(project_name) {
-        Some(config) => config,
-        None => {
-            return Err(CromError::ConfigError(format!(
-                "Unable to find project {}",
-                project_name
-            )));
-        }
-    };
-
-    let repo = Repo::new(root_path)?;
-    let latest_version = get_latest_version(&repo, &project_config, modification)?;
+fn print_version(
+    project: &dyn Project,
+    modification: VersionModification,
+) -> Result<i32, CromError> {
+    let latest_version = project.find_latest_version(modification);
 
     info!("{}", latest_version);
 
-    return Ok(0);
+    Ok(0)
 }
