@@ -22,6 +22,9 @@ pub fn make_file_upload_request(
 
     let mime: Mime = guess_mime_type(&file_path);
 
+    if !file_path.exists() {
+        return Err(ErrorContainer::IO(IOError::FileNotFound(file_path.clone())));
+    }
     let mut file = File::open(file_path)?;
     let mut contents: Vec<u8> = Vec::new();
     file.read_to_end(&mut contents)?;
@@ -91,7 +94,6 @@ pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, Er
 #[cfg(not(test))]
 pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, ErrorContainer> {
     use hyper::header::AUTHORIZATION;
-    use std::error::Error;
 
     let token = match std::env::var("GITHUB_TOKEN") {
         Ok(value) => format!("token {}", value),
@@ -102,7 +104,7 @@ pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, Er
         Ok(it) => it,
         Err(err) => {
             return Err(ErrorContainer::GitHub(GitHubError::TokenInvalid(
-                err.description().to_string(),
+                err.to_string(),
             )));
         }
     };

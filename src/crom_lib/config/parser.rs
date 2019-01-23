@@ -1,12 +1,8 @@
 use std::env;
-use std::error::Error;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
 
 use super::file::*;
 use super::*;
-use crate::crom_lib::error::ErrorContainer;
+use crate::crom_lib::*;
 
 impl ParsedProjectConfig {
     pub fn new() -> Result<Self, ErrorContainer> {
@@ -31,7 +27,7 @@ impl ParsedProjectConfig {
     }
 }
 
-fn find_and_parse_config() -> Result<(PathBuf, CromConfig), ConfigError> {
+fn find_and_parse_config() -> Result<(PathBuf, CromConfig), ErrorContainer> {
     let path = env::current_dir()?;
     for ancestor in path.ancestors() {
         let test_path = ancestor.join(crate::crom_lib::CONFIG_FILE);
@@ -43,28 +39,24 @@ fn find_and_parse_config() -> Result<(PathBuf, CromConfig), ConfigError> {
         }
     }
 
-    Err(ConfigError::UnableToFindConfig(path))
+    Err(ErrorContainer::Config(ConfigError::UnableToFindConfig(
+        path,
+    )))
 }
 
-fn parse_config<P: AsRef<Path>>(path: P) -> Result<CromConfig, ConfigError> {
-    let mut file = File::open(path)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
+fn parse_config(path: PathBuf) -> Result<CromConfig, ErrorContainer> {
+    let contents = read_file_to_string(&path)?;
 
     match toml::from_str::<CromConfig>(&contents) {
         Ok(config) => Ok(config),
-        Err(e) => Err(ConfigError::ParseError(e.to_string())),
-    }
-}
-
-impl From<std::io::Error> for ConfigError {
-    fn from(err: std::io::Error) -> Self {
-        ConfigError::IoError(err.description().to_string())
+        Err(e) => Err(ErrorContainer::Config(ConfigError::ParseError(
+            e.to_string(),
+        ))),
     }
 }
 
 impl From<toml::de::Error> for ConfigError {
     fn from(err: toml::de::Error) -> Self {
-        ConfigError::IoError(err.description().to_string())
+        ConfigError::IoError(err.to_string())
     }
 }
