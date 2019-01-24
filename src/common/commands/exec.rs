@@ -2,11 +2,13 @@ use std::path::PathBuf;
 
 use clap::ArgMatches;
 
-use crate::common::error::*;
 use crate::common::*;
 use crate::crom_lib::*;
 
-pub fn exec_update_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
+pub fn exec_update_version(
+    args: &ArgMatches,
+    project: &dyn Project,
+) -> Result<i32, ErrorContainer> {
     let modifier = parse_pre_release(args);
 
     let latest_version = match args.value_of("override_version") {
@@ -19,18 +21,21 @@ pub fn exec_update_version(args: &ArgMatches, project: &dyn Project) -> Result<i
     Ok(0)
 }
 
-pub fn exec_upload_artifacts(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
+pub fn exec_upload_artifacts(
+    args: &ArgMatches,
+    project: &dyn Project,
+) -> Result<i32, ErrorContainer> {
     let names = args.values_of("NAMES").unwrap().map(|x| s!(x)).collect();
 
     let version = project.find_latest_version(VersionModification::None);
 
-    let root_artifact_path = args.value_of("root_artifact_path").map(|x| PathBuf::from(x));
+    let root_artifact_path = args.value_of("root_artifact_path").map(PathBuf::from);
     project.publish(&version, names, root_artifact_path)?;
 
     Ok(0)
 }
 
-pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, CromError> {
+pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, ErrorContainer> {
     let allow_dirty_repo = if !args.is_present("ignore_changes") {
         true
     } else {

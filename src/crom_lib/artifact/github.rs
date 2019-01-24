@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::error::Error;
 use std::path::PathBuf;
 
 use hyper::client::HttpConnector;
@@ -24,7 +23,6 @@ pub fn make_upload_request(
     artifacts: ProjectArtifacts,
     root_artifact_path: Option<PathBuf>,
 ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
-
     let (owner, repo) = match &details.remote {
         RepoRemote::GitHub(owner, repo) => (owner, repo),
     };
@@ -48,15 +46,12 @@ pub fn make_upload_request(
     let res = rt.block_on(client.request(request)).unwrap();
     let upload_url = extract_upload_url(res)?;
 
-    let root_path = root_artifact_path.unwrap_or(details.path.clone());
+    let root_path = root_artifact_path.unwrap_or_else(|| details.path.clone());
 
     match artifacts.compress {
-        Some(compression) => compress_artifact(
-            &upload_url,
-            root_path,
-            &artifacts.paths,
-            &compression,
-        ),
+        Some(compression) => {
+            compress_artifact(&upload_url, root_path, &artifacts.paths, &compression)
+        }
         None => build_artifact_containers(&upload_url, root_path, &artifacts.paths),
     }
 }
@@ -126,7 +121,7 @@ fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {
                 Err(err) => {
                     debug!("Body was: {}", body_text);
                     return Err(ErrorContainer::GitHub(
-                        GitHubError::UnkownCommunicationError(err.description().to_lowercase()),
+                        GitHubError::UnkownCommunicationError(err.to_string().to_lowercase()),
                     ));
                 }
             }
@@ -157,7 +152,7 @@ fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {
     match Url::parse(upload_url) {
         Ok(it) => Ok(it),
         Err(e) => Err(ErrorContainer::GitHub(GitHubError::UnableToGetUploadUrl(
-            e.description().to_string(),
+            e.to_string(),
         ))),
     }
 }

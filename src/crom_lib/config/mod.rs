@@ -51,7 +51,12 @@ impl Project for ParsedProjectConfig {
         )
     }
 
-    fn publish(&self, version: &Version, names: Vec<String>, root_artifact_path: Option<PathBuf>) -> Result<(), ErrorContainer> {
+    fn publish(
+        &self,
+        version: &Version,
+        names: Vec<String>,
+        root_artifact_path: Option<PathBuf>,
+    ) -> Result<(), ErrorContainer> {
         let mut artifacts: Vec<ProjectArtifacts> = Vec::new();
 
         for name in names {
@@ -62,12 +67,19 @@ impl Project for ParsedProjectConfig {
         }
 
         if artifacts.is_empty() {
-            return Err(ErrorContainer::State(StateError::ArtifactNotFound(s!("No aritifact defined"))));
+            return Err(ErrorContainer::State(StateError::ArtifactNotFound(s!(
+                "No aritifact defined"
+            ))));
         }
 
         debug!("Artifacts to upload: {:?}", artifacts);
 
-        crate::crom_lib::artifact::upload_artifacts(&self.repo_details, version, artifacts, root_artifact_path)
+        crate::crom_lib::artifact::upload_artifacts(
+            &self.repo_details,
+            version,
+            artifacts,
+            root_artifact_path,
+        )
     }
 
     fn tag_version(

@@ -36,7 +36,9 @@ pub fn upload_artifacts(
 
     for art in artifacts {
         let res = match art.target {
-            ProjectArtifactTarget::GitHub => github::make_upload_request(details, version, art, root_artifact_path.clone()),
+            ProjectArtifactTarget::GitHub => {
+                github::make_upload_request(details, version, art, root_artifact_path.clone())
+            }
         };
 
         match res {

@@ -31,8 +31,7 @@ use clap::ArgMatches;
 use std::process;
 
 use common::configure_logging;
-use common::error::*;
-use crom_lib::make_project;
+use crom_lib::*;
 
 fn main() {
     let matches = clap_app!(MyApp =>
@@ -113,7 +112,7 @@ fn main() {
     process::exit(return_code);
 }
 
-fn exec_commad(matches: &ArgMatches) -> Result<i32, CromError> {
+fn exec_commad(matches: &ArgMatches) -> Result<i32, ErrorContainer> {
     let project = make_project();
 
     match matches.subcommand() {

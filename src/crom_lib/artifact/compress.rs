@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 
 use libflate::gzip::Encoder;
 use std::io::Write;
@@ -47,7 +47,9 @@ fn zip(
         art_path.push(Path::new(path));
 
         if !art_path.exists() {
-            return Err(ErrorContainer::Compress(CompressError::UnableToFindArtifact(art_path.to_str().unwrap().to_string())));
+            return Err(ErrorContainer::Compress(
+                CompressError::UnableToFindArtifact(art_path.to_str().unwrap().to_string()),
+            ));
         }
 
         let mut file = File::open(art_path)?;

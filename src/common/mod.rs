@@ -1,5 +1,4 @@
 pub mod commands;
-pub mod error;
 mod logging;
 
 use clap::ArgMatches;
@@ -7,10 +6,9 @@ use std::io::Write;
 
 pub use self::logging::configure_logging;
 
-use self::error::*;
 use crate::crom_lib::*;
 
-type CromResult<T> = Result<T, CromError>;
+type CromResult<T> = Result<T, ErrorContainer>;
 
 fn are_you_sure(default: bool) -> CromResult<bool> {
     std::io::stdout().flush()?;
@@ -21,7 +19,7 @@ fn are_you_sure(default: bool) -> CromResult<bool> {
         "n" => Ok(!default),
         _ => {
             error!("Didn't understand. Please try again.");
-            Err(CromError::UserInput)
+            Err(ErrorContainer::UserInput)
         }
     }
 }
