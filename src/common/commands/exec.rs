@@ -36,10 +36,10 @@ pub fn exec_upload_artifacts(
 }
 
 pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, ErrorContainer> {
-    let allow_dirty_repo = if !args.is_present("ignore_changes") {
+    let allow_dirty_repo = if args.is_present("ignore_changes") {
+        warn!("Skipping check for workspace changes.");
         true
     } else {
-        warn!("Skipping check for workspace changes.");
         false
     };
 
