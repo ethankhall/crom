@@ -5,16 +5,10 @@ use super::*;
 
 impl Ord for Version {
     fn cmp(&self, other: &Version) -> Ordering {
-        let self_str = self.to_string();
-        let other_str = other.to_string();
-
-        let self_parts: Vec<&str> = self_str.split('.').collect();
-        let other_parts: Vec<&str> = other_str.split('.').collect();
-
-        let end = min(self_parts.len(), other_parts.len());
+        let end = min(self.parts.len(), other.parts.len());
         for i in 0..end {
-            let other_part = other_parts[i];
-            let self_part = self_parts[i];
+            let other_part = &other.parts[i];
+            let self_part = &self.parts[i];
 
             match other_part.cmp(&self_part) {
                 Ordering::Equal => continue,
@@ -45,7 +39,33 @@ impl PartialEq for Version {
     }
 }
 
-impl Eq for Version {}
+impl Ord for VersionComponent {
+    fn cmp(&self, other: &VersionComponent) -> Ordering {
+        match (self, other) {
+            (VersionComponent::Static(s1), VersionComponent::Static(s2)) => s1.cmp(s2),
+            (VersionComponent::Changing(s1), VersionComponent::Static(s2)) => s1.to_string().cmp(s2),
+            (VersionComponent::Static(s1), VersionComponent::Changing(s2)) => s1.cmp(&s!(s2)),
+            (VersionComponent::Changing(s1), VersionComponent::Changing(s2)) => s1.cmp(s2)
+        }
+    }
+}
+
+impl PartialOrd for VersionComponent {
+    fn partial_cmp(&self, other: &VersionComponent) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for VersionComponent {
+    fn eq(&self, other: &VersionComponent) -> bool {
+        match (self, other) {
+            (VersionComponent::Static(s1), VersionComponent::Static(s2)) => s1 == s2,
+            (VersionComponent::Changing(s1), VersionComponent::Static(s2)) => s1.to_string() == s2.to_string(),
+            (VersionComponent::Static(s1), VersionComponent::Changing(s2)) => s1.to_string() == s2.to_string(),
+            (VersionComponent::Changing(s1), VersionComponent::Changing(s2)) => s1 == s2
+        }
+    }
+}
 
 impl Version {
     pub fn new(parts: Vec<VersionComponent>, snapshot: bool) -> Version {
@@ -139,4 +159,43 @@ fn test_version_comparison() {
     assert!(version_3 < version_4);
     assert!(version_3 < version_3_3);
     assert!(version_3_3 < version_4);
+}
+
+
+#[test]
+fn test_version_order() {
+    let matcher = VersionMatcher::new("1.2.%d");
+
+    let version_3 = matcher.match_version(s!("1.2.9")).unwrap();
+    let version_4 = matcher.match_version(s!("1.2.10")).unwrap();
+
+    let matcher_dot = VersionMatcher::new("1.2.9.%d");
+    let version_3_3 = matcher_dot.match_version(s!("1.2.9.1")).unwrap();
+
+    let mut v = vec![version_3, version_4, version_3_3];
+
+    v.sort();
+
+    assert!(v[0] < v[1]);
+    assert!(v[1] < v[2]);
+}
+
+#[test]
+fn test_version_order_10() {
+    let matcher = VersionMatcher::new("1.2.%d");
+
+    let version_1 = matcher.match_version(s!("1.2.1")).unwrap();
+    let version_10 = matcher.match_version(s!("1.2.10")).unwrap();
+    let version_9 = matcher.match_version(s!("1.2.9")).unwrap();
+
+    let mut v = vec![version_1, version_10, version_9];
+
+    v.sort();
+
+    assert!(v[0] < v[1]);
+    assert!(v[1] < v[2]);
+
+    assert_eq!(v[0].to_string(), "1.2.1");
+    assert_eq!(v[1].to_string(), "1.2.9");
+    assert_eq!(v[2].to_string(), "1.2.10");
 }

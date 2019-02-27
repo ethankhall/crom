@@ -17,6 +17,7 @@ pub fn compress_files(
     artifacts: &HashMap<String, String>,
     format: &ProjectArtifactCompressionFormat,
 ) -> Result<(), ErrorContainer> {
+    debug!("Compressing {:?} into {:?}", root_path, output_file);
     match format {
         ProjectArtifactCompressionFormat::ZIP => zip(output_file, root_path, artifacts),
         ProjectArtifactCompressionFormat::TGZ => tgz(output_file, root_path, artifacts),

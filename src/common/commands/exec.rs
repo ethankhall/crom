@@ -27,7 +27,10 @@ pub fn exec_upload_artifacts(
 ) -> Result<i32, ErrorContainer> {
     let names = args.values_of("NAMES").unwrap().map(|x| s!(x)).collect();
 
-    let version = project.find_latest_version(VersionModification::None);
+    let version = match args.value_of("override_version") {
+        Some(version) => Version::from(s!(version)),
+        None => project.find_latest_version(VersionModification::None),
+    };
 
     let root_artifact_path = args.value_of("root_artifact_path").map(PathBuf::from);
     project.publish(&version, names, root_artifact_path)?;

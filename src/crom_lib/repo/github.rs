@@ -1,6 +1,3 @@
-use hyper::rt::{Future, Stream};
-use hyper::Client;
-
 use super::*;
 use crate::crom_lib::http::*;
 
@@ -37,16 +34,11 @@ pub fn tag_version(
     let request = make_post(&url, make_github_auth_headers()?, body_text)?;
 
     trace!("Request {:?}", &request);
-
-    let https = hyper_rustls::HttpsConnector::new(4);
-    let client = Client::builder().build(https);
-
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-    let res = rt.block_on(client.request(request)).unwrap();
+    let mut res = crate::crom_lib::client().execute(request).unwrap();
     let status = res.status();
     if !status.is_success() {
-        let body = match res.into_body().concat2().wait() {
-            Ok(body) => String::from_utf8(body.to_vec())?,
+        let body = match res.text() {
+            Ok(body) => body,
             Err(err) => {
                 error!(
                     "Unable to access response from GitHub. Status was {}",

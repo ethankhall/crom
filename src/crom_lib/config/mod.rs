@@ -14,6 +14,7 @@ use crate::crom_lib::repo::*;
 use crate::crom_lib::version::*;
 use crate::crom_lib::Project;
 
+#[derive(Debug)]
 pub struct ParsedProjectConfig {
     pub project_config: Rc<file::ProjectConfig>,
     pub artifacts: HashMap<String, ProjectArtifacts>,

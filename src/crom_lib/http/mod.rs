@@ -1,14 +1,13 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::PathBuf;
+use std::io::Read;
 
-use hyper::body::Body;
-use hyper::header::{HeaderName, HeaderValue, ACCEPT, CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT};
-use hyper::Request;
+use reqwest::header::{HeaderName, HeaderValue, ACCEPT, CONTENT_TYPE, USER_AGENT, HeaderMap};
+use reqwest::Request;
 
 use mime::Mime;
 use mime_guess::guess_mime_type;
-use std::io::prelude::*;
 use url::Url;
 
 use crate::crom_lib::error::*;
@@ -17,7 +16,7 @@ pub fn make_file_upload_request(
     url: &Url,
     file_path: PathBuf,
     headers: HashMap<HeaderName, HeaderValue>,
-) -> Result<Request<Body>, ErrorContainer> {
+) -> Result<Request, ErrorContainer> {
     debug!("Upload url {}", url);
 
     let mime: Mime = guess_mime_type(&file_path);
@@ -25,43 +24,40 @@ pub fn make_file_upload_request(
     if !file_path.exists() {
         return Err(ErrorContainer::IO(IOError::FileNotFound(file_path.clone())));
     }
+    let mut buffer = Vec::new();
     let mut file = File::open(file_path)?;
-    let mut contents: Vec<u8> = Vec::new();
-    file.read_to_end(&mut contents)?;
-
-    let size = contents.len();
-
-    let mut builder = Request::builder();
-    let builder = builder.method("POST").uri(url.as_str());
-
+    file.read_to_end(&mut buffer)?;
+    
+    let mut header_map = HeaderMap::new();
     for (key, value) in headers {
-        builder.header(key, value);
+        header_map.insert(key, value);
     }
 
-    Ok(builder
+    Ok(crate::crom_lib::client()
+        .post(url.as_str())
         .header(USER_AGENT, format!("crom/{}", env!("CARGO_PKG_VERSION")))
         .header(CONTENT_TYPE, mime.to_string())
-        .header(CONTENT_LENGTH, size)
-        .body(contents.into())
+        .headers(header_map)
+        .body(buffer)
+        .build()
         .unwrap())
 }
 
 pub fn make_get_request(
     url: &str,
     headers: HashMap<HeaderName, HeaderValue>,
-) -> Result<Request<Body>, ErrorContainer> {
-    let mut builder = Request::builder();
-    let builder = builder.method("GET").uri(url);
-
+) -> Result<Request, ErrorContainer> {
+    let mut header_map = HeaderMap::new();
     for (key, value) in headers {
-        builder.header(key, value);
+        header_map.insert(key, value);
     }
 
-    Ok(builder
-        .uri(url)
+    Ok(crate::crom_lib::client()
+        .get(url)
         .header(USER_AGENT, format!("crom/{}", env!("CARGO_PKG_VERSION")))
         .header(ACCEPT, "application/vnd.github.v3+json")
-        .body(Body::empty())
+        .headers(header_map)
+        .build()
         .unwrap())
 }
 
@@ -69,19 +65,19 @@ pub fn make_post(
     url: &str,
     headers: HashMap<HeaderName, HeaderValue>,
     body_content: String,
-) -> Result<Request<Body>, ErrorContainer> {
-    let mut builder = Request::builder();
-    let builder = builder.method("POST").uri(url);
-
+) -> Result<Request, ErrorContainer> {
+    let mut header_map = HeaderMap::new();
     for (key, value) in headers {
-        builder.header(key, value);
+        header_map.insert(key, value);
     }
 
-    Ok(builder
-        .uri(url)
+    Ok(crate::crom_lib::client()
+        .post(url)
         .header(USER_AGENT, format!("crom/{}", env!("CARGO_PKG_VERSION")))
         .header(ACCEPT, "application/vnd.github.v3+json")
-        .body(body_content.into())
+        .headers(header_map)
+        .body(body_content)
+        .build()
         .unwrap())
 }
 
@@ -93,10 +89,10 @@ pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, Er
 
 #[cfg(not(test))]
 pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, ErrorContainer> {
-    use hyper::header::AUTHORIZATION;
+    use reqwest::header::AUTHORIZATION;
 
     let token = match std::env::var("GITHUB_TOKEN") {
-        Ok(value) => format!("token {}", value),
+        Ok(value) => format!("bearer {}", value),
         Err(_) => return Err(ErrorContainer::GitHub(GitHubError::TokenMissing)),
     };
 

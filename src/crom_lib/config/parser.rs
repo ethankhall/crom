@@ -18,12 +18,15 @@ impl ParsedProjectConfig {
         let matcher = VersionMatcher::new(&project_config.pattern);
         let repo_details = RepoDetails::new(&path, matcher)?;
 
-        Ok(ParsedProjectConfig {
+        let cfg = ParsedProjectConfig {
             project_config,
             project_path: path,
             repo_details,
             artifacts: config.artifact,
-        })
+        };
+
+        debug!("Config: {:?}", cfg);
+        Ok(cfg)
     }
 }
 

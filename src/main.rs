@@ -1,5 +1,3 @@
-#![feature(try_from)]
-
 #[macro_use]
 extern crate clap;
 extern crate chrono;
@@ -10,12 +8,13 @@ extern crate json;
 extern crate toml;
 #[macro_use]
 extern crate log;
-extern crate hyper;
+extern crate reqwest;
 extern crate libflate;
 extern crate tempfile;
 extern crate url;
 extern crate xmltree;
 extern crate zip;
+extern crate hyper;
 
 #[macro_export]
 macro_rules! s {

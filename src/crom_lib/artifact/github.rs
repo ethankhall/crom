@@ -1,13 +1,9 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use hyper::client::HttpConnector;
-use hyper::rt::{Future, Stream};
-use hyper::{Body, Client, Request, Response};
-use hyper_rustls::HttpsConnector;
-
 use json::{self, JsonValue};
 use url::Url;
+use reqwest::{Request, Response};
 
 use crate::crom_lib::config::file::*;
 use crate::crom_lib::error::*;
@@ -35,16 +31,11 @@ pub fn make_upload_request(
         version = version
     );
 
-    let https = HttpsConnector::new(1);
-    let client: Client<HttpsConnector<HttpConnector>> = Client::builder().build(https);
-
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-
     debug!("Release URL: {}", release_url);
 
     let request = make_get_request(&release_url, make_github_auth_headers()?)?;
-    let res = rt.block_on(client.request(request)).unwrap();
-    let upload_url = extract_upload_url(res)?;
+    let mut res = crate::crom_lib::client().execute(request).unwrap();
+    let upload_url = extract_upload_url(&mut res)?;
 
     let root_path = root_artifact_path.unwrap_or_else(|| details.path.clone());
 
@@ -62,6 +53,7 @@ fn compress_artifact(
     artifacts: &HashMap<String, String>,
     compresion: &ProjectArtifactWrapper,
 ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
+
     let compressed_name = compresion.name.to_string();
     let file = tempfile::NamedTempFile::new()?;
 
@@ -95,7 +87,7 @@ fn build_request(
     upload_url: &Url,
     file_name: &str,
     file: PathBuf,
-) -> Result<Request<Body>, ErrorContainer> {
+) -> Result<Request, ErrorContainer> {
     let mut uri = upload_url.clone();
     {
         let mut path = uri.path_segments_mut().expect("Cannot get path");
@@ -112,24 +104,23 @@ fn build_request(
     make_file_upload_request(&uri, file, make_github_auth_headers()?)
 }
 
-fn extract_upload_url(res: Response<Body>) -> Result<Url, ErrorContainer> {
-    let json_body = match res.into_body().concat2().wait() {
-        Ok(body) => {
-            let body_text = &String::from_utf8(body.to_vec())?;
-            match json::parse(body_text) {
-                Ok(value) => value,
-                Err(err) => {
-                    debug!("Body was: {}", body_text);
-                    return Err(ErrorContainer::GitHub(
-                        GitHubError::UnkownCommunicationError(err.to_string().to_lowercase()),
-                    ));
-                }
-            }
-        }
+fn extract_upload_url(res: &mut Response) -> Result<Url, ErrorContainer> {
+    let body_text = match res.text() {
+        Ok(text) => text,
         Err(err) => {
             error!("Unable to access response from GitHub.");
             return Err(ErrorContainer::GitHub(
                 GitHubError::UnkownCommunicationError(err.to_string()),
+            ));
+        }
+    };
+
+    let json_body = match json::parse(&body_text) {
+        Ok(value) => value,
+        Err(err) => {
+            debug!("Body was: {}", body_text);
+            return Err(ErrorContainer::GitHub(
+                GitHubError::UnkownCommunicationError(err.to_string().to_lowercase()),
             ));
         }
     };

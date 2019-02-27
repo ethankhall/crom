@@ -1,10 +1,7 @@
 use std::path::PathBuf;
 
-use hyper::client::HttpConnector;
-use hyper::rt::{Future, Stream};
-use hyper::{Body, Client, Request};
-use hyper_rustls::HttpsConnector;
 use indicatif::{ProgressBar, ProgressStyle};
+use reqwest::{Request};
 
 use crate::crom_lib::config::file::*;
 use crate::crom_lib::error::*;
@@ -16,12 +13,12 @@ mod github;
 
 #[derive(Debug)]
 pub struct ArtifactContainer {
-    request: Request<Body>,
+    request: Request,
     name: String,
 }
 
 impl ArtifactContainer {
-    pub fn new(request: Request<Body>, name: String) -> Self {
+    pub fn new(request: Request, name: String) -> Self {
         ArtifactContainer { request, name }
     }
 }
@@ -54,11 +51,6 @@ pub fn upload_artifacts(
 }
 
 fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
-    let https = hyper_rustls::HttpsConnector::new(4);
-    let client = Client::builder().build(https);
-
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-
     let spinner = ProgressBar::new(requests.len() as u64);
     spinner.set_style(
         ProgressStyle::default_spinner()
@@ -71,7 +63,7 @@ fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
     }
 
     for request in requests {
-        if let Err(e) = do_transfer(request, &mut rt, &client) {
+        if let Err(e) = do_transfer(request) {
             spinner.finish_and_clear();
             return Err(e);
         }
@@ -83,19 +75,28 @@ fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
     Ok(())
 }
 
-fn do_transfer(
-    container: ArtifactContainer,
-    rt: &mut tokio::runtime::Runtime,
-    client: &Client<HttpsConnector<HttpConnector>>,
-) -> Result<(), ErrorContainer> {
+fn do_transfer(container: ArtifactContainer) -> Result<(), ErrorContainer> {
     trace!("Request: {:?}", container);
-    let res = rt.block_on(client.request(container.request)).unwrap();
+
+    let mut res = match crate::crom_lib::client().execute(container.request) {
+        Ok(res) => res,
+        Err(err) => {
+            let err_string = err.to_string();
+            match err.get_ref() {
+                Some(ref e) => debug!("Hyper error: {:?}", e),
+                _ => {}
+            };
+            error!("Failed to make request for {}", container.name);
+            return Err(ErrorContainer::GitHub(GitHubError::UnkownCommunicationError(err_string)));
+        }
+    };
+
     let status = res.status();
     if !status.is_success() {
-        if let Ok(body) = res.into_body().concat2().wait() {
-            let body_text = &String::from_utf8(body.to_vec())?;
+        if let Ok(body_text) = res.text() {
             debug!("Failed Upload: {}", body_text);
         }
+        
         error!("Failed to upload to {}", container.name);
         return Err(ErrorContainer::GitHub(GitHubError::UploadFailed(format!(
             "Failed Upload to {}",

@@ -50,3 +50,12 @@ pub fn read_file_to_string(path: &PathBuf) -> Result<String, ErrorContainer> {
     file.read_to_string(&mut contents)?;
     Ok(contents)
 }
+
+
+pub fn client() -> reqwest::Client {
+    reqwest::Client::builder()
+        .gzip(true)
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .unwrap()
+}
