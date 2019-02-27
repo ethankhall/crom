@@ -36,7 +36,7 @@ jobs:
           docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly cargo build --release
           ./target/x86_64-unknown-linux-musl/release/crom update-version --pre-release release
 
-          chmod a+wr .
+          chmod -R a+wr .
           docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly ls -al
           docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly id
           docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly cargo test
