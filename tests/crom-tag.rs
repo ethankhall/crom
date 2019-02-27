@@ -16,7 +16,7 @@ use tempdir::TempDir;
 fn can_tag_version() {
     let mock = mock("POST", "/repos/ethankhall/crom-examples/releases")
         .match_header("accept", "application/vnd.github.v3+json")
-        .match_header("authorization", "token ABC123")
+        .match_header("authorization", "bearer ABC123")
         .with_status(201)
         .with_body("{\"test\": true}")
         .create();
