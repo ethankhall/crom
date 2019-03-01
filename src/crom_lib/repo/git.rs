@@ -69,8 +69,10 @@ fn get_tags(repo: &Repository, matcher: &VersionMatcher) -> Result<Vec<Version>>
 }
 
 pub fn is_working_repo_clean(repo: &Repository) -> Result<bool> {
-    let status = repo.statuses(None)?;
-    Ok(status.is_empty())
+    let mut options = StatusOptions::new();
+    let options = options.include_unmodified(false).include_untracked(false);
+    let statuses = repo.statuses(Some(options))?;
+    Ok(statuses.is_empty())
 }
 
 fn get_head_version(repo: &Repository, matcher: VersionMatcher) -> Option<Version> {
