@@ -36,6 +36,7 @@ fn can_list_current_version() {
 
     let foo_txt = builder.with_file_name("foo.txt");
     File::create(&foo_txt).expect(&format!("Should be able to create foo file: {:?}", foo_txt));
+    shared::add_file(tmp_dir, foo_txt);
 
     let mut cmd = Command::main_binary().unwrap();
     let assert = cmd
@@ -45,7 +46,7 @@ fn can_list_current_version() {
         .assert();
 
     assert.success().stdout(predicate::str::similar(format!(
-        "{}\n",
-        shared::NEXT_SNAPSHOT_VERSION
+        "{}-SNAPSHOT\n",
+        shared::NEXT_VERSION
     )));
 }
