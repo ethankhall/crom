@@ -19,7 +19,7 @@ impl VersionMatcher {
     }
 
     pub fn match_version(&self, input: String) -> Option<Version> {
-        let split: Vec<&str> = input.split('.').collect();
+        let split: Vec<&str> = input.trim().split('.').collect();
 
         if split.len() != self.pattern.len() {
             return None;
@@ -32,6 +32,9 @@ impl VersionMatcher {
 
             match pattern_part {
                 VersionComponent::Static(value) => {
+                    if value != split_part {
+                        return None;
+                    }
                     version_parts.push(VersionComponent::Static(value.to_string()));
                 }
                 VersionComponent::Changing(_) => {
@@ -70,4 +73,11 @@ fn parse_semver() {
         s!("a.b.3"),
         matcher.match_version(s!("a.b.3")).unwrap().to_string()
     );
+}
+
+#[test]
+fn parse_random() {
+    let matcher = VersionMatcher::new("1.2.%d");
+
+    assert_eq!(None, matcher.match_version(s!("2.2.3")));
 }

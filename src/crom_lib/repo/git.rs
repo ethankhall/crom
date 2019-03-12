@@ -103,6 +103,7 @@ fn get_head_version(repo: &Repository, matcher: VersionMatcher) -> Option<Versio
             Ok(it) => {
                 if it.id() == head_commit.id() {
                     let tag_name = tag.name().unwrap();
+                    let tag_name = tag_name.replace("refs/tags/", "");
                     trace!("HEAD points to {}", tag_name);
                     return matcher.match_version(tag_name.to_string());
                 }
