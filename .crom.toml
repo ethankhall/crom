@@ -1,6 +1,7 @@
 pattern = 'v0.1.%d'
-types = ["Cargo"]
 message-template = "Created {version} for release."
+
+[cargo]
 
 [artifact.windows]
 paths = { "crom.exe" = "artifacts/crom-windows/crom.exe" }

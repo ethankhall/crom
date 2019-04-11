@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::path::PathBuf;
 use std::io::Read;
+use std::path::PathBuf;
 
-use reqwest::header::{HeaderName, HeaderValue, ACCEPT, CONTENT_TYPE, USER_AGENT, HeaderMap};
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue, ACCEPT, CONTENT_TYPE, USER_AGENT};
 use reqwest::Request;
 
 use mime::Mime;
@@ -27,7 +27,7 @@ pub fn make_file_upload_request(
     let mut buffer = Vec::new();
     let mut file = File::open(file_path)?;
     file.read_to_end(&mut buffer)?;
-    
+
     let mut header_map = HeaderMap::new();
     for (key, value) in headers {
         header_map.insert(key, value);

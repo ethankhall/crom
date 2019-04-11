@@ -11,6 +11,7 @@ use self::file::*;
 
 use crate::crom_lib::error::*;
 use crate::crom_lib::repo::*;
+use crate::crom_lib::updater::*;
 use crate::crom_lib::version::*;
 use crate::crom_lib::Project;
 
@@ -25,7 +26,11 @@ pub struct ParsedProjectConfig {
 pub fn build_default_config(version_format: &str) -> String {
     let project_config = ProjectConfig {
         pattern: s!(version_format),
-        types: vec![],
+        cargo: None,
+        property: None,
+        maven: None,
+        package_json: None,
+        version_py: None,
         message_template: None,
     };
     let crom_lib = CromConfig {
@@ -45,11 +50,28 @@ impl Project for ParsedProjectConfig {
     }
 
     fn update_versions(&self, version: &Version) -> Result<(), ErrorContainer> {
-        crate::crom_lib::updater::update(
-            self.project_path.clone(),
-            version,
-            self.project_config.types.clone(),
-        )
+        let mut updators: Vec<&dyn UpdateVersion> = Vec::new();
+        if let Some(cargo) = &self.project_config.cargo {
+            updators.push(cargo);
+        }
+
+        if let Some(property) = &self.project_config.property {
+            updators.push(property);
+        }
+
+        if let Some(maven) = &self.project_config.maven {
+            updators.push(maven);
+        }
+
+        if let Some(package_json) = &self.project_config.package_json {
+            updators.push(package_json);
+        }
+
+        if let Some(version_py) = &self.project_config.version_py {
+            updators.push(version_py);
+        }
+
+        update(self.project_path.clone(), version, updators)
     }
 
     fn publish(

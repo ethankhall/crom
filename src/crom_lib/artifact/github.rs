@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 use json::{self, JsonValue};
-use url::Url;
 use reqwest::{Request, Response};
+use url::Url;
 
 use crate::crom_lib::config::file::*;
 use crate::crom_lib::error::*;
@@ -53,7 +53,6 @@ fn compress_artifact(
     artifacts: &HashMap<String, String>,
     compresion: &ProjectArtifactWrapper,
 ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
-
     let compressed_name = compresion.name.to_string();
     let file = tempfile::NamedTempFile::new()?;
 

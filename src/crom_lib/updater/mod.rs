@@ -1,30 +1,25 @@
 use std::path::PathBuf;
 
 pub mod cargo;
+pub mod package_json;
 pub mod pom;
 pub mod property;
+pub mod version_py;
 
 use crate::crom_lib::error::*;
-
-use self::cargo::CargoUpdater;
-use self::pom::PomUpdater;
-use self::property::PropertyUpdater;
-
-use crate::crom_lib::config::file::VersionType;
 use crate::crom_lib::version::Version;
+
+pub trait UpdateVersion {
+    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer>;
+}
 
 pub fn update(
     root_path: PathBuf,
     version: &Version,
-    formats: Vec<VersionType>,
+    version_updators: Vec<&dyn UpdateVersion>,
 ) -> Result<(), ErrorContainer> {
-    for format in formats {
-        let path = root_path.clone();
-        let result = match format {
-            VersionType::Cargo => CargoUpdater::update_version(path, &version),
-            VersionType::Property => PropertyUpdater::update_version(path, &version),
-            VersionType::Maven => PomUpdater::update_version(path, &version),
-        };
+    for updator in version_updators {
+        let result = updator.update_version(root_path.clone(), &version);
 
         match result {
             Ok(()) => {}

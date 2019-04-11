@@ -17,6 +17,7 @@ pub use version::{Version, VersionModification};
 
 pub static CONFIG_FILE: &'static str = ".crom.toml";
 
+pub static PACKAGE_JSON: &'static str = "package.json";
 pub static VERSION_PROPERTIES: &'static str = "version.properties";
 pub static CARGO_TOML: &'static str = "Cargo.toml";
 
@@ -50,7 +51,6 @@ pub fn read_file_to_string(path: &PathBuf) -> Result<String, ErrorContainer> {
     file.read_to_string(&mut contents)?;
     Ok(contents)
 }
-
 
 pub fn client() -> reqwest::Client {
     reqwest::Client::builder()

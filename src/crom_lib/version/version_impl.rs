@@ -43,9 +43,11 @@ impl Ord for VersionComponent {
     fn cmp(&self, other: &VersionComponent) -> Ordering {
         match (self, other) {
             (VersionComponent::Static(s1), VersionComponent::Static(s2)) => s1.cmp(s2),
-            (VersionComponent::Changing(s1), VersionComponent::Static(s2)) => s1.to_string().cmp(s2),
+            (VersionComponent::Changing(s1), VersionComponent::Static(s2)) => {
+                s1.to_string().cmp(s2)
+            }
             (VersionComponent::Static(s1), VersionComponent::Changing(s2)) => s1.cmp(&s!(s2)),
-            (VersionComponent::Changing(s1), VersionComponent::Changing(s2)) => s1.cmp(s2)
+            (VersionComponent::Changing(s1), VersionComponent::Changing(s2)) => s1.cmp(s2),
         }
     }
 }
@@ -60,9 +62,9 @@ impl PartialEq for VersionComponent {
     fn eq(&self, other: &VersionComponent) -> bool {
         match (self, other) {
             (VersionComponent::Static(s1), VersionComponent::Static(s2)) => s1 == s2,
-            (VersionComponent::Changing(s1), VersionComponent::Static(s2)) => s1.to_string() == s2.to_string(),
-            (VersionComponent::Static(s1), VersionComponent::Changing(s2)) => s1.to_string() == s2.to_string(),
-            (VersionComponent::Changing(s1), VersionComponent::Changing(s2)) => s1 == s2
+            (VersionComponent::Changing(s1), VersionComponent::Static(s2)) => &s1.to_string() == s2,
+            (VersionComponent::Static(s1), VersionComponent::Changing(s2)) => s1 == &s2.to_string(),
+            (VersionComponent::Changing(s1), VersionComponent::Changing(s2)) => s1 == s2,
         }
     }
 }
@@ -160,7 +162,6 @@ fn test_version_comparison() {
     assert!(version_3 < version_3_3);
     assert!(version_3_3 < version_4);
 }
-
 
 #[test]
 fn test_version_order() {

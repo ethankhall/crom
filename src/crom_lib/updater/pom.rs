@@ -1,13 +1,13 @@
 use std::path::PathBuf;
 use std::process::*;
 
+use super::UpdateVersion;
+use crate::crom_lib::config::file::MavenConfig;
 use crate::crom_lib::error::*;
 use crate::crom_lib::Version;
 
-pub struct PomUpdater;
-
-impl PomUpdater {
-    pub fn update_version(root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
+impl UpdateVersion for MavenConfig {
+    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
         let spawn = Command::new("mvn")
             .current_dir(root_path)
             .args(&[
