@@ -30,7 +30,7 @@ libflate = "0.1"
 tempfile = "3.0"
 tar = "0.4"
 hyper = "0.12.22"
-serde_json = "1.0"
+serde_json = { version = "1.0", features = ["preserve_order"] }
 
 [dev-dependencies]
 assert_cmd = "0.10"

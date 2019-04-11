@@ -19,7 +19,7 @@ impl UpdateVersion for NodeConfig {
 
         json["version"] = Value::String(version.to_string());
 
-        let text = serde_json::to_string(&json)?;
+        let text = serde_json::to_string_pretty(&json)?;
 
         let mut file = File::create(path)?;
         file.write_all(text.as_bytes())?;
