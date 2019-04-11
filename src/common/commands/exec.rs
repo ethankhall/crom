@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::string::ToString;
 
 use clap::ArgMatches;
 
@@ -25,7 +26,11 @@ pub fn exec_upload_artifacts(
     args: &ArgMatches,
     project: &dyn Project,
 ) -> Result<i32, ErrorContainer> {
-    let names = args.values_of("NAMES").unwrap().map(|x| s!(x)).collect();
+    let names = args
+        .values_of("NAMES")
+        .unwrap()
+        .map(ToString::to_string)
+        .collect();
 
     let version = match args.value_of("override_version") {
         Some(version) => Version::from(s!(version)),
@@ -48,7 +53,11 @@ pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i3
 
     let version = project.find_latest_version(VersionModification::OneMore);
 
-    let targets: Vec<String> = args.values_of("source").unwrap().map(|x| s!(x)).collect();
+    let targets: Vec<String> = args
+        .values_of("source")
+        .unwrap()
+        .map(ToString::to_string)
+        .collect();
     let targets: Vec<TagTarget> = targets
         .into_iter()
         .map(|x| match x.to_lowercase().as_str() {

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use indicatif::{ProgressBar, ProgressStyle};
-use reqwest::{Request};
+use reqwest::Request;
 
 use crate::crom_lib::config::file::*;
 use crate::crom_lib::error::*;
@@ -82,12 +82,13 @@ fn do_transfer(container: ArtifactContainer) -> Result<(), ErrorContainer> {
         Ok(res) => res,
         Err(err) => {
             let err_string = err.to_string();
-            match err.get_ref() {
-                Some(ref e) => debug!("Hyper error: {:?}", e),
-                _ => {}
-            };
+            if let Some(ref e) = err.get_ref() {
+                debug!("Hyper error: {:?}", e)
+            }
             error!("Failed to make request for {}", container.name);
-            return Err(ErrorContainer::GitHub(GitHubError::UnkownCommunicationError(err_string)));
+            return Err(ErrorContainer::GitHub(
+                GitHubError::UnkownCommunicationError(err_string),
+            ));
         }
     };
 
@@ -96,7 +97,7 @@ fn do_transfer(container: ArtifactContainer) -> Result<(), ErrorContainer> {
         if let Ok(body_text) = res.text() {
             debug!("Failed Upload: {}", body_text);
         }
-        
+
         error!("Failed to upload to {}", container.name);
         return Err(ErrorContainer::GitHub(GitHubError::UploadFailed(format!(
             "Failed Upload to {}",

@@ -67,33 +67,39 @@ Now on your local machine you run `git fetch && git pull` and see the history no
 Running `crom get current-version` shows `v0.1.5`.
 
 ## Config Options
-In the `.crom.toml` file, there are two required fields and one optional one.
+Here is an example `.crom.toml`.
 
 ```
 pattern = 'v0.1.%d'
-types = ["Cargo"]
 message-template = "Created {version} for release."
+
+[cargo]
+[maven]
+[node]
+[python]
+path = \"path/to/version.py\"
+[property]
+path = \"path/to/property-file.properties\"
 ```
 
-`pattern` and `types` are required, were `message-template` is optional.
+
+|         Name         |                                Description                                 |
+| :------------------: | :------------------------------------------------------------------------: |
+| `pattern` (required) |                 User defined format versions should take.                  |
+|  `message-template`  |            When generating a `git tag` what should the text be?            |
+|       `cargo`+       |             Specify that the crom should update Cargo configs              |
+|       `maven`+       |           Specify that the crom should update Maven `pom.xml`'s.           |
+|       `node`+        |         Specify that the crom should update node's `package.json`.         |
+|      `python`+       | Specify that the crom should the specified file in a `version.py` format.  |
+|     `property`+      | Specify that the crom should the specified file in a property file format. |
+
+At least 1 of items marked with `+` need to also be included. 
 
 ### Pattern
 
 The `pattern` field is completely completely user defined but is required to have a `%d`. The `%d` tells `crom` where you want the version to increment. In the example above, `crom` will create version `v0.1.0`, `v0.1.1`, `v0.1.2`, and so on. If you were to want a version more like an atomic incrementing number, you could use `%d` as the `pattern`.
 
 In the event of a "hotfix" where a new part needs to be added to the version, you would just update the `pattern` to reflect that. In this example we would update pattern to be `v0.1.4.%d` if we needed to hotfix `v0.1.4`.
-
-### Types
-
-The `types` field tells `crom` _how_ to update the version number. For a Rust, it would be updating the `Cargo.toml` files directly.
-
-Here is a table of supported types, and what they do.
-
-| Type                     | Description   |
-|:------------------------:|:-------------:|
-| `cargo`, `rust`          | Updates `Cargo.toml` file, supports workspaces|
-| `property`, `properties` | Updates the `version.property` file. |
-| `maven`, `mvn`           | Runs `mvn versions:set` in the repo |
 
 ## Artifacts
 Crom is also able to upload built artifacts into GitHub. Making it easy to release artifacts to the rest of the world.
@@ -124,7 +130,7 @@ The `name` field is the name of the artifact that will be uploaded, and `format`
 
 The `name` field should include the extension of the artifact.
 
-| Supported Format | Description   |
-|:-----------------:|:-------------:|
+| Supported Format |          Description           |
+| :--------------: | :----------------------------: |
 | `tgz`, `tar.gz`  | Build a tar.gz file to upload. |
-| `zip`            | Build a zip file to upload. |
+|      `zip`       |  Build a zip file to upload.   |

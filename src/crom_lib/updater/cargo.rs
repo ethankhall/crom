@@ -5,12 +5,11 @@ use std::path::PathBuf;
 use toml_edit::{value, Document};
 
 use super::*;
+use crate::crom_lib::config::file::CargoConfig;
 use crate::crom_lib::{read_file_to_string, Version};
 
-pub struct CargoUpdater;
-
-impl CargoUpdater {
-    pub fn update_version(root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
+impl UpdateVersion for CargoConfig {
+    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
         let mut path = root_path.clone();
 
         path.push(crate::crom_lib::CARGO_TOML);

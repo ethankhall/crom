@@ -29,8 +29,6 @@ fn zip(
     root_path: PathBuf,
     artifacts: &HashMap<String, String>,
 ) -> Result<(), ErrorContainer> {
-    use std::io::Write;
-
     let mut zip = zip::ZipWriter::new(output_file);
 
     for (name, path) in artifacts {

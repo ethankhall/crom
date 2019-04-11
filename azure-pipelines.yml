@@ -1,6 +1,3 @@
-variables:
-  crom-version: v0.1.4
-
 trigger:
   branches:
     include:
@@ -26,21 +23,26 @@ jobs:
           ArtifactName: crom-windows
           ArtifactType: Container
 
+  - job: Check_Style
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+      - script: |
+          set -e
+          docker build -t checker -f ci/style.Dockerfile .
+          docker run --rm checker
+
   - job: Linux_Build
     pool:
       vmImage: 'ubuntu-16.04'
     steps:
       - script: |
           set -e
-          chmod a+wr .
-          docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly cargo build --release
-          ./target/x86_64-unknown-linux-musl/release/crom update-version --pre-release release
-
-          sudo chmod -R a+wr .
-          docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly ls -al
-          docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly id
-          docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly cargo test
-          docker run --rm -t -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:nightly cargo build --release
+          mkdir -p target/x86_64-unknown-linux-musl/release/
+          docker build -t musl-builder -f ci/musl.Dockerfile .
+          docker run --name musl-build musl-builder
+          docker cp musl-build:/home/rust/src/target/x86_64-unknown-linux-musl/release/crom target/x86_64-unknown-linux-musl/release/crom
+          docker rm musl-build
       - task: PublishBuildArtifacts@1
         displayName: "Publish Artifact: Release Build"
         inputs:
@@ -72,6 +74,7 @@ jobs:
       vmImage: "ubuntu-16.04"
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
     dependsOn:
+      - Check_Style
       - Mac_Build
       - Linux_Build
       - Windows_Build

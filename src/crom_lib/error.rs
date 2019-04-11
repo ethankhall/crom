@@ -38,6 +38,7 @@ impl From<ErrorContainer> for i32 {
 pub enum IOError {
     Unknown(String),
     FileNotFound(PathBuf),
+    SeralizationError(String),
 }
 
 #[derive(Debug, PartialEq)]
@@ -149,5 +150,11 @@ impl From<ConfigError> for ErrorContainer {
 impl From<UpdaterError> for ErrorContainer {
     fn from(err: UpdaterError) -> ErrorContainer {
         ErrorContainer::Updater(err)
+    }
+}
+
+impl From<serde_json::Error> for ErrorContainer {
+    fn from(err: serde_json::Error) -> ErrorContainer {
+        ErrorContainer::IO(IOError::SeralizationError(err.to_string()))
     }
 }
