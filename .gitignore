@@ -6,3 +6,4 @@
 **/*.rs.bk
 .vs
 *.stackdump
+.idea
