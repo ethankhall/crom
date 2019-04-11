@@ -77,9 +77,9 @@ message-template = "Created {version} for release."
 [maven]
 [node]
 [python]
-path = \"path/to/version.py\"
+path = "path/to/version.py"
 [property]
-path = \"path/to/property-file.properties\"
+path = "path/to/property-file.properties"
 ```
 
 
