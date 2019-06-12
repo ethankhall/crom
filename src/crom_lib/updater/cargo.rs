@@ -12,6 +12,10 @@ impl UpdateVersion for CargoConfig {
     fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
         let mut path = root_path.clone();
 
+        if let Some(dir) = &self.directory {
+            path.push(dir);
+        }
+        
         path.push(crate::crom_lib::CARGO_TOML);
 
         let text = read_file_to_string(&path)?;

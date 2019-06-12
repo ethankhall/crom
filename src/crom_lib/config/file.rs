@@ -33,7 +33,11 @@ pub struct VersionPyConfig {
 pub struct NodeConfig {}
 
 #[derive(Serialize, Debug, PartialEq, Clone, Deserialize)]
-pub struct CargoConfig {}
+pub struct CargoConfig {
+    #[serde(default = "default_cargo_file_path")]
+    #[serde(alias = "path")]
+    pub directory: Option<String>
+}
 
 #[derive(Serialize, Debug, PartialEq, Clone, Deserialize)]
 pub struct MavenConfig {}
@@ -42,6 +46,10 @@ pub struct MavenConfig {}
 pub struct PropertyFileConfig {
     #[serde(default = "default_propery_file_path")]
     pub path: String,
+}
+
+fn default_cargo_file_path() -> Option<String> {
+    None
 }
 
 fn default_propery_file_path() -> String {
