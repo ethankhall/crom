@@ -105,9 +105,9 @@ path = \"path/to/property-file.properties\"
 
     let config = toml::from_str::<CromConfig>(&example_text).unwrap();
     println!("config: {:?}", config);
-    assert_eq!(Some(CargoConfig {}), config.project.cargo);
+    assert_eq!(Some(CargoConfig { directory: None }), config.project.cargo);
     assert_eq!(Some(MavenConfig {}), config.project.maven);
-    assert_eq!(Some(NodeConfig {}), config.project.package_json);
+    assert_eq!(Some(NodeConfig { directory: None}), config.project.package_json);
     assert_eq!(
         Some(VersionPyConfig {
             path: s!("path/to/version.py")
