@@ -15,7 +15,7 @@ impl UpdateVersion for CargoConfig {
         if let Some(dir) = &self.directory {
             path.push(dir);
         }
-        
+
         path.push(crate::crom_lib::CARGO_TOML);
 
         let text = read_file_to_string(&path)?;
