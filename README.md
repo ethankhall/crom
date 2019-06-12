@@ -74,8 +74,10 @@ pattern = 'v0.1.%d'
 message-template = "Created {version} for release."
 
 [cargo]
+path = "server" # Optional, defaults to current dir
 [maven]
 [node]
+path = "ui" # Optional, defaults to current dir
 [python]
 path = "path/to/version.py"
 [property]

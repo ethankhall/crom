@@ -11,6 +11,11 @@ use crate::crom_lib::{read_file_to_string, Version};
 impl UpdateVersion for NodeConfig {
     fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
         let mut path = root_path.clone();
+
+        if let Some(dir) = &self.directory {
+            path.push(dir);
+        }
+
         path.push(crate::PACKAGE_JSON);
 
         let text = read_file_to_string(&path)?;
