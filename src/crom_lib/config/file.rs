@@ -30,11 +30,15 @@ pub struct VersionPyConfig {
 }
 
 #[derive(Serialize, Debug, PartialEq, Clone, Deserialize)]
-pub struct NodeConfig {}
+pub struct NodeConfig {
+    #[serde(default = "default_none_path")]
+    #[serde(alias = "path")]
+    pub directory: Option<String>
+}
 
 #[derive(Serialize, Debug, PartialEq, Clone, Deserialize)]
 pub struct CargoConfig {
-    #[serde(default = "default_cargo_file_path")]
+    #[serde(default = "default_none_path")]
     #[serde(alias = "path")]
     pub directory: Option<String>
 }
@@ -48,7 +52,7 @@ pub struct PropertyFileConfig {
     pub path: String,
 }
 
-fn default_cargo_file_path() -> Option<String> {
+fn default_none_path() -> Option<String> {
     None
 }
 
