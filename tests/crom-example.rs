@@ -22,7 +22,7 @@ fn can_list_current_version() {
 
     println!("Finished clone");
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("crom").unwrap();
     let assert = cmd
         .arg("get")
         .arg("current-version")
@@ -38,7 +38,7 @@ fn can_list_current_version() {
     File::create(&foo_txt).expect(&format!("Should be able to create foo file: {:?}", foo_txt));
     shared::add_file(tmp_dir, foo_txt);
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("crom").unwrap();
     let assert = cmd
         .arg("get")
         .arg("current-version")
