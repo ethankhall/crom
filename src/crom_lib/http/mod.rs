@@ -6,8 +6,7 @@ use std::path::PathBuf;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, ACCEPT, CONTENT_TYPE, USER_AGENT};
 use reqwest::Request;
 
-use mime::Mime;
-use mime_guess::guess_mime_type;
+use mime_guess::from_path;
 use url::Url;
 
 use crate::crom_lib::error::*;
@@ -19,7 +18,7 @@ pub fn make_file_upload_request(
 ) -> Result<Request, ErrorContainer> {
     debug!("Upload url {}", url);
 
-    let mime: Mime = guess_mime_type(&file_path);
+    let mime = from_path(&file_path).first_or_octet_stream();
 
     if !file_path.exists() {
         return Err(ErrorContainer::IO(IOError::FileNotFound(file_path.clone())));

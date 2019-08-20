@@ -30,7 +30,7 @@ fn can_tag_version() {
 
     println!("Finished clone");
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("crom").unwrap();
     let assert = cmd
         .arg("tag-version")
         .arg("--source=github,local")
@@ -47,7 +47,7 @@ fn can_tag_version() {
 
     mock.assert();
 
-    let mut cmd = Command::main_binary().unwrap();
+    let mut cmd = Command::cargo_bin("crom").unwrap();
     let assert = cmd
         .arg("get")
         .arg("current-version")
