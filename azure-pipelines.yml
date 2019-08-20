@@ -56,7 +56,9 @@ jobs:
     steps:
       - script: |
           set -e
-          curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly -y
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          rustup toolchain install 1.36.0
+          rustup default 1.36.0
           $HOME/.cargo/bin/cargo build
           ./target/debug/crom update-version --pre-release release
 

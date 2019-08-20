@@ -1,7 +1,7 @@
-FROM rustlang/rust:nightly
+FROM rust:1.36.0
 
-RUN rustup component add rustfmt --toolchain nightly-x86_64-unknown-linux-gnu
-RUN cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
+RUN rustup component add rustfmt
+RUN rustup component add clippy
 ADD . ./
 
 CMD cargo fmt -- --check && cargo clippy -- -D warnings
