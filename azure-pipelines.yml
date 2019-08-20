@@ -57,6 +57,7 @@ jobs:
       - script: |
           set -e
           curl https://sh.rustup.rs -sSf | sh -s -- -y
+          source $HOME/.cargo/env
           rustup toolchain install 1.36.0
           rustup default 1.36.0
           $HOME/.cargo/bin/cargo build
