@@ -29,7 +29,7 @@ zip = "0.5"
 libflate = "0.1"
 tempfile = "3.0"
 tar = "0.4"
-hyper = "0.12.22"
+hyper = "0.13.3"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 
 [dev-dependencies]
