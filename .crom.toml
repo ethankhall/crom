@@ -4,16 +4,16 @@ message-template = "Created {version} for release."
 [cargo]
 
 [artifact.windows]
-paths = { "crom.exe" = "artifacts/crom-windows/crom.exe" }
+paths = { "crom.exe" = "windows/crom.exe" }
 compress = { name = "crom-windows.zip", format = "zip" }
 target = "GitHub"
 
 [artifact.mac]
-paths = {crom = "artifacts/crom-mac/crom"}
+paths = {crom = "mac/crom"}
 compress = { name = "crom-mac.tar.gz", format = "tgz" }
 target = "GitHub"
 
 [artifact.linux]
-paths = {crom = "artifacts/crom-linux/crom"}
+paths = {crom = "linux/crom"}
 compress = { name = "crom-linux-musl.tar.gz", format = "tgz" }
 target = "GitHub"

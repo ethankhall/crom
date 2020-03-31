@@ -79,7 +79,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: mac-artifacts
+          name: windows-artifacts
           path: target\release\crom.exe
 
   build-mac:
@@ -136,13 +136,14 @@ jobs:
         with:
           name: linux-artifacts
           path: artifacts/linux
+      - uses: actions/download-artifact@v1
+        with:
+          name: windows-artifacts
+          path: artifacts/windows
       - name: Create release
         run: |
-          mkdir ~/bin
-          curl --location https://github.com/ethankhall/crom/releases/download/v0.2.4/crom-linux-musl.tar.gz | tar -xvz  -C ~/bin
-          chmod +x ~/bin/crom
-          ~/bin/crom tag-version --source local,github --ignore-changes
-          ~/bin/crom upload-artifacts --root-artifact-path=./artifacts linux mac
+          artifacts/linux/crom tag-version --local --github --ignore-changes
+          artifacts/linux/crom upload-artifacts --root-artifact-path=./artifacts linux mac
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
