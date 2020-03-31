@@ -5,6 +5,7 @@ pub fn tag_version(
     details: &RepoDetails,
     version: &Version,
     message: &str,
+    auth: &Option<String>
 ) -> Result<(), ErrorContainer> {
     let head = details.head_ref.to_string();
     let (owner, repo) = match &details.remote {
@@ -31,7 +32,7 @@ pub fn tag_version(
 
     let body_text = body.dump();
 
-    let request = make_post(&url, make_github_auth_headers()?, body_text)?;
+    let request = make_post(&url, make_github_auth_headers(auth)?, body_text)?;
 
     trace!("Request {:?}", &request);
     let mut res = crate::crom_lib::client().execute(request).unwrap();

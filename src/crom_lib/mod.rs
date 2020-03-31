@@ -38,7 +38,7 @@ pub trait Project {
     ) -> Result<(), ErrorContainer>;
 }
 
-pub fn make_project() -> Result<impl Project, ErrorContainer> {
+pub fn make_project() -> Result<ParsedProjectConfig, ErrorContainer> {
     ParsedProjectConfig::new()
 }
 

@@ -13,7 +13,6 @@ use crate::crom_lib::error::*;
 use crate::crom_lib::repo::*;
 use crate::crom_lib::updater::*;
 use crate::crom_lib::version::*;
-use crate::crom_lib::Project;
 
 #[derive(Debug)]
 pub struct ParsedProjectConfig {
@@ -41,15 +40,15 @@ pub fn build_default_config(version_format: &str) -> String {
     toml::to_string_pretty(&crom_lib).expect("That toml should be serializer.")
 }
 
-impl Project for ParsedProjectConfig {
-    fn find_latest_version(&self, modification: VersionModification) -> Version {
+impl ParsedProjectConfig {
+    pub fn find_latest_version(&self, modification: VersionModification) -> Version {
         match self.repo_details.known_versions.last() {
             Some(v) => get_latest_version(&self.repo_details, v.clone(), modification),
             None => VersionMatcher::new(&self.project_config.pattern).build_default_version(),
         }
     }
 
-    fn update_versions(&self, version: &Version) -> Result<(), ErrorContainer> {
+    pub fn update_versions(&self, version: &Version) -> Result<(), ErrorContainer> {
         let mut updators: Vec<&dyn UpdateVersion> = Vec::new();
         if let Some(cargo) = &self.project_config.cargo {
             updators.push(cargo);
@@ -74,11 +73,12 @@ impl Project for ParsedProjectConfig {
         update(self.project_path.clone(), version, updators)
     }
 
-    fn publish(
+    pub fn publish(
         &self,
         version: &Version,
         names: Vec<String>,
         root_artifact_path: Option<PathBuf>,
+        auth: &Option<String>
     ) -> Result<(), ErrorContainer> {
         let mut artifacts: Vec<ProjectArtifacts> = Vec::new();
 
@@ -102,14 +102,16 @@ impl Project for ParsedProjectConfig {
             version,
             artifacts,
             root_artifact_path,
+            auth
         )
     }
 
-    fn tag_version(
+    pub fn tag_version(
         &self,
         version: &Version,
         targets: Vec<TagTarget>,
         allow_dirty_repo: bool,
+        auth: &Option<String>
     ) -> Result<(), ErrorContainer> {
         if !self.repo_details.is_workspace_clean {
             if allow_dirty_repo {
@@ -121,7 +123,7 @@ impl Project for ParsedProjectConfig {
 
         let message = make_message(self.project_config.message_template.clone(), version)?;
 
-        crate::crom_lib::repo::tag_repo(&self.repo_details, version, &message, targets)?;
+        crate::crom_lib::repo::tag_repo(&self.repo_details, version, &message, targets, auth)?;
 
         Ok(())
     }

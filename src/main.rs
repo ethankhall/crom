@@ -78,7 +78,12 @@ fn main() {
             (name: "tag-version")
             (about: "Tags the current repo with the next version")
             (long_about: "Finds the most recent version in the tags, and set the version to be one more than that. When running this command we expect files to be consistant with the repo. That means that there are no changes to tracked files. This way we can ensure that a tag is for something `real`.")
-            (@arg source: --source +multiple +takes_value +use_delimiter default_value[local] possible_value[local github] "Should the tag be created locally or on GitHub?")
+            (@group destination =>
+                (@attributes +required +multiple)
+                (@arg github: --github requires[GITHUB_TOKEN] "Should the tag be created on GitHub?")
+                (@arg local: --local "Should the tag be created locally?")
+            )
+            (@arg GITHUB_TOKEN: --("github-token") +takes_value env("GITHUB_TOKEN") "API token to publish to Github with")
             (@arg ignore_changes: --("ignore-changes") "Disables check for workspace changes"))
         (@subcommand update_version =>
             (name: "update-version")
@@ -89,6 +94,7 @@ fn main() {
             (name: "upload-artifacts")
             (alias: "upload-artifact")
             (about: "Upload artifacts to store")
+            (@arg GITHUB_TOKEN: --github-token +required +takes_value env("GITHUB_TOKEN") "API token to publish to Github with")
             (@arg root_artifact_path: --("root-artifact-path") -a +takes_value "Path to the root artifact dir")
             (@arg override_version: --("override-version") +takes_value "Don't look at history, use this value instead")
             (@arg NAMES: +takes_value +use_delimiter +multiple +required "Artifact names from `.crom.toml` to publish"))

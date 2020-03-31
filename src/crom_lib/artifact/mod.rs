@@ -28,13 +28,15 @@ pub fn upload_artifacts(
     version: &Version,
     artifacts: Vec<ProjectArtifacts>,
     root_artifact_path: Option<PathBuf>,
+    auth: &Option<String>
 ) -> Result<(), ErrorContainer> {
     let mut upload_requests: Vec<ArtifactContainer> = Vec::new();
 
     for art in artifacts {
         let res = match art.target {
             ProjectArtifactTarget::GitHub => {
-                github::make_upload_request(details, version, art, root_artifact_path.clone())
+                let client = github::GithubClient::new(auth, details);
+                client.make_upload_request(version, art, root_artifact_path.clone())
             }
         };
 

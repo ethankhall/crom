@@ -13,94 +13,110 @@ use crate::crom_lib::version::Version;
 
 use super::ArtifactContainer;
 
-pub fn make_upload_request(
-    details: &RepoDetails,
-    version: &Version,
-    artifacts: ProjectArtifacts,
-    root_artifact_path: Option<PathBuf>,
-) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
-    let (owner, repo) = match &details.remote {
-        RepoRemote::GitHub(owner, repo) => (owner, repo),
-    };
+pub struct GithubClient<'a> {
+    auth: &'a Option<String>,
+    details: &'a RepoDetails
+}
 
-    let release_url = format!(
-        "{api}/repos/{owner}/{repo}/releases/tags/{version}",
-        api = get_github_api(),
-        owner = owner,
-        repo = repo,
-        version = version
-    );
+impl <'a> GithubClient<'a> {
+    
+    pub fn new(auth: &'a Option<String>, details: &'a RepoDetails) -> Self {
+        GithubClient { auth, details }
+    }
 
-    debug!("Release URL: {}", release_url);
+    pub fn make_upload_request(
+        &self,
+        version: &Version,
+        artifacts: ProjectArtifacts,
+        root_artifact_path: Option<PathBuf>,
+    ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
 
-    let request = make_get_request(&release_url, make_github_auth_headers()?)?;
-    let mut res = crate::crom_lib::client().execute(request).unwrap();
-    let upload_url = extract_upload_url(&mut res)?;
+        let (owner, repo) = match &self.details.remote {
+            RepoRemote::GitHub(owner, repo) => (owner, repo),
+        };
 
-    let root_path = root_artifact_path.unwrap_or_else(|| details.path.clone());
+        let release_url = format!(
+            "{api}/repos/{owner}/{repo}/releases/tags/{version}",
+            api = get_github_api(),
+            owner = owner,
+            repo = repo,
+            version = version
+        );
 
-    match artifacts.compress {
-        Some(compression) => {
-            compress_artifact(&upload_url, root_path, &artifacts.paths, &compression)
+        debug!("Release URL: {}", release_url);
+
+        let request = make_get_request(&release_url, make_github_auth_headers(self.auth)?)?;
+        let mut res = crate::crom_lib::client().execute(request).unwrap();
+        let upload_url = extract_upload_url(&mut res)?;
+
+        let root_path = root_artifact_path.unwrap_or_else(|| self.details.path.clone());
+
+        match artifacts.compress {
+            Some(compression) => {
+                self.compress_artifact(&upload_url, root_path, &artifacts.paths, &compression)
+            }
+            None => self.build_artifact_containers(&upload_url, root_path, &artifacts.paths),
         }
-        None => build_artifact_containers(&upload_url, root_path, &artifacts.paths),
-    }
-}
-
-fn compress_artifact(
-    upload_url: &Url,
-    root_path: PathBuf,
-    artifacts: &HashMap<String, String>,
-    compresion: &ProjectArtifactWrapper,
-) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
-    let compressed_name = compresion.name.to_string();
-    let file = tempfile::NamedTempFile::new()?;
-
-    super::compress::compress_files(&file, root_path, &artifacts, &compresion.format)?;
-    let request = build_request(upload_url, &compressed_name, file.path().to_path_buf())?;
-    file.close()?;
-
-    let container = ArtifactContainer::new(request, compressed_name);
-    Ok(vec![container])
-}
-
-fn build_artifact_containers(
-    upload_url: &Url,
-    root_path: PathBuf,
-    artifacts: &HashMap<String, String>,
-) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
-    let mut upload_requests = Vec::new();
-
-    for (name, art_path) in artifacts {
-        let mut path = root_path.clone();
-        path.push(art_path);
-
-        let request = build_request(upload_url, &name, path)?;
-        upload_requests.push(ArtifactContainer::new(request, name.to_string()));
     }
 
-    Ok(upload_requests)
-}
+    fn compress_artifact(
+        &self,
+        upload_url: &Url,
+        root_path: PathBuf,
+        artifacts: &HashMap<String, String>,
+        compresion: &ProjectArtifactWrapper,
+    ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
+        let compressed_name = compresion.name.to_string();
+        let file = tempfile::NamedTempFile::new()?;
 
-fn build_request(
-    upload_url: &Url,
-    file_name: &str,
-    file: PathBuf,
-) -> Result<Request, ErrorContainer> {
-    let mut uri = upload_url.clone();
-    {
-        let mut path = uri.path_segments_mut().expect("Cannot get path");
-        path.pop();
-        path.push("assets");
+        super::compress::compress_files(&file, root_path, &artifacts, &compresion.format)?;
+        let request = self.build_request(upload_url, &compressed_name, file.path().to_path_buf())?;
+        file.close()?;
+
+        let container = ArtifactContainer::new(request, compressed_name);
+        Ok(vec![container])
     }
 
-    {
-        let mut query = uri.query_pairs_mut();
-        query.clear();
-        query.append_pair("name", file_name);
+    fn build_artifact_containers(
+        &self,
+        upload_url: &Url,
+        root_path: PathBuf,
+        artifacts: &HashMap<String, String>,
+    ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
+        let mut upload_requests = Vec::new();
+
+        for (name, art_path) in artifacts {
+            let mut path = root_path.clone();
+            path.push(art_path);
+
+            let request = self.build_request(upload_url, &name, path)?;
+            upload_requests.push(ArtifactContainer::new(request, name.to_string()));
+        }
+
+        Ok(upload_requests)
     }
 
-    make_file_upload_request(&uri, file, make_github_auth_headers()?)
+    fn build_request(
+        &self,
+        upload_url: &Url,
+        file_name: &str,
+        file: PathBuf,
+    ) -> Result<Request, ErrorContainer> {
+        let mut uri = upload_url.clone();
+        {
+            let mut path = uri.path_segments_mut().expect("Cannot get path");
+            path.pop();
+            path.push("assets");
+        }
+
+        {
+            let mut query = uri.query_pairs_mut();
+            query.clear();
+            query.append_pair("name", file_name);
+        }
+
+        make_file_upload_request(&uri, file, make_github_auth_headers(&self.auth)?)
+    }
 }
 
 fn extract_upload_url(res: &mut Response) -> Result<Url, ErrorContainer> {

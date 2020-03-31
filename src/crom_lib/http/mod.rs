@@ -81,18 +81,18 @@ pub fn make_post(
 }
 
 #[cfg(test)]
-pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, ErrorContainer> {
+pub fn make_github_auth_headers(auth: &Option<String>) -> Result<HashMap<HeaderName, HeaderValue>, ErrorContainer> {
     warn!("Using debug GITHUB headers!");
     Ok(HashMap::new())
 }
 
 #[cfg(not(test))]
-pub fn make_github_auth_headers() -> Result<HashMap<HeaderName, HeaderValue>, ErrorContainer> {
+pub fn make_github_auth_headers(auth: &Option<String>) -> Result<HashMap<HeaderName, HeaderValue>, ErrorContainer> {
     use reqwest::header::AUTHORIZATION;
 
-    let token = match std::env::var("GITHUB_TOKEN") {
-        Ok(value) => format!("bearer {}", value),
-        Err(_) => return Err(ErrorContainer::GitHub(GitHubError::TokenMissing)),
+    let token = match auth {
+        Some(value) => format!("bearer {}", value),
+        None => return Err(ErrorContainer::GitHub(GitHubError::TokenMissing)),
     };
 
     let value = match HeaderValue::from_str(&token) {

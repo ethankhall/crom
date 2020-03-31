@@ -41,10 +41,11 @@ pub fn tag_repo(
     version: &Version,
     message: &str,
     targets: Vec<TagTarget>,
+    auth: &Option<String>,
 ) -> Result<i32, ErrorContainer> {
     for target in targets {
         match target {
-            TagTarget::GitHub => github::tag_version(details, version, message)?,
+            TagTarget::GitHub => github::tag_version(details, version, message, auth)?,
             TagTarget::Local => git::tag_version(details, version, message)?,
         };
     }
