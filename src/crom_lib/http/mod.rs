@@ -106,7 +106,8 @@ pub fn make_github_auth_headers(auth: &Option<String>) -> Result<HashMap<String,
     };
 
     let mut map: HashMap<String, String> = HashMap::new();
-    map.insert(AUTHORIZATION.to_string(), token);
+    let auth_header = AUTHORIZATION;
+    map.insert(auth_header.to_string(), token);
 
     Ok(map)
 }
