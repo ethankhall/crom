@@ -42,7 +42,7 @@ pub fn tag_repo(
     message: &str,
     targets: Vec<TagTarget>,
     auth: &Option<String>,
-) -> Result<i32, ErrorContainer> {
+) -> Result<i32, CliErrors> {
     for target in targets {
         match target {
             TagTarget::GitHub => github::tag_version(details, version, message, auth)?,

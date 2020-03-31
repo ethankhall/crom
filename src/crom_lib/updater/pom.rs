@@ -7,7 +7,7 @@ use crate::crom_lib::error::*;
 use crate::crom_lib::Version;
 
 impl UpdateVersion for MavenConfig {
-    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
+    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), CliErrors> {
         let spawn = Command::new("mvn")
             .current_dir(root_path)
             .args(&[
@@ -20,7 +20,7 @@ impl UpdateVersion for MavenConfig {
         let mut child = match spawn {
             Ok(child) => child,
             Err(e) => {
-                return Err(ErrorContainer::Updater(
+                return Err(CliErrors::Updater(
                     UpdaterError::UnableToStartMavenProcess(e.to_string()),
                 ));
             }
@@ -29,14 +29,14 @@ impl UpdateVersion for MavenConfig {
         let ecode = match child.wait() {
             Ok(code) => code,
             Err(e) => {
-                return Err(ErrorContainer::Updater(
+                return Err(CliErrors::Updater(
                     UpdaterError::UnableToStartMavenProcess(e.to_string()),
                 ));
             }
         };
 
         if !ecode.success() {
-            Err(ErrorContainer::Updater(
+            Err(CliErrors::Updater(
                 UpdaterError::MavenVersionSetFailed(ecode.code().unwrap_or(1)),
             ))
         } else {

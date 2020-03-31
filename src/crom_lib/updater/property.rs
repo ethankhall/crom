@@ -10,8 +10,8 @@ use crate::crom_lib::config::file::PropertyFileConfig;
 use crate::crom_lib::{read_file_to_string, Version};
 
 impl UpdateVersion for PropertyFileConfig {
-    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
-        let mut path = root_path.clone();
+    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), CliErrors> {
+        let mut path = root_path;
         path.push(self.path.clone());
 
         let text = read_file_to_string(&path)?;

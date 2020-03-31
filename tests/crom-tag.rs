@@ -33,7 +33,8 @@ fn can_tag_version() {
     let mut cmd = Command::cargo_bin("crom").unwrap();
     let assert = cmd
         .arg("tag-version")
-        .arg("--source=github,local")
+        .arg("--github")
+        .arg("--local")
         .arg("-dddd")
         .env("GITHUB_API_SERVER", mockito::server_url())
         .env("GITHUB_TOKEN", "ABC123")

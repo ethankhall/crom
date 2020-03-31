@@ -48,7 +48,7 @@ impl ParsedProjectConfig {
         }
     }
 
-    pub fn update_versions(&self, version: &Version) -> Result<(), ErrorContainer> {
+    pub fn update_versions(&self, version: &Version) -> Result<(), CliErrors> {
         let mut updators: Vec<&dyn UpdateVersion> = Vec::new();
         if let Some(cargo) = &self.project_config.cargo {
             updators.push(cargo);
@@ -79,18 +79,18 @@ impl ParsedProjectConfig {
         names: Vec<String>,
         root_artifact_path: Option<PathBuf>,
         auth: &Option<String>
-    ) -> Result<(), ErrorContainer> {
+    ) -> Result<(), CliErrors> {
         let mut artifacts: Vec<ProjectArtifacts> = Vec::new();
 
         for name in names {
             match self.artifacts.get(&name) {
                 Some(value) => artifacts.push(value.clone()),
-                None => return Err(ErrorContainer::State(StateError::ArtifactNotFound(name))),
+                None => return Err(CliErrors::State(StateError::ArtifactNotFound(name))),
             }
         }
 
         if artifacts.is_empty() {
-            return Err(ErrorContainer::State(StateError::ArtifactNotFound(s!(
+            return Err(CliErrors::State(StateError::ArtifactNotFound(s!(
                 "No aritifact defined"
             ))));
         }
@@ -112,12 +112,12 @@ impl ParsedProjectConfig {
         targets: Vec<TagTarget>,
         allow_dirty_repo: bool,
         auth: &Option<String>
-    ) -> Result<(), ErrorContainer> {
+    ) -> Result<(), CliErrors> {
         if !self.repo_details.is_workspace_clean {
             if allow_dirty_repo {
                 warn!("Skipping check for workspace changes.");
             } else {
-                return Err(ErrorContainer::State(StateError::RepoNotClean));
+                return Err(CliErrors::State(StateError::RepoNotClean));
             }
         }
 
@@ -132,13 +132,12 @@ impl ParsedProjectConfig {
 pub fn make_message(
     message_template: Option<String>,
     version: &Version,
-) -> Result<String, ErrorContainer> {
+) -> Result<String, CliErrors> {
     let template = message_template
-        .clone()
         .unwrap_or_else(|| s!("Crom is creating a version {version}."));
 
     if !template.contains("{version}") {
-        return Err(ErrorContainer::Config(
+        return Err(CliErrors::Config(
             ConfigError::MissingVersionDefinition,
         ));
     }

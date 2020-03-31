@@ -1,22 +1,7 @@
 #![deny(clippy::all)]
-#[macro_use]
-extern crate clap;
-extern crate chrono;
-#[macro_use]
-extern crate serde_derive;
-#[macro_use]
-extern crate json;
-extern crate toml;
+
 #[macro_use]
 extern crate log;
-extern crate hyper;
-extern crate libflate;
-extern crate reqwest;
-extern crate serde_json;
-extern crate tempfile;
-extern crate url;
-extern crate xmltree;
-extern crate zip;
 
 #[macro_export]
 macro_rules! s {
@@ -28,7 +13,7 @@ macro_rules! s {
 mod common;
 mod crom_lib;
 
-use clap::ArgMatches;
+use clap::{clap_app, crate_version, ArgMatches};
 use std::process;
 
 use common::configure_logging;
@@ -112,14 +97,14 @@ fn main() {
         Ok(v) => v,
         Err(err) => {
             error!("{:?}", err);
-            i32::from(err)
+            err.get_error_number().into()
         }
     };
 
     process::exit(return_code);
 }
 
-fn exec_commad(matches: &ArgMatches) -> Result<i32, ErrorContainer> {
+fn exec_commad(matches: &ArgMatches) -> Result<i32, CliErrors> {
     let project = make_project();
 
     match matches.subcommand() {

@@ -8,8 +8,8 @@ use crate::crom_lib::config::file::VersionPyConfig;
 use crate::crom_lib::Version;
 
 impl UpdateVersion for VersionPyConfig {
-    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
-        let mut path = root_path.clone();
+    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), CliErrors> {
+        let mut path = root_path;
         path.push(self.path.clone());
 
         let version_text = format!("__version__ = \"{}\"", version);

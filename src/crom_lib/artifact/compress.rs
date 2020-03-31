@@ -16,7 +16,7 @@ pub fn compress_files(
     root_path: PathBuf,
     artifacts: &HashMap<String, String>,
     format: &ProjectArtifactCompressionFormat,
-) -> Result<(), ErrorContainer> {
+) -> Result<(), CliErrors> {
     debug!("Compressing {:?} into {:?}", root_path, output_file);
     match format {
         ProjectArtifactCompressionFormat::ZIP => zip(output_file, root_path, artifacts),
@@ -28,7 +28,7 @@ fn zip(
     output_file: &NamedTempFile,
     root_path: PathBuf,
     artifacts: &HashMap<String, String>,
-) -> Result<(), ErrorContainer> {
+) -> Result<(), CliErrors> {
     let mut zip = zip::ZipWriter::new(output_file);
 
     for (name, path) in artifacts {
@@ -37,7 +37,7 @@ fn zip(
         let options =
             zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
         if let Err(_e) = zip.start_file(name.clone(), options) {
-            return Err(ErrorContainer::Compress(CompressError::ZipFileNameErr(
+            return Err(CliErrors::Compress(CompressError::ZipFileNameErr(
                 name,
             )));
         }
@@ -46,7 +46,7 @@ fn zip(
         art_path.push(Path::new(path));
 
         if !art_path.exists() {
-            return Err(ErrorContainer::Compress(
+            return Err(CliErrors::Compress(
                 CompressError::UnableToFindArtifact(art_path.to_str().unwrap().to_string()),
             ));
         }
@@ -68,7 +68,7 @@ fn tgz(
     output_file: &NamedTempFile,
     root_path: PathBuf,
     artifacts: &HashMap<String, String>,
-) -> Result<(), ErrorContainer> {
+) -> Result<(), CliErrors> {
     let mut ar = TarBuilder::new(Vec::new());
 
     for (name, path) in artifacts {

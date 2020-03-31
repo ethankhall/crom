@@ -29,7 +29,7 @@ impl <'a> GithubClient<'a> {
         version: &Version,
         artifacts: ProjectArtifacts,
         root_artifact_path: Option<PathBuf>,
-    ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
+    ) -> Result<Vec<ArtifactContainer>, CliErrors> {
 
         let (owner, repo) = match &self.details.remote {
             RepoRemote::GitHub(owner, repo) => (owner, repo),
@@ -65,7 +65,7 @@ impl <'a> GithubClient<'a> {
         root_path: PathBuf,
         artifacts: &HashMap<String, String>,
         compresion: &ProjectArtifactWrapper,
-    ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
+    ) -> Result<Vec<ArtifactContainer>, CliErrors> {
         let compressed_name = compresion.name.to_string();
         let file = tempfile::NamedTempFile::new()?;
 
@@ -82,7 +82,7 @@ impl <'a> GithubClient<'a> {
         upload_url: &Url,
         root_path: PathBuf,
         artifacts: &HashMap<String, String>,
-    ) -> Result<Vec<ArtifactContainer>, ErrorContainer> {
+    ) -> Result<Vec<ArtifactContainer>, CliErrors> {
         let mut upload_requests = Vec::new();
 
         for (name, art_path) in artifacts {
@@ -101,7 +101,7 @@ impl <'a> GithubClient<'a> {
         upload_url: &Url,
         file_name: &str,
         file: PathBuf,
-    ) -> Result<Request, ErrorContainer> {
+    ) -> Result<Request, CliErrors> {
         let mut uri = upload_url.clone();
         {
             let mut path = uri.path_segments_mut().expect("Cannot get path");
@@ -119,12 +119,12 @@ impl <'a> GithubClient<'a> {
     }
 }
 
-fn extract_upload_url(res: &mut Response) -> Result<Url, ErrorContainer> {
+fn extract_upload_url(res: &mut Response) -> Result<Url, CliErrors> {
     let body_text = match res.text() {
         Ok(text) => text,
         Err(err) => {
             error!("Unable to access response from GitHub.");
-            return Err(ErrorContainer::GitHub(
+            return Err(CliErrors::GitHub(
                 GitHubError::UnkownCommunicationError(err.to_string()),
             ));
         }
@@ -134,7 +134,7 @@ fn extract_upload_url(res: &mut Response) -> Result<Url, ErrorContainer> {
         Ok(value) => value,
         Err(err) => {
             debug!("Body was: {}", body_text);
-            return Err(ErrorContainer::GitHub(
+            return Err(CliErrors::GitHub(
                 GitHubError::UnkownCommunicationError(err.to_string().to_lowercase()),
             ));
         }
@@ -144,7 +144,7 @@ fn extract_upload_url(res: &mut Response) -> Result<Url, ErrorContainer> {
         JsonValue::Object(obj) => obj,
         _ => {
             error!("GitHub gave back a strange type.");
-            return Err(ErrorContainer::GitHub(
+            return Err(CliErrors::GitHub(
                 GitHubError::UnkownCommunicationError(s!("GitHub gave back a strange type.")),
             ));
         }
@@ -157,7 +157,7 @@ fn extract_upload_url(res: &mut Response) -> Result<Url, ErrorContainer> {
     let upload_url = obj.get("upload_url").unwrap().as_str().unwrap();
     match Url::parse(upload_url) {
         Ok(it) => Ok(it),
-        Err(e) => Err(ErrorContainer::GitHub(GitHubError::UnableToGetUploadUrl(
+        Err(e) => Err(CliErrors::GitHub(GitHubError::UnableToGetUploadUrl(
             e.to_string(),
         ))),
     }

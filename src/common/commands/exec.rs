@@ -9,7 +9,7 @@ use crate::crom_lib::*;
 pub fn exec_update_version(
     args: &ArgMatches,
     project: &ParsedProjectConfig,
-) -> Result<i32, ErrorContainer> {
+) -> Result<i32, CliErrors> {
     let modifier = parse_pre_release(args);
 
     let latest_version = match args.value_of("override_version") {
@@ -25,7 +25,7 @@ pub fn exec_update_version(
 pub fn exec_upload_artifacts(
     args: &ArgMatches,
     project: &ParsedProjectConfig,
-) -> Result<i32, ErrorContainer> {
+) -> Result<i32, CliErrors> {
     let names = args
         .values_of("NAMES")
         .unwrap()
@@ -44,7 +44,7 @@ pub fn exec_upload_artifacts(
     Ok(0)
 }
 
-pub fn exec_claim_version(args: &ArgMatches, project: &ParsedProjectConfig) -> Result<i32, ErrorContainer> {
+pub fn exec_claim_version(args: &ArgMatches, project: &ParsedProjectConfig) -> Result<i32, CliErrors> {
     let allow_dirty_repo = if args.is_present("ignore_changes") {
         warn!("Skipping check for workspace changes.");
         true

@@ -29,7 +29,7 @@ pub fn upload_artifacts(
     artifacts: Vec<ProjectArtifacts>,
     root_artifact_path: Option<PathBuf>,
     auth: &Option<String>
-) -> Result<(), ErrorContainer> {
+) -> Result<(), CliErrors> {
     let mut upload_requests: Vec<ArtifactContainer> = Vec::new();
 
     for art in artifacts {
@@ -43,7 +43,7 @@ pub fn upload_artifacts(
         match res {
             Err(e) => {
                 error!("Error while building upload request: {:?}", e);
-                return Err(ErrorContainer::Artifact(ArtifactError::FailedUpload));
+                return Err(CliErrors::Artifact(ArtifactError::FailedUpload));
             }
             Ok(bodys) => upload_requests.extend(bodys),
         }
@@ -52,7 +52,7 @@ pub fn upload_artifacts(
     do_request(upload_requests)
 }
 
-fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
+fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), CliErrors> {
     let spinner = ProgressBar::new(requests.len() as u64);
     spinner.set_style(
         ProgressStyle::default_spinner()
@@ -77,7 +77,7 @@ fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), ErrorContainer> {
     Ok(())
 }
 
-fn do_transfer(container: ArtifactContainer) -> Result<(), ErrorContainer> {
+fn do_transfer(container: ArtifactContainer) -> Result<(), CliErrors> {
     trace!("Request: {:?}", container);
 
     let mut res = match crate::crom_lib::client().execute(container.request) {
@@ -88,7 +88,7 @@ fn do_transfer(container: ArtifactContainer) -> Result<(), ErrorContainer> {
                 debug!("Hyper error: {:?}", e)
             }
             error!("Failed to make request for {}", container.name);
-            return Err(ErrorContainer::GitHub(
+            return Err(CliErrors::GitHub(
                 GitHubError::UnkownCommunicationError(err_string),
             ));
         }
@@ -101,7 +101,7 @@ fn do_transfer(container: ArtifactContainer) -> Result<(), ErrorContainer> {
         }
 
         error!("Failed to upload to {}", container.name);
-        return Err(ErrorContainer::GitHub(GitHubError::UploadFailed(format!(
+        return Err(CliErrors::GitHub(GitHubError::UploadFailed(format!(
             "Failed Upload to {}",
             container.name
         ))));

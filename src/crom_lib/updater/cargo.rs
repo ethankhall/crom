@@ -9,7 +9,7 @@ use crate::crom_lib::config::file::CargoConfig;
 use crate::crom_lib::{read_file_to_string, Version};
 
 impl UpdateVersion for CargoConfig {
-    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
+    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), CliErrors> {
         let mut path = root_path.clone();
 
         if let Some(dir) = &self.directory {
@@ -30,7 +30,7 @@ impl UpdateVersion for CargoConfig {
                         let name = match item.as_str() {
                             Some(s) => s,
                             None => {
-                                return Err(ErrorContainer::Updater(
+                                return Err(CliErrors::Updater(
                                     UpdaterError::CargoTomlNotValid(s!(
                                         "Cargo.toml for workspace.members was not a string."
                                     )),
@@ -45,7 +45,7 @@ impl UpdateVersion for CargoConfig {
                     }
                 }
                 None => {
-                    return Err(ErrorContainer::Updater(UpdaterError::CargoTomlNotValid(
+                    return Err(CliErrors::Updater(UpdaterError::CargoTomlNotValid(
                         s!("Cargo.toml for workspace was missing members."),
                     )));
                 }
@@ -56,7 +56,7 @@ impl UpdateVersion for CargoConfig {
     }
 }
 
-fn update_version_in_cargo_toml(path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
+fn update_version_in_cargo_toml(path: PathBuf, version: &Version) -> Result<(), CliErrors> {
     let text = read_file_to_string(&path)?;
     let mut doc = text.parse::<Document>().expect("invalid doc");
 

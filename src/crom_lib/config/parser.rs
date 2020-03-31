@@ -5,7 +5,7 @@ use super::*;
 use crate::crom_lib::*;
 
 impl ParsedProjectConfig {
-    pub fn new() -> Result<Self, ErrorContainer> {
+    pub fn new() -> Result<Self, CliErrors> {
         let (path, config) = find_and_parse_config()?;
 
         debug!("Parsed config: {:?}", config);
@@ -30,7 +30,7 @@ impl ParsedProjectConfig {
     }
 }
 
-fn find_and_parse_config() -> Result<(PathBuf, CromConfig), ErrorContainer> {
+fn find_and_parse_config() -> Result<(PathBuf, CromConfig), CliErrors> {
     let path = env::current_dir()?;
     for ancestor in path.ancestors() {
         let test_path = ancestor.join(crate::crom_lib::CONFIG_FILE);
@@ -42,17 +42,17 @@ fn find_and_parse_config() -> Result<(PathBuf, CromConfig), ErrorContainer> {
         }
     }
 
-    Err(ErrorContainer::Config(ConfigError::UnableToFindConfig(
+    Err(CliErrors::Config(ConfigError::UnableToFindConfig(
         path,
     )))
 }
 
-fn parse_config(path: PathBuf) -> Result<CromConfig, ErrorContainer> {
+fn parse_config(path: PathBuf) -> Result<CromConfig, CliErrors> {
     let contents = read_file_to_string(&path)?;
 
     match toml::from_str::<CromConfig>(&contents) {
         Ok(config) => Ok(config),
-        Err(e) => Err(ErrorContainer::Config(ConfigError::ParseError(
+        Err(e) => Err(CliErrors::Config(ConfigError::ParseError(
             e.to_string(),
         ))),
     }
