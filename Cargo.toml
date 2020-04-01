@@ -15,7 +15,7 @@ serde = { version =  "1.0", features = ["rc", "derive"] }
 toml = "0.5"
 regex = "1.1"
 toml_edit = "0.1"
-rust-ini = "0.13"
+rust-ini = "0.15"
 xmltree = "0.8"
 json = "*"
 reqwest = { version = "0.9", features = ["rustls-tls"] }
