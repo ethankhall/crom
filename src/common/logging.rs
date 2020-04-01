@@ -53,7 +53,7 @@ fn log_level(number_of_verbose: i32) -> Level {
         1 => Level::Warn,
         2 => Level::Info,
         3 => Level::Debug,
-        4 | _ => Level::Trace,
+        _ => Level::Trace,
     }
 }
 

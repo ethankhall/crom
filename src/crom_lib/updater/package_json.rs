@@ -9,8 +9,8 @@ use crate::crom_lib::error::*;
 use crate::crom_lib::{read_file_to_string, Version};
 
 impl UpdateVersion for NodeConfig {
-    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), ErrorContainer> {
-        let mut path = root_path.clone();
+    fn update_version(&self, root_path: PathBuf, version: &Version) -> Result<(), CliErrors> {
+        let mut path = root_path;
 
         if let Some(dir) = &self.directory {
             path.push(dir);

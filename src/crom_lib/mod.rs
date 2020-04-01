@@ -15,36 +15,36 @@ pub use error::*;
 pub use repo::TagTarget;
 pub use version::{Version, VersionModification};
 
-pub static CONFIG_FILE: &'static str = ".crom.toml";
+pub static CONFIG_FILE: &str = ".crom.toml";
 
-pub static PACKAGE_JSON: &'static str = "package.json";
-pub static VERSION_PROPERTIES: &'static str = "version.properties";
-pub static CARGO_TOML: &'static str = "Cargo.toml";
+pub static PACKAGE_JSON: &str = "package.json";
+pub static VERSION_PROPERTIES: &str = "version.properties";
+pub static CARGO_TOML: &str = "Cargo.toml";
 
 pub trait Project {
     fn find_latest_version(&self, version_mod: VersionModification) -> Version;
-    fn update_versions(&self, version: &Version) -> Result<(), ErrorContainer>;
+    fn update_versions(&self, version: &Version) -> Result<(), CliErrors>;
     fn publish(
         &self,
         version: &Version,
         names: Vec<String>,
         root_artifact_path: Option<PathBuf>,
-    ) -> Result<(), ErrorContainer>;
+    ) -> Result<(), CliErrors>;
     fn tag_version(
         &self,
         version: &Version,
         targets: Vec<TagTarget>,
         allow_dirty_repo: bool,
-    ) -> Result<(), ErrorContainer>;
+    ) -> Result<(), CliErrors>;
 }
 
-pub fn make_project() -> Result<impl Project, ErrorContainer> {
+pub fn make_project() -> Result<ParsedProjectConfig, CliErrors> {
     ParsedProjectConfig::new()
 }
 
-pub fn read_file_to_string(path: &PathBuf) -> Result<String, ErrorContainer> {
+pub fn read_file_to_string(path: &PathBuf) -> Result<String, CliErrors> {
     if !path.exists() {
-        return Err(ErrorContainer::IO(IOError::FileNotFound(path.clone())));
+        return Err(CliErrors::IO(IOError::FileNotFound(path.clone())));
     }
     let mut file = File::open(path)?;
     let mut contents = String::new();

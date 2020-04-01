@@ -1,11 +1,13 @@
 use super::*;
 use crate::crom_lib::http::*;
+use json::object;
 
 pub fn tag_version(
     details: &RepoDetails,
     version: &Version,
     message: &str,
-) -> Result<(), ErrorContainer> {
+    auth: &Option<String>
+) -> Result<(), CliErrors> {
     let head = details.head_ref.to_string();
     let (owner, repo) = match &details.remote {
         RepoRemote::GitHub(owner, repo) => (owner, repo),
@@ -31,7 +33,7 @@ pub fn tag_version(
 
     let body_text = body.dump();
 
-    let request = make_post(&url, make_github_auth_headers()?, body_text)?;
+    let request = make_post(&url, make_github_auth_headers(auth)?, body_text)?;
 
     trace!("Request {:?}", &request);
     let mut res = crate::crom_lib::client().execute(request).unwrap();
@@ -44,14 +46,14 @@ pub fn tag_version(
                     "Unable to access response from GitHub. Status was {}",
                     status
                 );
-                return Err(ErrorContainer::GitHub(GitHubError::AccessError(
+                return Err(CliErrors::GitHub(GitHubError::AccessError(
                     err.to_string(),
                 )));
             }
         };
 
         error!("Response {} from GitHub ({}) was {}", status, url, body);
-        Err(ErrorContainer::GitHub(
+        Err(CliErrors::GitHub(
             GitHubError::UnkownCommunicationError(s!("Trouble talking to GitHub")),
         ))
     } else {

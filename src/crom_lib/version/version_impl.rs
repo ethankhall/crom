@@ -17,12 +17,10 @@ impl Ord for Version {
             }
         }
 
-        if other.parts.len() == self.parts.len() {
-            Ordering::Equal
-        } else if other.parts.len() > self.parts.len() {
-            Ordering::Less
-        } else {
-            Ordering::Greater
+        match other.parts.len().cmp(&self.parts.len()) {
+            Ordering::Equal => Ordering::Equal,
+            Ordering::Greater => Ordering::Less,
+            Ordering::Less => Ordering::Greater
         }
     }
 }

@@ -8,7 +8,7 @@ pub use self::logging::configure_logging;
 
 use crate::crom_lib::*;
 
-type CromResult<T> = Result<T, ErrorContainer>;
+type CromResult<T> = Result<T, CliErrors>;
 
 fn are_you_sure(default: bool) -> CromResult<bool> {
     std::io::stdout().flush()?;
@@ -19,7 +19,7 @@ fn are_you_sure(default: bool) -> CromResult<bool> {
         "n" => Ok(!default),
         _ => {
             error!("Didn't understand. Please try again.");
-            Err(ErrorContainer::UserInput)
+            Err(CliErrors::UserInput(UserError::Unknown))
         }
     }
 }

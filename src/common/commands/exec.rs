@@ -8,8 +8,8 @@ use crate::crom_lib::*;
 
 pub fn exec_update_version(
     args: &ArgMatches,
-    project: &dyn Project,
-) -> Result<i32, ErrorContainer> {
+    project: &ParsedProjectConfig,
+) -> Result<i32, CliErrors> {
     let modifier = parse_pre_release(args);
 
     let latest_version = match args.value_of("override_version") {
@@ -24,8 +24,8 @@ pub fn exec_update_version(
 
 pub fn exec_upload_artifacts(
     args: &ArgMatches,
-    project: &dyn Project,
-) -> Result<i32, ErrorContainer> {
+    project: &ParsedProjectConfig,
+) -> Result<i32, CliErrors> {
     let names = args
         .values_of("NAMES")
         .unwrap()
@@ -37,13 +37,14 @@ pub fn exec_upload_artifacts(
         None => project.find_latest_version(VersionModification::None),
     };
 
+    let github_token = args.value_of("GITHUB_TOKEN").map(|x| x.to_string());
     let root_artifact_path = args.value_of("root_artifact_path").map(PathBuf::from);
-    project.publish(&version, names, root_artifact_path)?;
+    project.publish(&version, names, root_artifact_path, &github_token)?;
 
     Ok(0)
 }
 
-pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i32, ErrorContainer> {
+pub fn exec_claim_version(args: &ArgMatches, project: &ParsedProjectConfig) -> Result<i32, CliErrors> {
     let allow_dirty_repo = if args.is_present("ignore_changes") {
         warn!("Skipping check for workspace changes.");
         true
@@ -51,23 +52,21 @@ pub fn exec_claim_version(args: &ArgMatches, project: &dyn Project) -> Result<i3
         false
     };
 
+    let mut targets: Vec<TagTarget> = Vec::new();
+
+    if args.is_present("github") {
+        targets.push(TagTarget::GitHub);
+    }
+
+    if args.is_present("local") {
+        targets.push(TagTarget::Local);
+    }
+
+    let github_token = args.value_of("GITHUB_TOKEN").map(|x| x.to_string());
+
     let version = project.find_latest_version(VersionModification::OneMore);
 
-    let targets: Vec<String> = args
-        .values_of("source")
-        .unwrap()
-        .map(ToString::to_string)
-        .collect();
-    let targets: Vec<TagTarget> = targets
-        .into_iter()
-        .map(|x| match x.to_lowercase().as_str() {
-            "local" => TagTarget::Local,
-            "github" => TagTarget::GitHub,
-            _ => unreachable!(),
-        })
-        .collect();
-
-    project.tag_version(&version, targets, allow_dirty_repo)?;
+    project.tag_version(&version, targets, allow_dirty_repo, &github_token)?;
 
     info!("Created tag {}", version);
     Ok(0)
