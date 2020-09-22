@@ -160,7 +160,7 @@ jobs:
       run: docker build . --file Dockerfile --tag crom
     - name: push to registry
       run: |
-        VERSION=$(docker run --rm -v $(pwd):/target f84ef183d4f8 get current-version --no-snapshot | sed 's/v//g')
+        VERSION=$(docker run --rm -v $(pwd):/target crom get current-version --no-snapshot | sed 's/v//g')
         docker tag crom docker.pkg.github.com/ethankhall/crom/cli:$(git rev-parse --short HEAD)
         docker tag crom docker.pkg.github.com/ethankhall/crom/cli:latest
         docker tag crom docker.pkg.github.com/ethankhall/crom/cli:$VERSION
