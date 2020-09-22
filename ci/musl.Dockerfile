@@ -1,6 +1,6 @@
-FROM ekidd/rust-musl-builder:1.36.0
+FROM ekidd/rust-musl-builder:1.46.0
 
 ADD . ./
 RUN sudo chown -R rust:rust .
 
-CMD cargo run -- update-version --pre-release release && cargo test && cargo build --release
+CMD cargo run --release -- update-version --pre-release release && cargo test --release && cargo build --release

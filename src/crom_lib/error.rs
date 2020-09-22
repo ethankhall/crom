@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use ini::ini::ParseError as IniError;
 
-use error_enum::{ErrorEnum, ErrorContainer, PrettyError};
+use error_enum::{ErrorContainer, ErrorEnum, PrettyError};
 
 #[derive(Debug, PartialEq, Eq, ErrorContainer)]
 pub enum CliErrors {
@@ -22,7 +22,7 @@ pub enum CliErrors {
 #[error_enum(prefix = "USER")]
 pub enum UserError {
     #[error_enum(description = "Unknown")]
-    Unknown
+    Unknown,
 }
 
 #[derive(Debug, PartialEq, Eq, ErrorEnum)]
@@ -70,6 +70,7 @@ pub enum GitHubError {
     AccessError(String),
     #[error_enum(description = "Connection Error")]
     UnkownCommunicationError(String),
+    #[cfg(not(test))]
     #[error_enum(description = "Token Missing")]
     TokenMissing,
     #[error_enum(description = "Upload Fialed")]
@@ -77,7 +78,7 @@ pub enum GitHubError {
     #[error_enum(description = "Unable to Upload")]
     UnableToGetUploadUrl(String),
     #[error_enum(description = "Invalid Header")]
-    InvalidHeader(String)
+    InvalidHeader(String),
 }
 
 #[derive(Debug, PartialEq, Eq, ErrorEnum)]

@@ -2,7 +2,10 @@ use clap::ArgMatches;
 
 use crate::crom_lib::*;
 
-pub fn handle_get_command(args: &ArgMatches, project: &ParsedProjectConfig) -> Result<i32, CliErrors> {
+pub fn handle_get_command(
+    args: &ArgMatches,
+    project: &ParsedProjectConfig,
+) -> Result<i32, CliErrors> {
     match args.subcommand() {
         ("current-version", Some(run_matches)) => {
             let modifier = if run_matches.is_present("no_snapshot") {

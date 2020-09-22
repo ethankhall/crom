@@ -2,8 +2,6 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use toml;
-
 pub(crate) mod file;
 mod parser;
 
@@ -73,12 +71,12 @@ impl ParsedProjectConfig {
         update(self.project_path.clone(), version, updators)
     }
 
-    pub fn publish(
+    pub async fn publish(
         &self,
         version: &Version,
         names: Vec<String>,
         root_artifact_path: Option<PathBuf>,
-        auth: &Option<String>
+        auth: &Option<String>,
     ) -> Result<(), CliErrors> {
         let mut artifacts: Vec<ProjectArtifacts> = Vec::new();
 
@@ -102,16 +100,17 @@ impl ParsedProjectConfig {
             version,
             artifacts,
             root_artifact_path,
-            auth
+            auth,
         )
+        .await
     }
 
-    pub fn tag_version(
+    pub async fn tag_version(
         &self,
         version: &Version,
         targets: Vec<TagTarget>,
         allow_dirty_repo: bool,
-        auth: &Option<String>
+        auth: &Option<String>,
     ) -> Result<(), CliErrors> {
         if !self.repo_details.is_workspace_clean {
             if allow_dirty_repo {
@@ -123,7 +122,8 @@ impl ParsedProjectConfig {
 
         let message = make_message(self.project_config.message_template.clone(), version)?;
 
-        crate::crom_lib::repo::tag_repo(&self.repo_details, version, &message, targets, auth)?;
+        crate::crom_lib::repo::tag_repo(&self.repo_details, version, &message, targets, auth)
+            .await?;
 
         Ok(())
     }
@@ -133,13 +133,10 @@ pub fn make_message(
     message_template: Option<String>,
     version: &Version,
 ) -> Result<String, CliErrors> {
-    let template = message_template
-        .unwrap_or_else(|| s!("Crom is creating a version {version}."));
+    let template = message_template.unwrap_or_else(|| s!("Crom is creating a version {version}."));
 
     if !template.contains("{version}") {
-        return Err(CliErrors::Config(
-            ConfigError::MissingVersionDefinition,
-        ));
+        return Err(CliErrors::Config(ConfigError::MissingVersionDefinition));
     }
 
     Ok(template.replace("{version}", &version.to_string()))

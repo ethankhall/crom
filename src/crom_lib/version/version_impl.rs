@@ -20,7 +20,7 @@ impl Ord for Version {
         match other.parts.len().cmp(&self.parts.len()) {
             Ordering::Equal => Ordering::Equal,
             Ordering::Greater => Ordering::Less,
-            Ordering::Less => Ordering::Greater
+            Ordering::Less => Ordering::Greater,
         }
     }
 }

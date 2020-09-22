@@ -36,7 +36,7 @@ impl RepoDetails {
     }
 }
 
-pub fn tag_repo(
+pub async fn tag_repo(
     details: &RepoDetails,
     version: &Version,
     message: &str,
@@ -45,7 +45,7 @@ pub fn tag_repo(
 ) -> Result<i32, CliErrors> {
     for target in targets {
         match target {
-            TagTarget::GitHub => github::tag_version(details, version, message, auth)?,
+            TagTarget::GitHub => github::tag_version(details, version, message, auth).await?,
             TagTarget::Local => git::tag_version(details, version, message)?,
         };
     }

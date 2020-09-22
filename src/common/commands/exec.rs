@@ -22,8 +22,8 @@ pub fn exec_update_version(
     Ok(0)
 }
 
-pub fn exec_upload_artifacts(
-    args: &ArgMatches,
+pub async fn exec_upload_artifacts(
+    args: &ArgMatches<'_>,
     project: &ParsedProjectConfig,
 ) -> Result<i32, CliErrors> {
     let names = args
@@ -39,12 +39,17 @@ pub fn exec_upload_artifacts(
 
     let github_token = args.value_of("GITHUB_TOKEN").map(|x| x.to_string());
     let root_artifact_path = args.value_of("root_artifact_path").map(PathBuf::from);
-    project.publish(&version, names, root_artifact_path, &github_token)?;
+    project
+        .publish(&version, names, root_artifact_path, &github_token)
+        .await?;
 
     Ok(0)
 }
 
-pub fn exec_claim_version(args: &ArgMatches, project: &ParsedProjectConfig) -> Result<i32, CliErrors> {
+pub async fn exec_claim_version(
+    args: &ArgMatches<'_>,
+    project: &ParsedProjectConfig,
+) -> Result<i32, CliErrors> {
     let allow_dirty_repo = if args.is_present("ignore_changes") {
         warn!("Skipping check for workspace changes.");
         true
@@ -66,7 +71,9 @@ pub fn exec_claim_version(args: &ArgMatches, project: &ParsedProjectConfig) -> R
 
     let version = project.find_latest_version(VersionModification::OneMore);
 
-    project.tag_version(&version, targets, allow_dirty_repo, &github_token)?;
+    project
+        .tag_version(&version, targets, allow_dirty_repo, &github_token)
+        .await?;
 
     info!("Created tag {}", version);
     Ok(0)

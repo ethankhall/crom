@@ -23,12 +23,12 @@ impl ArtifactContainer {
     }
 }
 
-pub fn upload_artifacts(
+pub async fn upload_artifacts(
     details: &RepoDetails,
     version: &Version,
     artifacts: Vec<ProjectArtifacts>,
     root_artifact_path: Option<PathBuf>,
-    auth: &Option<String>
+    auth: &Option<String>,
 ) -> Result<(), CliErrors> {
     let mut upload_requests: Vec<ArtifactContainer> = Vec::new();
 
@@ -36,7 +36,9 @@ pub fn upload_artifacts(
         let res = match art.target {
             ProjectArtifactTarget::GitHub => {
                 let client = github::GithubClient::new(auth, details);
-                client.make_upload_request(version, art, root_artifact_path.clone())
+                client
+                    .make_upload_request(version, art, root_artifact_path.clone())
+                    .await
             }
         };
 
@@ -49,10 +51,10 @@ pub fn upload_artifacts(
         }
     }
 
-    do_request(upload_requests)
+    do_request(upload_requests).await
 }
 
-fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), CliErrors> {
+async fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), CliErrors> {
     let spinner = ProgressBar::new(requests.len() as u64);
     spinner.set_style(
         ProgressStyle::default_spinner()
@@ -65,7 +67,7 @@ fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), CliErrors> {
     }
 
     for request in requests {
-        if let Err(e) = do_transfer(request) {
+        if let Err(e) = do_transfer(request).await {
             spinner.finish_and_clear();
             return Err(e);
         }
@@ -77,26 +79,24 @@ fn do_request(requests: Vec<ArtifactContainer>) -> Result<(), CliErrors> {
     Ok(())
 }
 
-fn do_transfer(container: ArtifactContainer) -> Result<(), CliErrors> {
+async fn do_transfer(container: ArtifactContainer) -> Result<(), CliErrors> {
     trace!("Request: {:?}", container);
 
-    let mut res = match crate::crom_lib::client().execute(container.request) {
+    let res = match crate::crom_lib::client().execute(container.request).await {
         Ok(res) => res,
         Err(err) => {
             let err_string = err.to_string();
-            if let Some(ref e) = err.get_ref() {
-                debug!("Hyper error: {:?}", e)
-            }
+            debug!("Hyper error: {:?}", err);
             error!("Failed to make request for {}", container.name);
-            return Err(CliErrors::GitHub(
-                GitHubError::UnkownCommunicationError(err_string),
-            ));
+            return Err(CliErrors::GitHub(GitHubError::UnkownCommunicationError(
+                err_string,
+            )));
         }
     };
 
     let status = res.status();
     if !status.is_success() {
-        if let Ok(body_text) = res.text() {
+        if let Ok(body_text) = res.text().await {
             debug!("Failed Upload: {}", body_text);
         }
 

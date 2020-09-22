@@ -157,7 +157,7 @@ fn test_parse_remote_https() {
             assert_eq!("ethankhall", owner);
             assert_eq!("crom", repo);
         }
-        Err(_) => assert!(false),
+        Err(_) => unreachable!(),
     };
 }
 
@@ -169,7 +169,7 @@ fn test_parse_remote_git() {
             assert_eq!("ethankhall", owner);
             assert_eq!("crom", repo);
         }
-        Err(_) => assert!(false),
+        Err(_) => unreachable!(),
     };
 }
 
