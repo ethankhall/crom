@@ -28,7 +28,7 @@ zip = "0.5"
 libflate = "0.1"
 tempfile = "3.0"
 tar = "0.4"
-hyper = "0.12.22"
+hyper = "0.13.8"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 error-enum = { git = "https://github.com/ethankhall/error-enum-generator", rev = "b5f3276a8d967fc58149d0698a342539ebcec55e" }
 
