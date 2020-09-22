@@ -2,8 +2,6 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use toml;
-
 pub(crate) mod file;
 mod parser;
 
@@ -73,7 +71,7 @@ impl ParsedProjectConfig {
         update(self.project_path.clone(), version, updators)
     }
 
-    pub fn publish(
+    pub async fn publish(
         &self,
         version: &Version,
         names: Vec<String>,
@@ -103,10 +101,10 @@ impl ParsedProjectConfig {
             artifacts,
             root_artifact_path,
             auth
-        )
+        ).await
     }
 
-    pub fn tag_version(
+    pub async fn tag_version(
         &self,
         version: &Version,
         targets: Vec<TagTarget>,
@@ -123,7 +121,7 @@ impl ParsedProjectConfig {
 
         let message = make_message(self.project_config.message_template.clone(), version)?;
 
-        crate::crom_lib::repo::tag_repo(&self.repo_details, version, &message, targets, auth)?;
+        crate::crom_lib::repo::tag_repo(&self.repo_details, version, &message, targets, auth).await?;
 
         Ok(())
     }

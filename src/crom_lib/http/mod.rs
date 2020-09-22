@@ -112,9 +112,6 @@ pub fn make_github_auth_headers(auth: &Option<String>) -> Result<HashMap<String,
     Ok(map)
 }
 
-#[cfg(test)]
-use mockito;
-
 #[cfg(not(test))]
 pub fn get_github_api() -> String {
     use std::env;

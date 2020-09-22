@@ -24,7 +24,7 @@ impl <'a> GithubClient<'a> {
         GithubClient { auth, details }
     }
 
-    pub fn make_upload_request(
+    pub async fn make_upload_request(
         &self,
         version: &Version,
         artifacts: ProjectArtifacts,
@@ -46,8 +46,8 @@ impl <'a> GithubClient<'a> {
         debug!("Release URL: {}", release_url);
 
         let request = make_get_request(&release_url, make_github_auth_headers(self.auth)?)?;
-        let mut res = crate::crom_lib::client().execute(request).unwrap();
-        let upload_url = extract_upload_url(&mut res)?;
+        let res = crate::crom_lib::client().execute(request).await.unwrap();
+        let upload_url = extract_upload_url(res).await?;
 
         let root_path = root_artifact_path.unwrap_or_else(|| self.details.path.clone());
 
@@ -119,8 +119,8 @@ impl <'a> GithubClient<'a> {
     }
 }
 
-fn extract_upload_url(res: &mut Response) -> Result<Url, CliErrors> {
-    let body_text = match res.text() {
+async fn extract_upload_url(res: Response) -> Result<Url, CliErrors> {
+    let body_text = match res.text().await {
         Ok(text) => text,
         Err(err) => {
             error!("Unable to access response from GitHub.");

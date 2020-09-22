@@ -19,7 +19,8 @@ use std::process;
 use common::configure_logging;
 use crom_lib::*;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let matches = clap_app!(MyApp =>
         (name: "crom")
         (@setting SubcommandRequiredElseHelp)
@@ -91,7 +92,7 @@ fn main() {
         matches.is_present("quite"),
     );
 
-    let command_result = exec_commad(&matches);
+    let command_result = exec_commad(&matches).await;
 
     let return_code = match command_result {
         Ok(v) => v,
@@ -104,7 +105,7 @@ fn main() {
     process::exit(return_code);
 }
 
-fn exec_commad(matches: &ArgMatches) -> Result<i32, CliErrors> {
+async fn exec_commad(matches: &ArgMatches<'_>) -> Result<i32, CliErrors> {
     let project = make_project();
 
     match matches.subcommand() {
@@ -113,13 +114,13 @@ fn exec_commad(matches: &ArgMatches) -> Result<i32, CliErrors> {
             common::commands::get::handle_get_command(arg_matches, &project?)
         }
         ("tag-version", Some(arg_matches)) => {
-            common::commands::exec::exec_claim_version(arg_matches, &project?)
+            common::commands::exec::exec_claim_version(arg_matches, &project?).await
         }
         ("update-version", Some(arg_matches)) => {
             common::commands::exec::exec_update_version(arg_matches, &project?)
         }
         ("upload-artifacts", Some(arg_matches)) => {
-            common::commands::exec::exec_upload_artifacts(arg_matches, &project?)
+            common::commands::exec::exec_upload_artifacts(arg_matches, &project?).await
         }
         _ => unreachable!(),
     }

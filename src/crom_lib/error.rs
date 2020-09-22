@@ -70,6 +70,7 @@ pub enum GitHubError {
     AccessError(String),
     #[error_enum(description = "Connection Error")]
     UnkownCommunicationError(String),
+    #[cfg(not(test))]
     #[error_enum(description = "Token Missing")]
     TokenMissing,
     #[error_enum(description = "Upload Fialed")]
