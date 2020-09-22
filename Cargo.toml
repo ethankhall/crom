@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 log = "0.4"
-fern = { version = "0.5", features = ["colored"] }
+fern = { version = "0.6", features = ["colored"] }
 clap = { version = "2.*", features = ["color"] }
 colored = "1.6"
 git2 = { version = "0.7", default-features = false }
