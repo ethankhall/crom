@@ -46,10 +46,7 @@ pub fn make_file_upload_request(
         .unwrap())
 }
 
-pub fn make_get_request(
-    url: &str,
-    headers: HashMap<String, String>,
-) -> Result<Request, CliErrors> {
+pub fn make_get_request(url: &str, headers: HashMap<String, String>) -> Result<Request, CliErrors> {
     let mut header_map = HeaderMap::new();
     for (key, value) in headers {
         let value = HeaderValue::from_str(&value)?;
@@ -91,13 +88,17 @@ pub fn make_post(
 }
 
 #[cfg(test)]
-pub fn make_github_auth_headers(_auth: &Option<String>) -> Result<HashMap<String, String>, CliErrors> {
+pub fn make_github_auth_headers(
+    _auth: &Option<String>,
+) -> Result<HashMap<String, String>, CliErrors> {
     warn!("Using debug GITHUB headers!");
     Ok(HashMap::new())
 }
 
 #[cfg(not(test))]
-pub fn make_github_auth_headers(auth: &Option<String>) -> Result<HashMap<String, String>, CliErrors> {
+pub fn make_github_auth_headers(
+    auth: &Option<String>,
+) -> Result<HashMap<String, String>, CliErrors> {
     use reqwest::header::AUTHORIZATION;
 
     let token = match auth {

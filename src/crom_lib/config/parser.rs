@@ -42,9 +42,7 @@ fn find_and_parse_config() -> Result<(PathBuf, CromConfig), CliErrors> {
         }
     }
 
-    Err(CliErrors::Config(ConfigError::UnableToFindConfig(
-        path,
-    )))
+    Err(CliErrors::Config(ConfigError::UnableToFindConfig(path)))
 }
 
 fn parse_config(path: PathBuf) -> Result<CromConfig, CliErrors> {
@@ -52,9 +50,7 @@ fn parse_config(path: PathBuf) -> Result<CromConfig, CliErrors> {
 
     match toml::from_str::<CromConfig>(&contents) {
         Ok(config) => Ok(config),
-        Err(e) => Err(CliErrors::Config(ConfigError::ParseError(
-            e.to_string(),
-        ))),
+        Err(e) => Err(CliErrors::Config(ConfigError::ParseError(e.to_string()))),
     }
 }
 

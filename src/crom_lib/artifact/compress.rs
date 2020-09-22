@@ -37,18 +37,16 @@ fn zip(
         let options =
             zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
         if let Err(_e) = zip.start_file(name.clone(), options) {
-            return Err(CliErrors::Compress(CompressError::ZipFileNameErr(
-                name,
-            )));
+            return Err(CliErrors::Compress(CompressError::ZipFileNameErr(name)));
         }
 
         let mut art_path = root_path.clone();
         art_path.push(Path::new(path));
 
         if !art_path.exists() {
-            return Err(CliErrors::Compress(
-                CompressError::UnableToFindArtifact(art_path.to_str().unwrap().to_string()),
-            ));
+            return Err(CliErrors::Compress(CompressError::UnableToFindArtifact(
+                art_path.to_str().unwrap().to_string(),
+            )));
         }
 
         let mut file = File::open(art_path)?;

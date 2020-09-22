@@ -30,10 +30,7 @@ pub fn handle_init_command(args: &ArgMatches) -> Result<i32, CliErrors> {
     Ok(0)
 }
 
-fn write_default_config<P: AsRef<Path>>(
-    default_format: &str,
-    dest: P,
-) -> Result<(), CliErrors> {
+fn write_default_config<P: AsRef<Path>>(default_format: &str, dest: P) -> Result<(), CliErrors> {
     let default_config = build_default_config(default_format);
 
     let mut file = File::create(dest)?;

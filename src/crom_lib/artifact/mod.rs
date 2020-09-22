@@ -28,7 +28,7 @@ pub async fn upload_artifacts(
     version: &Version,
     artifacts: Vec<ProjectArtifacts>,
     root_artifact_path: Option<PathBuf>,
-    auth: &Option<String>
+    auth: &Option<String>,
 ) -> Result<(), CliErrors> {
     let mut upload_requests: Vec<ArtifactContainer> = Vec::new();
 
@@ -36,7 +36,9 @@ pub async fn upload_artifacts(
         let res = match art.target {
             ProjectArtifactTarget::GitHub => {
                 let client = github::GithubClient::new(auth, details);
-                client.make_upload_request(version, art, root_artifact_path.clone()).await
+                client
+                    .make_upload_request(version, art, root_artifact_path.clone())
+                    .await
             }
         };
 
@@ -86,9 +88,9 @@ async fn do_transfer(container: ArtifactContainer) -> Result<(), CliErrors> {
             let err_string = err.to_string();
             debug!("Hyper error: {:?}", err);
             error!("Failed to make request for {}", container.name);
-            return Err(CliErrors::GitHub(
-                GitHubError::UnkownCommunicationError(err_string),
-            ));
+            return Err(CliErrors::GitHub(GitHubError::UnkownCommunicationError(
+                err_string,
+            )));
         }
     };
 

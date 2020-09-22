@@ -20,25 +20,25 @@ impl UpdateVersion for MavenConfig {
         let mut child = match spawn {
             Ok(child) => child,
             Err(e) => {
-                return Err(CliErrors::Updater(
-                    UpdaterError::UnableToStartMavenProcess(e.to_string()),
-                ));
+                return Err(CliErrors::Updater(UpdaterError::UnableToStartMavenProcess(
+                    e.to_string(),
+                )));
             }
         };
 
         let ecode = match child.wait() {
             Ok(code) => code,
             Err(e) => {
-                return Err(CliErrors::Updater(
-                    UpdaterError::UnableToStartMavenProcess(e.to_string()),
-                ));
+                return Err(CliErrors::Updater(UpdaterError::UnableToStartMavenProcess(
+                    e.to_string(),
+                )));
             }
         };
 
         if !ecode.success() {
-            Err(CliErrors::Updater(
-                UpdaterError::MavenVersionSetFailed(ecode.code().unwrap_or(1)),
-            ))
+            Err(CliErrors::Updater(UpdaterError::MavenVersionSetFailed(
+                ecode.code().unwrap_or(1),
+            )))
         } else {
             Ok(())
         }

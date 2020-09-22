@@ -15,11 +15,10 @@ use super::ArtifactContainer;
 
 pub struct GithubClient<'a> {
     auth: &'a Option<String>,
-    details: &'a RepoDetails
+    details: &'a RepoDetails,
 }
 
-impl <'a> GithubClient<'a> {
-    
+impl<'a> GithubClient<'a> {
     pub fn new(auth: &'a Option<String>, details: &'a RepoDetails) -> Self {
         GithubClient { auth, details }
     }
@@ -30,7 +29,6 @@ impl <'a> GithubClient<'a> {
         artifacts: ProjectArtifacts,
         root_artifact_path: Option<PathBuf>,
     ) -> Result<Vec<ArtifactContainer>, CliErrors> {
-
         let (owner, repo) = match &self.details.remote {
             RepoRemote::GitHub(owner, repo) => (owner, repo),
         };
@@ -70,7 +68,8 @@ impl <'a> GithubClient<'a> {
         let file = tempfile::NamedTempFile::new()?;
 
         super::compress::compress_files(&file, root_path, &artifacts, &compresion.format)?;
-        let request = self.build_request(upload_url, &compressed_name, file.path().to_path_buf())?;
+        let request =
+            self.build_request(upload_url, &compressed_name, file.path().to_path_buf())?;
         file.close()?;
 
         let container = ArtifactContainer::new(request, compressed_name);
@@ -124,9 +123,9 @@ async fn extract_upload_url(res: Response) -> Result<Url, CliErrors> {
         Ok(text) => text,
         Err(err) => {
             error!("Unable to access response from GitHub.");
-            return Err(CliErrors::GitHub(
-                GitHubError::UnkownCommunicationError(err.to_string()),
-            ));
+            return Err(CliErrors::GitHub(GitHubError::UnkownCommunicationError(
+                err.to_string(),
+            )));
         }
     };
 
@@ -134,9 +133,9 @@ async fn extract_upload_url(res: Response) -> Result<Url, CliErrors> {
         Ok(value) => value,
         Err(err) => {
             debug!("Body was: {}", body_text);
-            return Err(CliErrors::GitHub(
-                GitHubError::UnkownCommunicationError(err.to_string().to_lowercase()),
-            ));
+            return Err(CliErrors::GitHub(GitHubError::UnkownCommunicationError(
+                err.to_string().to_lowercase(),
+            )));
         }
     };
 
@@ -144,9 +143,9 @@ async fn extract_upload_url(res: Response) -> Result<Url, CliErrors> {
         JsonValue::Object(obj) => obj,
         _ => {
             error!("GitHub gave back a strange type.");
-            return Err(CliErrors::GitHub(
-                GitHubError::UnkownCommunicationError(s!("GitHub gave back a strange type.")),
-            ));
+            return Err(CliErrors::GitHub(GitHubError::UnkownCommunicationError(
+                s!("GitHub gave back a strange type."),
+            )));
         }
     };
 

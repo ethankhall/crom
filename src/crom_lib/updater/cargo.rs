@@ -30,11 +30,9 @@ impl UpdateVersion for CargoConfig {
                         let name = match item.as_str() {
                             Some(s) => s,
                             None => {
-                                return Err(CliErrors::Updater(
-                                    UpdaterError::CargoTomlNotValid(s!(
-                                        "Cargo.toml for workspace.members was not a string."
-                                    )),
-                                ));
+                                return Err(CliErrors::Updater(UpdaterError::CargoTomlNotValid(
+                                    s!("Cargo.toml for workspace.members was not a string."),
+                                )));
                             }
                         };
 
@@ -45,9 +43,9 @@ impl UpdateVersion for CargoConfig {
                     }
                 }
                 None => {
-                    return Err(CliErrors::Updater(UpdaterError::CargoTomlNotValid(
-                        s!("Cargo.toml for workspace was missing members."),
-                    )));
+                    return Err(CliErrors::Updater(UpdaterError::CargoTomlNotValid(s!(
+                        "Cargo.toml for workspace was missing members."
+                    ))));
                 }
             }
 
