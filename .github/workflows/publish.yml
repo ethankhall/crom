@@ -143,6 +143,7 @@ jobs:
       #     path: artifacts/windows
       - name: Create release
         run: |
+          chmod +x artifacts/linux/crom
           artifacts/linux/crom tag-version --local --github --ignore-changes
           artifacts/linux/crom upload-artifacts --root-artifact-path=./artifacts linux mac
         env:
