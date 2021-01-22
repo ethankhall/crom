@@ -42,46 +42,6 @@ jobs:
           name: linux-artifacts
           path: target/x86_64-unknown-linux-musl/release/crom
 
-  # build-windows:
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: actions/checkout@v1
-  #     - name: Cache cargo registry
-  #       uses: actions/cache@v1
-  #       with:
-  #         path: ~/.cargo/registry
-  #         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-  #     - name: Cache cargo index
-  #       uses: actions/cache@v1
-  #       with:
-  #         path: ~/.cargo/git
-  #         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-  #     - name: Cache cargo build
-  #       uses: actions/cache@v1
-  #       with:
-  #         path: target
-  #         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-  #     - name: Install latest stable
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #     - uses: actions-rs/cargo@v1
-  #       with:
-  #         command: run
-  #         args: -- update-version --pre-release release
-  #     - uses: actions-rs/cargo@v1
-  #       with:
-  #         command: check
-  #     - uses: actions-rs/cargo@v1
-  #       with:
-  #         command: build
-  #         args: --release
-  #     - name: Upload Artifacts
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: windows-artifacts
-  #         path: target\release\crom.exe
-
   build-mac:
     runs-on: macos-latest
     steps:
@@ -137,15 +97,11 @@ jobs:
         with:
           name: linux-artifacts
           path: artifacts/linux
-      # - uses: actions/download-artifact@v1
-      #   with:
-      #     name: windows-artifacts
-      #     path: artifacts/windows
       - name: Create release
         run: |
           chmod +x artifacts/linux/crom
-          artifacts/linux/crom tag-version --local --github --ignore-changes
-          artifacts/linux/crom upload-artifacts --root-artifact-path=./artifacts linux mac
+          artifacts/linux/crom tag next-release --local --github --ignore-changes
+          artifacts/linux/crom upload latest --artifact-path=./artifacts linux mac
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -161,7 +117,7 @@ jobs:
       run: docker build . --file Dockerfile --tag crom
     - name: push to registry
       run: |
-        VERSION=$(docker run --rm -v $(pwd):/target crom get current-version --no-snapshot | sed 's/v//g')
+        VERSION=$(docker run --rm -v $(pwd):/target crom get latest | sed 's/v//g')
         docker tag crom docker.pkg.github.com/ethankhall/crom/cli:$(git rev-parse --short HEAD)
         docker tag crom docker.pkg.github.com/ethankhall/crom/cli:latest
         docker tag crom docker.pkg.github.com/ethankhall/crom/cli:$VERSION

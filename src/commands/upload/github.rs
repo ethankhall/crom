@@ -1,53 +1,51 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
+use error_chain::bail;
 
 use json::{self, JsonValue};
 use reqwest::{Request, Response};
 use url::Url;
 
-use crate::crom_lib::config::file::*;
-use crate::crom_lib::error::*;
-use crate::crom_lib::http::*;
-use crate::crom_lib::repo::*;
-use crate::crom_lib::version::Version;
+use log::{debug, log_enabled, error, trace};
+
+use crate::CromResult;
+use crate::version::Version;
+use crate::models::*;
+use crate::http::*;
+use crate::errors::ErrorKind;
 
 use super::ArtifactContainer;
 
-pub struct GithubClient<'a> {
-    auth: &'a Option<String>,
-    details: &'a RepoDetails,
+pub struct GithubClient {
+    auth: String,
+    owner: String,
+    repo: String,
 }
 
-impl<'a> GithubClient<'a> {
-    pub fn new(auth: &'a Option<String>, details: &'a RepoDetails) -> Self {
-        GithubClient { auth, details }
+impl<'a> GithubClient {
+    pub fn new(owner: &str, repo: &str, auth: &str) -> Self {
+        GithubClient { auth: auth.to_string(), owner: owner.to_string(), repo: repo.to_string() }
     }
 
     pub async fn make_upload_request(
         &self,
         version: &Version,
         artifacts: ProjectArtifacts,
-        root_artifact_path: Option<PathBuf>,
-    ) -> Result<Vec<ArtifactContainer>, CliErrors> {
-        let (owner, repo) = match &self.details.remote {
-            RepoRemote::GitHub(owner, repo) => (owner, repo),
-        };
-
+        root_path: PathBuf,
+    ) -> CromResult<Vec<ArtifactContainer>> {
         let release_url = format!(
             "{api}/repos/{owner}/{repo}/releases/tags/{version}",
             api = get_github_api(),
-            owner = owner,
-            repo = repo,
+            owner = self.owner,
+            repo = self.repo,
             version = version
         );
 
         debug!("Release URL: {}", release_url);
 
-        let request = make_get_request(&release_url, make_github_auth_headers(self.auth)?)?;
-        let res = crate::crom_lib::client().execute(request).await.unwrap();
+        let request = make_get_request(&release_url, make_github_auth_headers(&self.auth)?)?;
+        let res = client().execute(request).await.unwrap();
         let upload_url = extract_upload_url(res).await?;
-
-        let root_path = root_artifact_path.unwrap_or_else(|| self.details.path.clone());
 
         match artifacts.compress {
             Some(compression) => {
@@ -63,7 +61,7 @@ impl<'a> GithubClient<'a> {
         root_path: PathBuf,
         artifacts: &HashMap<String, String>,
         compresion: &ProjectArtifactWrapper,
-    ) -> Result<Vec<ArtifactContainer>, CliErrors> {
+    ) -> CromResult<Vec<ArtifactContainer>> {
         let compressed_name = compresion.name.to_string();
         let file = tempfile::NamedTempFile::new()?;
 
@@ -81,7 +79,7 @@ impl<'a> GithubClient<'a> {
         upload_url: &Url,
         root_path: PathBuf,
         artifacts: &HashMap<String, String>,
-    ) -> Result<Vec<ArtifactContainer>, CliErrors> {
+    ) -> CromResult<Vec<ArtifactContainer>> {
         let mut upload_requests = Vec::new();
 
         for (name, art_path) in artifacts {
@@ -100,7 +98,7 @@ impl<'a> GithubClient<'a> {
         upload_url: &Url,
         file_name: &str,
         file: PathBuf,
-    ) -> Result<Request, CliErrors> {
+    ) -> CromResult<Request> {
         let mut uri = upload_url.clone();
         {
             let mut path = uri.path_segments_mut().expect("Cannot get path");
@@ -118,14 +116,14 @@ impl<'a> GithubClient<'a> {
     }
 }
 
-async fn extract_upload_url(res: Response) -> Result<Url, CliErrors> {
+async fn extract_upload_url(res: Response) -> CromResult<Url> {
     let body_text = match res.text().await {
         Ok(text) => text,
         Err(err) => {
             error!("Unable to access response from GitHub.");
-            return Err(CliErrors::GitHub(GitHubError::UnkownCommunicationError(
+            bail!(ErrorKind::GitHubError(
                 err.to_string(),
-            )));
+            ))
         }
     };
 
@@ -133,9 +131,9 @@ async fn extract_upload_url(res: Response) -> Result<Url, CliErrors> {
         Ok(value) => value,
         Err(err) => {
             debug!("Body was: {}", body_text);
-            return Err(CliErrors::GitHub(GitHubError::UnkownCommunicationError(
+            bail!(ErrorKind::GitHubError(
                 err.to_string().to_lowercase(),
-            )));
+            ))
         }
     };
 
@@ -143,9 +141,9 @@ async fn extract_upload_url(res: Response) -> Result<Url, CliErrors> {
         JsonValue::Object(obj) => obj,
         _ => {
             error!("GitHub gave back a strange type.");
-            return Err(CliErrors::GitHub(GitHubError::UnkownCommunicationError(
+            bail!(ErrorKind::GitHubError(
                 s!("GitHub gave back a strange type."),
-            )));
+            ))
         }
     };
 
@@ -156,8 +154,8 @@ async fn extract_upload_url(res: Response) -> Result<Url, CliErrors> {
     let upload_url = obj.get("upload_url").unwrap().as_str().unwrap();
     match Url::parse(upload_url) {
         Ok(it) => Ok(it),
-        Err(e) => Err(CliErrors::GitHub(GitHubError::UnableToGetUploadUrl(
+        Err(e) => bail!(ErrorKind::GitHubError(
             e.to_string(),
-        ))),
+        ))
     }
 }

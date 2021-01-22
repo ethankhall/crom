@@ -15,7 +15,7 @@ impl VersionMatcher {
     }
 
     pub fn build_default_version(&self) -> Version {
-        Version::new(self.pattern.clone(), false)
+        Version::new(self.pattern.clone(), None)
     }
 
     pub fn match_version(&self, input: String) -> Option<Version> {
@@ -48,7 +48,7 @@ impl VersionMatcher {
             }
         }
 
-        Some(Version::new(version_parts, false))
+        Some(Version::new(version_parts, None))
     }
 }
 

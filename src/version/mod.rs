@@ -7,20 +7,13 @@ pub enum VersionComponent {
 #[derive(Debug, Clone, Eq)]
 pub struct Version {
     parts: Vec<VersionComponent>,
-    is_snapshot: bool,
     is_only_static: bool,
+    pre_release: Option<String>,
 }
 
 #[derive(Debug)]
 pub struct VersionMatcher {
     pattern: Vec<VersionComponent>,
-}
-
-pub enum VersionModification {
-    NoneOrSnapshot,
-    None,
-    NoneOrNext,
-    OneMore,
 }
 
 mod version_impl;

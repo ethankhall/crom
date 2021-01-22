@@ -6,8 +6,11 @@ edition = "2018"
 
 [dependencies]
 log = "0.4"
-fern = { version = "0.6", features = ["colored"] }
-clap = { version = "2.*", features = ["color"] }
+dotenv = "*"
+async-trait = "0.1"
+flexi_logger = { version = "0.17", features = ["specfile", "compress"]  }
+clap = { git = "https://github.com/clap-rs/clap/", tag = "v3.0.0-beta.2" }
+error-chain = "0.12"
 colored = "2.0"
 git2 = { version = "0.13", default-features = false }
 chrono = "0.4"

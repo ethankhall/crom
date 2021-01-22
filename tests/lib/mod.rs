@@ -1,9 +1,12 @@
 use std::path::PathBuf;
 use std::process::Command;
 
+#[allow(dead_code)]
 pub const CURRENT_VERSION: &str = "v0.1.6";
+#[allow(dead_code)]
 pub const NEXT_VERSION: &str = "v0.1.7";
 
+#[allow(dead_code)]
 pub fn checkout_repo(path: PathBuf) {
     println!("Cloning from test repo");
 
@@ -19,6 +22,7 @@ pub fn checkout_repo(path: PathBuf) {
     assert!(ecode.success());
 }
 
+#[allow(dead_code)]
 pub fn add_file(root: PathBuf, file: PathBuf) {
     let mut child = Command::new("git")
         .arg("add")

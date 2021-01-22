@@ -1,7 +1,10 @@
+use log::warn;
 use std::cmp::{min, Ord, Ordering};
 use std::fmt::{Display, Formatter};
 
-use super::*;
+#[cfg(test)]
+use super::VersionMatcher;
+use super::{Version, VersionComponent};
 
 impl Ord for Version {
     fn cmp(&self, other: &Version) -> Ordering {
@@ -68,7 +71,7 @@ impl PartialEq for VersionComponent {
 }
 
 impl Version {
-    pub fn new(parts: Vec<VersionComponent>, snapshot: bool) -> Version {
+    pub fn new(parts: Vec<VersionComponent>, pre_release: Option<String>) -> Version {
         let has_dynamic_version = parts.clone().into_iter().any(|x| match x {
             VersionComponent::Changing(_) => true,
             VersionComponent::Static(_) => false,
@@ -76,12 +79,12 @@ impl Version {
 
         Version {
             parts,
-            is_snapshot: snapshot,
+            pre_release,
             is_only_static: !has_dynamic_version,
         }
     }
 
-    pub fn next_version(&self) -> Version {
+    pub fn next_version(&self, pre_release: Option<String>) -> Version {
         if self.is_only_static {
             warn!("Attempting to bump a static only version!");
         }
@@ -96,23 +99,13 @@ impl Version {
             })
             .collect();
 
-        Version::new(parts, false)
-    }
-
-    pub fn self_without_snapshot(&self) -> Version {
-        Version::new(self.parts.clone(), false)
-    }
-
-    pub fn next_snapshot(&self) -> Version {
-        let mut next_version = self.next_version();
-        next_version.is_snapshot = true;
-        next_version
+        Version::new(parts, pre_release)
     }
 }
 
 impl From<String> for Version {
     fn from(input: String) -> Self {
-        Version::new(vec![VersionComponent::Static(input)], false)
+        Version::new(vec![VersionComponent::Static(input)], None)
     }
 }
 
@@ -129,11 +122,12 @@ impl Display for Version {
             .collect();
 
         let joined = parts.join(".");
-        if self.is_snapshot {
-            write!(f, "{}-SNAPSHOT", joined)
-        } else {
-            write!(f, "{}", joined)
-        }
+        let pre_release = match &self.pre_release {
+            Some(x) => format!("-{}", x),
+            None => "".to_string(),
+        };
+
+        write!(f, "{}{}", joined, pre_release)
     }
 }
 
@@ -143,7 +137,7 @@ fn test_next_version() {
     let version = matcher.match_version(s!("1.2.3.5")).unwrap();
 
     assert_eq!("1.2.3.5", version.to_string());
-    assert_eq!("1.2.3.6", version.next_version().to_string());
+    assert_eq!("1.2.3.6", version.next_version(None).to_string());
 }
 
 #[test]

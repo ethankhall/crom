@@ -10,7 +10,7 @@ RUN rm src/*.rs
 ADD . ./
 
 RUN rm ./target/release/deps/crom*
-RUN cargo run --release -- update-version --pre-release release
+RUN cargo run --release -- write-version next-release
 RUN cargo build --release
 
 FROM debian:buster-slim

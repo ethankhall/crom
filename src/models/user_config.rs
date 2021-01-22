@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::version::VersionMatcher;
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "kebab-case")]
 pub struct CromConfig {
@@ -23,6 +25,29 @@ pub struct ProjectConfig {
     #[serde(rename = "python")]
     pub version_py: Option<VersionPyConfig>,
     pub message_template: Option<String>,
+}
+
+impl CromConfig {
+    pub fn create_default(pattern: String, message_template: String) -> Self {
+        let project_config = ProjectConfig {
+            pattern,
+            message_template: Some(message_template),
+            cargo: None,
+            property: None,
+            maven: None,
+            package_json: None,
+            version_py: None,
+        };
+
+        CromConfig {
+            project: project_config,
+            artifact: HashMap::new(),
+        }
+    }
+
+    pub fn create_version_matcher(&self) -> VersionMatcher {
+        VersionMatcher::new(&self.project.pattern)
+    }
 }
 
 #[derive(Serialize, Debug, PartialEq, Clone, Deserialize)]
@@ -58,7 +83,7 @@ fn default_none_path() -> Option<String> {
 }
 
 fn default_propery_file_path() -> String {
-    s!(crate::VERSION_PROPERTIES)
+    s!(crate::statics::VERSION_PROPERTIES)
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]

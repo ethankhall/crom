@@ -2,7 +2,7 @@ extern crate assert_cmd;
 extern crate mockito;
 extern crate predicates;
 
-mod shared;
+mod lib;
 
 use std::process::Command;
 
@@ -23,7 +23,7 @@ fn can_tag_version() {
 
     let tmp_dir = TempDir::new("test-dir").expect("temp dir should be created");
     let tmp_dir = tmp_dir.path().to_owned();
-    shared::checkout_repo(tmp_dir.clone());
+    lib::checkout_repo(tmp_dir.clone());
 
     let mut builder = tmp_dir.to_path_buf();
     builder.push("example-1");
@@ -32,10 +32,11 @@ fn can_tag_version() {
 
     let mut cmd = Command::cargo_bin("crom").unwrap();
     let assert = cmd
-        .arg("tag-version")
+        .arg("tag")
+        .arg("next-release")
         .arg("--github")
         .arg("--local")
-        .arg("-dddd")
+        .arg("-vvvv")
         .env("GITHUB_API_SERVER", mockito::server_url())
         .env("GITHUB_TOKEN", "ABC123")
         .current_dir(builder.clone())
@@ -51,12 +52,12 @@ fn can_tag_version() {
     let mut cmd = Command::cargo_bin("crom").unwrap();
     let assert = cmd
         .arg("get")
-        .arg("current-version")
+        .arg("latest")
         .current_dir(builder.clone())
         .assert();
 
     assert.success().stdout(predicate::str::similar(format!(
         "{}\n",
-        shared::NEXT_VERSION
+        lib::NEXT_VERSION
     )));
 }
