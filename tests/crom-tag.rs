@@ -11,9 +11,9 @@ use mockito::mock;
 use predicates::prelude::*;
 use tempdir::TempDir;
 
-#[test]
 #[cfg(unix)]
-fn can_tag_version() {
+#[tokio::test]
+async fn can_tag_version() {
     let mock = mock("POST", "/repos/ethankhall/crom-examples/releases")
         .match_header("accept", "application/vnd.github.v3+json")
         .match_header("authorization", "bearer ABC123")

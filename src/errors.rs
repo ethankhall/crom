@@ -9,7 +9,7 @@ error_chain! {
         Regex(::regex::Error);
         Reqwest(::reqwest::Error);
         Json(::serde_json::Error);
-        Ini(::ini::ini::ParseError);
+        Ini(::ini::ParseError);
         StringUtf8Error(::std::string::FromUtf8Error);
         Zip(::zip::result::ZipError);
     }
