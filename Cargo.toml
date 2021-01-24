@@ -9,7 +9,7 @@ log = "0.4"
 dotenv = "*"
 async-trait = "0.1"
 flexi_logger = { version = "0.17", features = ["specfile", "compress"]  }
-clap = { git = "https://github.com/clap-rs/clap/", tag = "v3.0.0-beta.2" }
+clap = { version = "3.0.0-beta.2" }
 error-chain = "0.12"
 git2 = { version = "0.13", default-features = false }
 serde = { version =  "1", features = ["rc", "derive"] }
@@ -18,7 +18,7 @@ regex = "1"
 toml_edit = "0.2"
 rust-ini = "0.16"
 json = "*"
-reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "gzip"] }
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "rustls-tls-native-roots", "gzip"] }
 indicatif = "0.15"
 mime_guess = "2.0"
 mime = "0.3"
