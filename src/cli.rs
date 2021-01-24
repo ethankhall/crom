@@ -1,7 +1,8 @@
-use clap::Clap;
+use clap::{ArgGroup, Clap};
 use log::LevelFilter;
 
 #[derive(Clap, Debug)]
+#[clap(group = ArgGroup::new("logging"))]
 pub struct LoggingOpts {
     /// A level of verbosity, and can be used multiple times
     #[clap(short, long, parse(from_occurrences), global(true), group = "logging")]
@@ -194,32 +195,35 @@ impl TagSubCommand {
 }
 
 #[derive(Clap, Debug)]
+#[clap(group = ArgGroup::new("target").required(true).multiple(true))]
 pub struct TagSubCommandArgs {
     /// Token to be used when talking to GitHub
     #[clap(long, env = "GITHUB_TOKEN")]
     pub github_token: Option<String>,
 
     /// Should the tag be created on GitHub
-    #[clap(short, long, requires = "github-token")]
+    #[clap(short, long, group = "target", requires = "github-token")]
     pub github: bool,
 
     /// Should the tag be created locally?
-    #[clap(short, long)]
+    #[clap(short, long, group = "target")]
     pub local: bool,
 }
 
 #[derive(Clap, Debug)]
-pub struct TagSubCommandCustomArgs {
-    /// Should the tag be created on GitHub
-    #[clap(short, long, requires = "github-token")]
-    pub github: bool,
 
+#[clap(group = ArgGroup::new("target").required(true).multiple(true))]
+pub struct TagSubCommandCustomArgs {
     /// Token to be used when talking to GitHub
     #[clap(long, env = "GITHUB_TOKEN")]
     pub github_token: Option<String>,
 
+    /// Should the tag be created on GitHub
+    #[clap(short, long, group = "target", requires = "github-token")]
+    pub github: bool,
+
     /// Should the tag be created locally?
-    #[clap(short, long)]
+    #[clap(short, long, group = "target")]
     pub local: bool,
 
     /// The custom version to be created.

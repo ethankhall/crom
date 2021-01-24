@@ -14,7 +14,7 @@ jobs:
         run: |
           mkdir -p target/x86_64-unknown-linux-musl/release/
           docker build . --file Dockerfile --tag crom
-          docker run --name crom crom
+          docker run --name crom crom help
           docker cp crom:/usr/bin/crom target/x86_64-unknown-linux-musl/release/crom
           docker rm crom
       - name: Upload Artifacts
@@ -49,7 +49,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: run
-          args: -- update-version --pre-release release
+          args: -- write-version next-release
       - uses: actions-rs/cargo@v1
         with:
           command: check
@@ -81,7 +81,7 @@ jobs:
       - name: Create release
         run: |
           chmod +x artifacts/linux/crom
-          artifacts/linux/crom tag next-release --local --github --ignore-changes
+          artifacts/linux/crom tag next-release --local --github
           artifacts/linux/crom upload latest --artifact-path=./artifacts linux mac
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

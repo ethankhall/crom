@@ -23,7 +23,7 @@ Image you have a few released version like below.
 
 When you run `crom get latest` and there are no working changes, you see `v0.1.4`.
 
-You start working on awesome feature #4 and yor run `crom get latest` when your git history looks like:
+You start working on awesome feature #4 and yor run `crom get pre-release` when your git history looks like:
 
 ```
 * 0cc81e3 - Adding awesome feature #4
@@ -32,13 +32,13 @@ You start working on awesome feature #4 and yor run `crom get latest` when your 
 * 557f909 - (tag: v0.1.2) Adding awesome feature #1
 ```
 
-Crom will tell you the version is `v0.1.5-{short git hash}` since there are local changes, and `v0.1.5` hasn't been released yet.
+Crom will tell you the version is `v0.1.5-0cc81e3` since there are local changes, and `v0.1.5` hasn't been released yet.
 
 Now lets push to the repo. CI kicks off, instead of having to update a config file with every version you run `crom write-version next-release`. This will update your version meta-data to be `v0.1.5`. 
 
 Now you run your build. As the build executes and your code isn't to blame, but you need to fix something.
 
-After fixing the change, you re-run `crom get latest` and still see `v0.1.5-SNAPSHOT` since you don't release if a version doesn't build.
+After fixing the change, you re-run `crom get latest` and still see `v0.1.4` since you don't release if a version doesn't build.
 
 When you push, the history looks like:
 
@@ -50,9 +50,11 @@ When you push, the history looks like:
 * 557f909 - (tag: v0.1.2) Adding awesome feature #1
 ```
 
-The CI job runs again, running `crom update-version --pre-release release` like before, and getting `v0.1.5` like before. This time however, the build passes.
+The CI job runs again, running `crom write-version next-release` like before, and getting `v0.1.5` like before. This time however, the build passes.
 
-Since the job passed, you want to tag it with `crom tag-version --source local,github --ignore-changes`. This creates a tag locally, and on GitHub. The tag locally is so you can use `crom upload-artifacts` without specifying a version.
+Since the job passed, you want to tag it with `crom tag next-release --local --github`. This creates a tag locally, and on GitHub. Now that the release has been created,
+you may want to upload artifacts that were produced. To upload the artifacts you run `crom upload latest foo bar biz` where the artifacts are named `foo`, `bar`, `biz` in
+`.crom.toml`.
 
 Now on your local machine you run `git fetch && git pull` and see the history now looks like:
 
@@ -64,7 +66,7 @@ Now on your local machine you run `git fetch && git pull` and see the history no
 * 557f909 - (tag: v0.1.2) Adding awesome feature #1
 ```
 
-Running `crom get current-version` shows `v0.1.5`.
+Running `crom get latest` shows `v0.1.5`.
 
 ## Config Options
 Here is an example `.crom.toml`.
