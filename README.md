@@ -21,9 +21,9 @@ Image you have a few released version like below.
 * 557f909 - (tag: v0.1.2) Adding awesome feature #1
 ```
 
-When you run `crom get current-version` and there are no working changes, you see `v0.1.4`.
+When you run `crom get latest` and there are no working changes, you see `v0.1.4`.
 
-You start working on awesome feature #4 and yor run `crom get current-version` when your git history looks like:
+You start working on awesome feature #4 and yor run `crom get latest` when your git history looks like:
 
 ```
 * 0cc81e3 - Adding awesome feature #4
@@ -32,13 +32,13 @@ You start working on awesome feature #4 and yor run `crom get current-version` w
 * 557f909 - (tag: v0.1.2) Adding awesome feature #1
 ```
 
-Crom will tell you the version is `v0.1.5-SNAPSHOT` since there are local changes, and `v0.1.5` hasn't been released yet.
+Crom will tell you the version is `v0.1.5-{short git hash}` since there are local changes, and `v0.1.5` hasn't been released yet.
 
-Now lets push to the repo. CI kicks off, instead of having to update a config file with every version you run `crom update-version --pre-release release`. This will update your version meta-data to be `v0.1.5`. 
+Now lets push to the repo. CI kicks off, instead of having to update a config file with every version you run `crom write-version next-release`. This will update your version meta-data to be `v0.1.5`. 
 
 Now you run your build. As the build executes and your code isn't to blame, but you need to fix something.
 
-After fixing the change, you re-run `crom get current-version` and still see `v0.1.5-SNAPSHOT` since you don't release if a version doesn't build.
+After fixing the change, you re-run `crom get latest` and still see `v0.1.5-SNAPSHOT` since you don't release if a version doesn't build.
 
 When you push, the history looks like:
 

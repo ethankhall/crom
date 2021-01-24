@@ -41,11 +41,11 @@ jobs:
   build-docker:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: do-build
-      run: |
-        mkdir -p target/x86_64-unknown-linux-musl/release/
-        docker build -t musl-builder -f ci/musl.Dockerfile .
-        docker run --name musl-build musl-builder
-        docker cp musl-build:/home/rust/src/target/x86_64-unknown-linux-musl/release/crom target/x86_64-unknown-linux-musl/release/crom
-        docker rm musl-build
+      - uses: actions/checkout@v1
+      - name: do-build
+        run: |
+          mkdir -p target/x86_64-unknown-linux-musl/release/
+          docker build . --file Dockerfile --tag crom
+          docker run --name crom crom help
+          docker cp crom:/usr/bin/crom target/x86_64-unknown-linux-musl/release/crom
+          docker rm crom
