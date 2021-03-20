@@ -34,4 +34,4 @@ serde_json = { version = "1", features = ["preserve_order"] }
 assert_cmd = "1.0"
 tempdir = "0.3"
 predicates = "1.0"
-mockito = "*"
+mockito = "*"\n
