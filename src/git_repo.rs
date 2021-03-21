@@ -1,4 +1,4 @@
-use log::{debug};
+use log::debug;
 use std::vec::Vec;
 
 use error_chain::bail;

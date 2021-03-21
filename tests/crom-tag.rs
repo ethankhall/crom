@@ -56,8 +56,7 @@ async fn can_tag_version() {
         .current_dir(builder.clone())
         .assert();
 
-    assert.success().stdout(predicate::str::similar(format!(
-        "{}\n",
-        lib::NEXT_VERSION
-    )));
+    assert
+        .success()
+        .stdout(predicate::str::similar(format!("{}\n", lib::NEXT_VERSION)));
 }

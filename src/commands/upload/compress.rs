@@ -1,17 +1,17 @@
+use error_chain::bail;
+use log::debug;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
-use log::debug;
-use error_chain::bail;
 
 use libflate::gzip::Encoder;
 use std::io::Write;
 use tar::Builder as TarBuilder;
 use tempfile::NamedTempFile;
 
-use crate::models::*;
 use crate::errors::ErrorKind;
+use crate::models::*;
 use crate::CromResult;
 
 pub fn compress_files(
@@ -40,14 +40,20 @@ fn zip(
         let options =
             zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
         if let Err(e) = zip.start_file(name.clone(), options) {
-            bail!(ErrorKind::CompressionError(format!("Invalid Artifact Name: Error {:?}", e)));
+            bail!(ErrorKind::CompressionError(format!(
+                "Invalid Artifact Name: Error {:?}",
+                e
+            )));
         }
 
         let mut art_path = root_path.clone();
         art_path.push(Path::new(path));
 
         if !art_path.exists() {
-            bail!(ErrorKind::CompressionError(format!("Unable to find artifact at {}", art_path.to_str().unwrap().to_string())))
+            bail!(ErrorKind::CompressionError(format!(
+                "Unable to find artifact at {}",
+                art_path.to_str().unwrap().to_string()
+            )))
         }
 
         let mut file = File::open(art_path)?;

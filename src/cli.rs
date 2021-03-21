@@ -118,7 +118,7 @@ impl GetSubCommand {
         match self {
             GetSubCommand::Latest => VersionRequest::Latest,
             GetSubCommand::PreRelease => VersionRequest::PreRelease,
-            GetSubCommand::NextRelease => VersionRequest::NextRelease
+            GetSubCommand::NextRelease => VersionRequest::NextRelease,
         }
     }
 }
@@ -160,15 +160,14 @@ pub enum TagSubCommand {
 }
 
 impl TagSubCommand {
-
     pub fn make_version_request(&self) -> VersionRequest {
         match self {
             TagSubCommand::Custom(args) => VersionRequest::Custom(args.version.clone()),
             TagSubCommand::PreRelease(_) => VersionRequest::PreRelease,
-            TagSubCommand::NextRelease(_) => VersionRequest::NextRelease
+            TagSubCommand::NextRelease(_) => VersionRequest::NextRelease,
         }
     }
-    
+
     pub fn github_token(&self) -> &Option<String> {
         match self {
             TagSubCommand::NextRelease(args) => &args.github_token,
@@ -211,7 +210,6 @@ pub struct TagSubCommandArgs {
 }
 
 #[derive(Clap, Debug)]
-
 #[clap(group = ArgGroup::new("target").required(true).multiple(true))]
 pub struct TagSubCommandCustomArgs {
     /// Token to be used when talking to GitHub
@@ -269,7 +267,7 @@ impl WriteSubCommand {
             WriteSubCommand::Custom(args) => VersionRequest::Custom(args.version.clone()),
             WriteSubCommand::PreRelease => VersionRequest::PreRelease,
             WriteSubCommand::NextRelease => VersionRequest::NextRelease,
-            WriteSubCommand::Latest => VersionRequest::Latest
+            WriteSubCommand::Latest => VersionRequest::Latest,
         }
     }
 }

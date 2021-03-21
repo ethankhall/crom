@@ -80,11 +80,11 @@ fn build_headers(headers: HashMap<String, String>) -> CromResult<HeaderMap> {
     for (key, value) in headers {
         let value = match HeaderValue::from_str(&value) {
             Ok(value) => value,
-            Err(e) => bail!(ErrorKind::HeaderError(e.to_string()))
+            Err(e) => bail!(ErrorKind::HeaderError(e.to_string())),
         };
         let key = match HeaderName::from_str(&key) {
             Ok(key) => key,
-            Err(e) => bail!(ErrorKind::HeaderError(e.to_string()))
+            Err(e) => bail!(ErrorKind::HeaderError(e.to_string())),
         };
 
         header_map.insert(key, value);

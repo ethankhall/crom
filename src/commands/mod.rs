@@ -1,21 +1,21 @@
+use crate::git_repo;
 use async_trait::async_trait;
-use std::path::PathBuf;
 use error_chain::bail;
 use log::{debug, error};
-use crate::git_repo;
+use std::path::PathBuf;
 
 mod get;
 mod init;
 mod tag;
+mod upload;
 mod utils;
 mod write;
-mod upload;
 
-use crate::errors::ErrorKind;
-use crate::CromResult;
-use crate::version::Version;
 use crate::cli::VersionRequest;
+use crate::errors::ErrorKind;
 use crate::models::CromConfig;
+use crate::version::Version;
+use crate::CromResult;
 
 #[async_trait]
 trait CommandRunner<T>
@@ -105,7 +105,11 @@ fn test_latest_release() {
     let matcher = VersionMatcher::new("1.2.%d");
     let latest_version = matcher.match_version(s!("1.2.3")).unwrap();
 
-    let version = build_version(VersionRequest::Latest, "abc123".to_string(), &latest_version);
+    let version = build_version(
+        VersionRequest::Latest,
+        "abc123".to_string(),
+        &latest_version,
+    );
     assert_eq!(s!("1.2.3"), version.to_string());
 }
 
@@ -116,7 +120,11 @@ fn test_next_release() {
     let matcher = VersionMatcher::new("1.2.%d");
     let latest_version = matcher.match_version(s!("1.2.3")).unwrap();
 
-    let version = build_version(VersionRequest::NextRelease, "abc123".to_string(), &latest_version);
+    let version = build_version(
+        VersionRequest::NextRelease,
+        "abc123".to_string(),
+        &latest_version,
+    );
     assert_eq!(s!("1.2.4"), version.to_string());
 }
 
@@ -127,7 +135,11 @@ fn test_custom_version() {
     let matcher = VersionMatcher::new("1.2.%d");
     let latest_version = matcher.match_version(s!("1.2.3")).unwrap();
 
-    let version = build_version(VersionRequest::Custom(s!("4.5.3")), "abc123".to_string(), &latest_version);
+    let version = build_version(
+        VersionRequest::Custom(s!("4.5.3")),
+        "abc123".to_string(),
+        &latest_version,
+    );
     assert_eq!(s!("4.5.3"), version.to_string());
 }
 
@@ -138,6 +150,10 @@ fn test_pre_release() {
     let matcher = VersionMatcher::new("1.2.%d");
     let latest_version = matcher.match_version(s!("1.2.3")).unwrap();
 
-    let version = build_version(VersionRequest::PreRelease, "abc123".to_string(), &latest_version);
+    let version = build_version(
+        VersionRequest::PreRelease,
+        "abc123".to_string(),
+        &latest_version,
+    );
     assert_eq!(s!("1.2.4-abc123"), version.to_string());
 }

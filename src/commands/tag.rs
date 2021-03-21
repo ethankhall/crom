@@ -3,7 +3,7 @@ use error_chain::bail;
 
 use log::{error, info, trace};
 
-use crate::cli::{TagArgs};
+use crate::cli::TagArgs;
 use git2::Repository;
 use log::debug;
 
@@ -17,7 +17,8 @@ pub struct TagCommand;
 #[async_trait]
 impl super::CommandRunner<TagArgs> for TagCommand {
     async fn run_command(args: TagArgs) -> CromResult<i32> {
-        let (version, location, config) = super::create_version(args.sub_command.make_version_request()).await?;
+        let (version, location, config) =
+            super::create_version(args.sub_command.make_version_request()).await?;
         let repo = Repository::discover(location)?;
         let message = make_message(config.project.message_template, &version)?;
 

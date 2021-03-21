@@ -1,35 +1,40 @@
 use async_trait::async_trait;
-use std::path::PathBuf;
-use log::{debug, error, log_enabled, trace};
 use error_chain::bail;
+use log::{debug, error, log_enabled, trace};
+use std::path::PathBuf;
 
+use git2::Repository;
 use indicatif::{ProgressBar, ProgressStyle};
 use reqwest::Request;
-use git2::Repository;
 
 mod compress;
 mod github;
 
+use crate::cli::UploadArgs;
 use crate::errors::ErrorKind;
-use crate::cli::{UploadArgs};
-use crate::CromResult;
-use crate::version::Version;
-use crate::models::*;
 use crate::git_repo;
+use crate::models::*;
+use crate::version::Version;
+use crate::CromResult;
 
 pub struct UploadCommand;
 
 #[async_trait]
 impl super::CommandRunner<UploadArgs> for UploadCommand {
     async fn run_command(args: UploadArgs) -> CromResult<i32> {
-        let (version, location, config) = super::create_version(args.sub_command.make_version_request()).await?;
+        let (version, location, config) =
+            super::create_version(args.sub_command.make_version_request()).await?;
         let repo = Repository::discover(location.clone())?;
         let remote = git_repo::get_owner_repo_info(&repo)?;
         let (owner, repo) = match &remote {
             git_repo::RepoRemote::GitHub { owner, repo } => (owner, repo),
         };
 
-        let artifact_path = args.sub_command.artifact_path().map(PathBuf::from).unwrap_or(location);
+        let artifact_path = args
+            .sub_command
+            .artifact_path()
+            .map(PathBuf::from)
+            .unwrap_or(location);
         let mut artifacts: Vec<ProjectArtifacts> = Vec::new();
 
         for name in args.sub_command.artifact_names() {
@@ -42,11 +47,18 @@ impl super::CommandRunner<UploadArgs> for UploadCommand {
             }
         }
 
-        upload_artifacts(&owner, &repo, &version, artifacts, artifact_path, args.sub_command.github_token()).await?;
+        upload_artifacts(
+            &owner,
+            &repo,
+            &version,
+            artifacts,
+            artifact_path,
+            args.sub_command.github_token(),
+        )
+        .await?;
         Ok(0)
     }
 }
-
 
 #[derive(Debug)]
 pub struct ArtifactContainer {
@@ -126,7 +138,8 @@ async fn do_transfer(container: ArtifactContainer) -> CromResult<()> {
             let err_string = err.to_string();
             debug!("Hyper error: {:?}", err);
             error!("Failed to make request for {}", container.name);
-            bail!(ErrorKind::GitHubError(format!("Unknown communication error when talking to GitHub: Error {}",
+            bail!(ErrorKind::GitHubError(format!(
+                "Unknown communication error when talking to GitHub: Error {}",
                 err_string,
             )))
         }

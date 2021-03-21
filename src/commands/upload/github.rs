@@ -1,18 +1,18 @@
+use error_chain::bail;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use error_chain::bail;
 
 use json::{self, JsonValue};
 use reqwest::{Request, Response};
 use url::Url;
 
-use log::{debug, log_enabled, error, trace};
+use log::{debug, error, log_enabled, trace};
 
-use crate::CromResult;
-use crate::version::Version;
-use crate::models::*;
-use crate::http::*;
 use crate::errors::ErrorKind;
+use crate::http::*;
+use crate::models::*;
+use crate::version::Version;
+use crate::CromResult;
 
 use super::ArtifactContainer;
 
@@ -24,7 +24,11 @@ pub struct GithubClient {
 
 impl<'a> GithubClient {
     pub fn new(owner: &str, repo: &str, auth: &str) -> Self {
-        GithubClient { auth: auth.to_string(), owner: owner.to_string(), repo: repo.to_string() }
+        GithubClient {
+            auth: auth.to_string(),
+            owner: owner.to_string(),
+            repo: repo.to_string(),
+        }
     }
 
     pub async fn make_upload_request(
@@ -121,9 +125,7 @@ async fn extract_upload_url(res: Response) -> CromResult<Url> {
         Ok(text) => text,
         Err(err) => {
             error!("Unable to access response from GitHub.");
-            bail!(ErrorKind::GitHubError(
-                err.to_string(),
-            ))
+            bail!(ErrorKind::GitHubError(err.to_string(),))
         }
     };
 
@@ -131,9 +133,7 @@ async fn extract_upload_url(res: Response) -> CromResult<Url> {
         Ok(value) => value,
         Err(err) => {
             debug!("Body was: {}", body_text);
-            bail!(ErrorKind::GitHubError(
-                err.to_string().to_lowercase(),
-            ))
+            bail!(ErrorKind::GitHubError(err.to_string().to_lowercase(),))
         }
     };
 
@@ -141,9 +141,9 @@ async fn extract_upload_url(res: Response) -> CromResult<Url> {
         JsonValue::Object(obj) => obj,
         _ => {
             error!("GitHub gave back a strange type.");
-            bail!(ErrorKind::GitHubError(
-                s!("GitHub gave back a strange type."),
-            ))
+            bail!(ErrorKind::GitHubError(s!(
+                "GitHub gave back a strange type."
+            ),))
         }
     };
 
@@ -154,8 +154,6 @@ async fn extract_upload_url(res: Response) -> CromResult<Url> {
     let upload_url = obj.get("upload_url").unwrap().as_str().unwrap();
     match Url::parse(upload_url) {
         Ok(it) => Ok(it),
-        Err(e) => bail!(ErrorKind::GitHubError(
-            e.to_string(),
-        ))
+        Err(e) => bail!(ErrorKind::GitHubError(e.to_string(),)),
     }
 }

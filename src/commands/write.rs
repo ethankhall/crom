@@ -1,28 +1,29 @@
 use async_trait::async_trait;
-use std::path::PathBuf;
 use error_chain::bail;
+use std::path::PathBuf;
 
+use std::fs::read_to_string;
 use std::fs::File;
 use std::io::prelude::*;
-use std::fs::read_to_string;
 use std::process::*;
 
-use toml_edit::{value, Document};
-use serde_json::{self, Value};
 use ini::Ini;
+use serde_json::{self, Value};
+use toml_edit::{value, Document};
 
-use crate::cli::{WriteArgs};
+use crate::cli::WriteArgs;
+use crate::errors::ErrorKind;
+use crate::models::{CargoConfig, MavenConfig, NodeConfig, PropertyFileConfig, VersionPyConfig};
 use crate::version::Version;
 use crate::CromResult;
-use crate::errors::ErrorKind;
-use crate::models::{CargoConfig, NodeConfig, MavenConfig, PropertyFileConfig, VersionPyConfig};
 
 pub struct WriteCommand;
 
 #[async_trait]
 impl super::CommandRunner<WriteArgs> for WriteCommand {
     async fn run_command(args: WriteArgs) -> CromResult<i32> {
-        let (version, location, config) = super::create_version(args.sub_command.make_version_request()).await?;
+        let (version, location, config) =
+            super::create_version(args.sub_command.make_version_request()).await?;
 
         if let Some(project) = config.project.cargo {
             project.update_version(location.clone(), &version)?;
@@ -75,7 +76,8 @@ impl UpdateVersion for CargoConfig {
                             Some(s) => s,
                             None => {
                                 bail!(ErrorKind::InvalidToml(
-                                    "Cargo.toml for workspace.members was not a string.".to_string()
+                                    "Cargo.toml for workspace.members was not a string."
+                                        .to_string()
                                 ))
                             }
                         };
@@ -143,7 +145,6 @@ impl UpdateVersion for NodeConfig {
     }
 }
 
-
 impl UpdateVersion for MavenConfig {
     fn update_version(&self, root_path: PathBuf, version: &Version) -> CromResult<()> {
         let spawn = Command::new("mvn")
@@ -158,18 +159,14 @@ impl UpdateVersion for MavenConfig {
         let mut child = match spawn {
             Ok(child) => child,
             Err(e) => {
-                bail!(ErrorKind::Maven(
-                    e.to_string(),
-                ))
-                        }
+                bail!(ErrorKind::Maven(e.to_string(),))
+            }
         };
 
         let ecode = match child.wait() {
             Ok(code) => code,
             Err(e) => {
-                bail!(ErrorKind::Maven(
-                    e.to_string(),
-                ))
+                bail!(ErrorKind::Maven(e.to_string(),))
             }
         };
 
