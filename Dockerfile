@@ -1,4 +1,4 @@
-FROM rust:1.49-alpine3.11 as builder
+FROM rust:1.50-alpine3.13 as builder
 RUN apk update
 RUN apk add libc-dev openssl-dev openssl
 

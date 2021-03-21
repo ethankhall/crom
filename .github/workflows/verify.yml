@@ -28,7 +28,6 @@ jobs:
     - name: Install latest nightly
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
         components: clippy
         override: true
     - uses: actions-rs/cargo@v1
