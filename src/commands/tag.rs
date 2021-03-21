@@ -20,7 +20,7 @@ impl super::CommandRunner<TagArgs> for TagCommand {
         let (version, location, config) =
             super::create_version(args.sub_command.make_version_request()).await?;
         let repo = Repository::discover(location)?;
-        let message = make_message(config.project.message_template, &version)?;
+        let message = make_message(config.project.message_template, &version);
 
         if args.sub_command.target_github() {
             let github_token = args
@@ -45,10 +45,10 @@ impl super::CommandRunner<TagArgs> for TagCommand {
     }
 }
 
-fn make_message(message_template: Option<String>, version: &Version) -> CromResult<String> {
+fn make_message(message_template: Option<String>, version: &Version) -> String {
     let template = message_template.unwrap_or_else(|| s!("Crom is creating a version {version}."));
 
-    Ok(template.replace("{version}", &version.to_string()))
+    template.replace("{version}", &version.to_string())
 }
 
 pub async fn tag_github(
