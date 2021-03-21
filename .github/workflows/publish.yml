@@ -80,6 +80,7 @@ jobs:
           path: artifacts/linux
       - name: Create release
         run: |
+          set -eux
           chmod +x artifacts/linux/crom
           artifacts/linux/crom tag next-release --local --github
           artifacts/linux/crom upload latest --artifact-path=./artifacts linux mac
