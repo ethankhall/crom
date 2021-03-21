@@ -45,6 +45,10 @@ pub async fn run_write(args: crate::cli::WriteArgs) -> CromResult<i32> {
     write::WriteCommand::run_command(args).await
 }
 
+pub async fn run_upload(args: crate::cli::UploadArgs) -> CromResult<i32> {
+    upload::UploadCommand::run_command(args).await
+}
+
 pub fn are_you_sure(default: bool) -> CromResult<bool> {
     use std::io::Write;
 

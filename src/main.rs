@@ -41,7 +41,7 @@ async fn main() {
         SubCommand::Get(args) => crate::commands::run_get(args).await,
         SubCommand::Tag(args) => crate::commands::run_tag(args).await,
         SubCommand::WriteVersion(args) => crate::commands::run_write(args).await,
-        SubCommand::UploadArtifacts(_) => Ok(0),
+        SubCommand::UploadArtifacts(args) => crate::commands::run_upload(args).await,
         SubCommand::Utility(args) => crate::commands::run_utils(args).await,
     };
 
