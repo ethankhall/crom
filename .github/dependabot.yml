@@ -1,0 +1,52 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "13:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: async-trait
+    versions:
+    - 0.1.49
+  - dependency-name: zip
+    versions:
+    - 0.5.10
+    - 0.5.11
+    - 0.5.9
+  - dependency-name: serde
+    versions:
+    - 1.0.123
+    - 1.0.124
+  - dependency-name: serde_json
+    versions:
+    - 1.0.62
+    - 1.0.63
+    - 1.0.64
+  - dependency-name: tar
+    versions:
+    - 0.4.32
+    - 0.4.33
+  - dependency-name: url
+    versions:
+    - 2.2.1
+  - dependency-name: reqwest
+    versions:
+    - 0.11.1
+  - dependency-name: tokio
+    versions:
+    - 1.1.1
+    - 1.2.0
+  - dependency-name: assert_cmd
+    versions:
+    - 1.0.3
+  - dependency-name: log
+    versions:
+    - 0.4.14
+  - dependency-name: git2
+    versions:
+    - 0.13.17
+  - dependency-name: predicates
+    versions:
+    - 1.0.7
