@@ -377,6 +377,10 @@ pub struct UploadSubCommandArgsCustom {
     #[clap(long)]
     pub artifact_path: Option<String>,
 
+    /// The custom version to be written.
+    #[clap(long)]
+    pub version: String,
+
     /// Token to be used when talking to GitHub
     #[clap(long, env = "GITHUB_TOKEN")]
     pub github_token: String,
@@ -386,9 +390,6 @@ pub struct UploadSubCommandArgsCustom {
     /// These names are defined in the `.crom.toml`
     #[clap(required = true, min_values = 1)]
     pub names: Vec<String>,
-
-    /// The custom version to be written.
-    pub version: String,
 }
 
 /// Utility that are useful during CI.
