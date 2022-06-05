@@ -11,7 +11,6 @@ error_chain! {
         Json(::serde_json::Error);
         Ini(::ini::ParseError);
         StringUtf8Error(::std::string::FromUtf8Error);
-        Zip(::zip::result::ZipError);
     }
 
     errors {

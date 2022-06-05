@@ -13,14 +13,14 @@ mod cli;
 mod commands;
 mod errors;
 mod git_repo;
-mod http;
 mod logging;
 mod models;
 mod statics;
 mod version;
 
-use clap::Clap;
+use clap::Parser;
 use dotenv::dotenv;
+use human_panic::setup_panic;
 use log::error;
 use std::process;
 
@@ -30,6 +30,7 @@ use crate::cli::*;
 
 #[tokio::main]
 async fn main() {
+    setup_panic!();
     dotenv().ok();
 
     let opt = Opts::parse();
@@ -39,9 +40,7 @@ async fn main() {
     let result: CromResult<i32> = match opt.sub_command {
         SubCommand::Init(args) => crate::commands::run_init(args).await,
         SubCommand::Get(args) => crate::commands::run_get(args).await,
-        SubCommand::Tag(args) => crate::commands::run_tag(args).await,
         SubCommand::WriteVersion(args) => crate::commands::run_write(args).await,
-        SubCommand::UploadArtifacts(args) => crate::commands::run_upload(args).await,
         SubCommand::Utility(args) => crate::commands::run_utils(args).await,
     };
 
