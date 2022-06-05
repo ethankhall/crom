@@ -13,7 +13,7 @@ impl Ord for Version {
             let other_part = &other.parts[i];
             let self_part = &self.parts[i];
 
-            match other_part.cmp(&self_part) {
+            match other_part.cmp(self_part) {
                 Ordering::Equal => continue,
                 Ordering::Less => return Ordering::Greater,
                 Ordering::Greater => return Ordering::Less,
