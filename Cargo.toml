@@ -2,14 +2,15 @@
 name = "crom"
 version = "999.9.9-SNAPSHOT"
 authors = ["Ethan Hall <ethan@ehdev.io>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
+human-panic = "1.0.3"
 log = "0.4"
 dotenv = "*"
 async-trait = "0.1"
 flexi_logger = { version = "0.17", features = ["specfile", "compress"]  }
-clap = { version = "3.0.0-beta.2" }
+clap = { version = "3.1.18", features = ["derive", "env", "cargo"]  }
 error-chain = "0.12"
 git2 = { version = "0.13", default-features = false }
 serde = { version =  "1", features = ["rc", "derive"] }
@@ -17,17 +18,9 @@ toml = "0.5"
 regex = "1"
 toml_edit = "0.2"
 rust-ini = "0.16"
-json = "*"
 reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "rustls-tls-native-roots", "gzip"] }
-indicatif = "0.15"
-mime_guess = "2.0"
-mime = "0.3"
-url = "2.1"
-zip = "0.5"
-libflate = "1.0"
 tempfile = "3.1"
 tokio = { version = "1", features = ["full"] }
-tar = "0.4"
 serde_json = { version = "1", features = ["preserve_order"] }
 
 [dev-dependencies]

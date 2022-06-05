@@ -1,19 +1,11 @@
+use git2::*;
 use log::debug;
 use std::vec::Vec;
 
-use error_chain::bail;
-use git2::*;
-use regex::Regex;
-
-use crate::errors::{Error as CromError, ErrorKind};
+use crate::errors::Error as CromError;
 use crate::version::{Version, VersionMatcher};
 
 type Result<T> = std::result::Result<T, CromError>;
-
-#[derive(Debug)]
-pub enum RepoRemote {
-    GitHub { owner: String, repo: String },
-}
 
 pub fn get_tags(repo: &Repository, matcher: &VersionMatcher) -> Result<Vec<Version>> {
     let tags = repo.tag_names(None)?;
@@ -46,51 +38,4 @@ pub fn get_head_sha(repo: &Repository) -> Result<String> {
         .map(|x| format!("{:02x}", x))
         .collect();
     Ok(strs.join(""))
-}
-
-pub fn get_owner_repo_info(repo: &Repository) -> Result<RepoRemote> {
-    let config = repo.config()?;
-
-    let remote = config.get_string("remote.origin.url")?;
-
-    parse_remote(&remote)
-}
-
-fn parse_remote(remote: &str) -> Result<RepoRemote> {
-    let re =
-        Regex::new("^(https://github.com/|git@github.com:)(?P<owner>.+?)/(?P<repo>.+?)(\\.git)?$")?;
-
-    match re.captures(remote) {
-        Some(matches) => {
-            let owner = matches.name("owner").unwrap().as_str().to_string();
-            let repo = matches.name("repo").unwrap().as_str().to_string();
-
-            Ok(RepoRemote::GitHub { owner, repo })
-        }
-        None => bail!(ErrorKind::UnknownGitRemotes(remote.to_string())),
-    }
-}
-
-#[test]
-fn test_parse_remote_https() {
-    let https = parse_remote("https://github.com/ethankhall/crom");
-    match https {
-        Ok(RepoRemote::GitHub { owner, repo }) => {
-            assert_eq!("ethankhall", owner);
-            assert_eq!("crom", repo);
-        }
-        Err(_) => unreachable!(),
-    };
-}
-
-#[test]
-fn test_parse_remote_git() {
-    let https = parse_remote("git@github.com:ethankhall/crom.git");
-    match https {
-        Ok(RepoRemote::GitHub { owner, repo }) => {
-            assert_eq!("ethankhall", owner);
-            assert_eq!("crom", repo);
-        }
-        Err(_) => unreachable!(),
-    };
 }
