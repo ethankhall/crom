@@ -1,0 +1,90 @@
+name: Publish Image
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  build-for-os:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [linux, macos-x86, macos-aarch64]
+        include:
+        - build: linux
+          os: ubuntu-latest
+          target: x86_64-unknown-linux-gnu
+        - build: macos-x86
+          os: macos-latest
+          target: x86_64-apple-darwin
+        - build: macos-aarch64
+          os: macos-latest
+          target: aarch64-apple-darwin
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-release-${{ hashFiles('ci/cache-version') }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+             ${{ runner.os }}-${{ matrix.target }}-cargo-release-${{ hashFiles('ci/cache-version') }}-
+             ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('ci/cache-version') }}-
+      - name: Install correct version of Rust
+        uses: actions-rs/toolchain@v1
+        with:
+            profile: minimal
+            target: ${{ matrix.target }}
+            override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: -- write-version custom ${{ inputs.version }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose --release --target "${{ matrix.target }}"
+      - run: |
+          ls target/${{ matrix.target }}/*
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}
+          if-no-files-found: error
+          path: |
+            target/${{ matrix.target }}/release/crom
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build-for-os
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v3
+        with:
+          name: aarch64-apple-darwin
+          path: artifacts/aarch64-apple-darwin
+      - uses: actions/download-artifact@v3
+        with:
+          name: x86_64-apple-darwin
+          path: artifacts/x86_64-apple-darwin
+      - uses: actions/download-artifact@v3
+        with:
+          name: x86_64-unknown-linux-gnu
+          path: artifacts/x86_64-unknown-linux-gnu
+      - name: Create release
+        run: |
+          tar -czvf --strip-components 1 linux-gnu-x86_64.tgz artifacts/x86_64-unknown-linux-gnu/crom
+          tar -czvf --strip-components 1 darwin-aarch64.tgz artifacts/aarch64-apple-darwin/crom
+          tar -czvf --strip-components 1 darwin-x86_64.tgz artifacts/x86_64-apple-darwin/crom
+          gh release upload ${{ version }} linux-gnu-x86_64.tgz darwin-aarch64.tgz darwin-x86_64.tgz

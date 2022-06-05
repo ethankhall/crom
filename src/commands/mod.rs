@@ -6,8 +6,6 @@ use std::path::PathBuf;
 
 mod get;
 mod init;
-mod tag;
-mod upload;
 mod utils;
 mod write;
 
@@ -37,16 +35,8 @@ pub async fn run_utils(args: crate::cli::UtilityArgs) -> CromResult<i32> {
     utils::UtilsCommand::run_command(args).await
 }
 
-pub async fn run_tag(args: crate::cli::TagArgs) -> CromResult<i32> {
-    tag::TagCommand::run_command(args).await
-}
-
 pub async fn run_write(args: crate::cli::WriteArgs) -> CromResult<i32> {
     write::WriteCommand::run_command(args).await
-}
-
-pub async fn run_upload(args: crate::cli::UploadArgs) -> CromResult<i32> {
-    upload::UploadCommand::run_command(args).await
 }
 
 pub fn are_you_sure(default: bool) -> CromResult<bool> {
