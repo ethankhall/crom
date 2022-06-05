@@ -1,4 +1,4 @@
-use clap::{ArgGroup, ArgEnum, Parser};
+use clap::{ArgEnum, ArgGroup, Parser};
 use log::LevelFilter;
 
 #[derive(Parser, Debug)]
