@@ -21,6 +21,7 @@ mod version;
 
 use clap::Clap;
 use dotenv::dotenv;
+use human_panic::setup_panic;
 use log::error;
 use std::process;
 
@@ -30,6 +31,7 @@ use crate::cli::*;
 
 #[tokio::main]
 async fn main() {
+    setup_panic!();
     dotenv().ok();
 
     let opt = Opts::parse();

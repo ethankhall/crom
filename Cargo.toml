@@ -2,9 +2,10 @@
 name = "crom"
 version = "999.9.9-SNAPSHOT"
 authors = ["Ethan Hall <ethan@ehdev.io>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
+human-panic = "1.0.3"
 log = "0.4"
 dotenv = "*"
 async-trait = "0.1"
