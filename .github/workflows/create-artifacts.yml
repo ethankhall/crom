@@ -88,7 +88,7 @@ jobs:
         run: |
           ls artifacts/*/*
           mkdir artifacts-to-publish
-          tar -czv --strip-components 1 -f artifacts-to-publish/crom-linux-gnu-x86_64.tgz -C artifacts/x86_64-unknown-linux-gnu crom
-          tar -czv --strip-components 1 -f artifacts-to-publish/crom-darwin-aarch64.tgz -C artifacts/aarch64-apple-darwin crom
-          tar -czv --strip-components 1 -f artifacts-to-publish/crom-darwin-x86_64.tgz -C artifacts/x86_64-apple-darwin crom
+          tar -czv --strip-components 1 -f artifacts-to-publish/crom-${{ inputs.version }}-linux-gnu-x86_64.tgz -C artifacts/x86_64-unknown-linux-gnu crom
+          tar -czv --strip-components 1 -f artifacts-to-publish/crom-${{ inputs.version }}-darwin-aarch64.tgz -C artifacts/aarch64-apple-darwin crom
+          tar -czv --strip-components 1 -f artifacts-to-publish/crom-${{ inputs.version }}-darwin-x86_64.tgz -C artifacts/x86_64-apple-darwin crom
           gh release upload ${{ inputs.version }} artifacts-to-publish/*
