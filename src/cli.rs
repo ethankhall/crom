@@ -1,7 +1,7 @@
-use clap::{ArgGroup, Clap};
+use clap::{ArgGroup, ArgEnum, Parser};
 use log::LevelFilter;
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 #[clap(group = ArgGroup::new("logging"))]
 pub struct LoggingOpts {
     /// A level of verbosity, and can be used multiple times
@@ -40,7 +40,7 @@ pub enum VersionRequest {
     PreRelease,
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 #[clap(author, about, version)]
 pub struct Opts {
     #[clap(subcommand)]
@@ -49,7 +49,7 @@ pub struct Opts {
     pub logging_opts: LoggingOpts,
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub enum SubCommand {
     Init(InitArgs),
     Get(GetArgs),
@@ -60,7 +60,7 @@ pub enum SubCommand {
 }
 
 /// Bootstrap a project
-#[derive(Clap, Debug)]
+#[derive(Parser, ArgEnum, Debug, Clone)]
 pub enum InitBumper {
     #[clap(name = "semver")]
     SemanticVersion,
@@ -68,7 +68,7 @@ pub enum InitBumper {
 }
 
 /// Create a .crom.toml file in the working directory.
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub struct InitArgs {
     /// What logic should the project use to set versions?
     #[clap(arg_enum)]
@@ -76,13 +76,13 @@ pub struct InitArgs {
 }
 
 /// Retrieve information from the current repo
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub struct GetArgs {
     #[clap(subcommand)]
     pub sub_command: GetSubCommand,
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub enum GetSubCommand {
     /// Get the latest version based on the git history.
     #[clap(alias = "latest-version")]
@@ -124,13 +124,13 @@ impl GetSubCommand {
 ///
 /// You mush specify the locations that need to be updated in the
 /// `.crom.toml` file.
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub struct WriteArgs {
     #[clap(subcommand)]
     pub sub_command: WriteSubCommand,
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub enum WriteSubCommand {
     /// Write the latest version
     ///
@@ -164,20 +164,20 @@ impl WriteSubCommand {
     }
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub struct WriteSubCommandArgsCustom {
     /// The custom version to be written.
     pub version: String,
 }
 
 /// Utility that are useful during CI.
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub struct UtilityArgs {
     #[clap(subcommand)]
     pub sub_command: UtilitySubCommand,
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 pub enum UtilitySubCommand {
     /// Verify repo has no tracked changes
     ///

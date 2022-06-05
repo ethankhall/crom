@@ -18,7 +18,7 @@ mod models;
 mod statics;
 mod version;
 
-use clap::Clap;
+use clap::Parser;
 use dotenv::dotenv;
 use human_panic::setup_panic;
 use log::error;
