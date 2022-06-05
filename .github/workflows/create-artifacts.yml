@@ -87,4 +87,4 @@ jobs:
           tar -czvf --strip-components 1 linux-gnu-x86_64.tgz artifacts/x86_64-unknown-linux-gnu/crom
           tar -czvf --strip-components 1 darwin-aarch64.tgz artifacts/aarch64-apple-darwin/crom
           tar -czvf --strip-components 1 darwin-x86_64.tgz artifacts/x86_64-apple-darwin/crom
-          gh release upload ${{ version }} linux-gnu-x86_64.tgz darwin-aarch64.tgz darwin-x86_64.tgz
+          gh release upload ${{ inputs.version }} linux-gnu-x86_64.tgz darwin-aarch64.tgz darwin-x86_64.tgz
