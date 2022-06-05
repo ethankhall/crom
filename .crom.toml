@@ -1,19 +1,5 @@
-pattern = 'v0.3.%d'
+pattern = 'v0.4.%d'
 message-template = "Created {version} for release."
 
 [cargo]
 
-[artifact.windows]
-paths = { "crom.exe" = "windows/crom.exe" }
-compress = { name = "crom-windows.zip", format = "zip" }
-target = "GitHub"
-
-[artifact.mac]
-paths = {crom = "mac/crom"}
-compress = { name = "crom-mac.tar.gz", format = "tgz" }
-target = "GitHub"
-
-[artifact.linux]
-paths = {crom = "linux/crom"}
-compress = { name = "crom-linux-musl.tar.gz", format = "tgz" }
-target = "GitHub"
