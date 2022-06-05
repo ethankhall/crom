@@ -87,7 +87,8 @@ jobs:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           ls artifacts/*/*
-          tar -czv --strip-components 1 -f linux-gnu-x86_64.tgz artifacts/x86_64-unknown-linux-gnu/crom
-          tar -czv --strip-components 1 -f darwin-aarch64.tgz artifacts/aarch64-apple-darwin/crom
-          tar -czv --strip-components 1 -f darwin-x86_64.tgz artifacts/x86_64-apple-darwin/crom
-          gh release upload ${{ inputs.version }} linux-gnu-x86_64.tgz darwin-aarch64.tgz darwin-x86_64.tgz
+          mkdir artifacts-to-publish
+          tar -czv --strip-components 1 -f artifacts-to-publish/crom-linux-gnu-x86_64.tgz -C artifacts/x86_64-unknown-linux-gnu crom
+          tar -czv --strip-components 1 -f artifacts-to-publish/crom-darwin-aarch64.tgz -C artifacts/aarch64-apple-darwin crom
+          tar -czv --strip-components 1 -f artifacts-to-publish/crom-darwin-x86_64.tgz -C artifacts/x86_64-apple-darwin crom
+          gh release upload ${{ inputs.version }} artifacts-to-publish/*
