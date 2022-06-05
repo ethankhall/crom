@@ -28,6 +28,8 @@ jobs:
           override: true
       - name: create pre-release
         id: version
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           VERSION=$(cargo run -- get pre-release)
           gh release create $VERSION --generate-notes --prerelease --target $(git rev-parse HEAD)
