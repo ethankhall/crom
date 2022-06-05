@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use error_chain::bail;
-use log::{debug, error, log_enabled, trace};
+use log::{debug, error, info, log_enabled, trace};
 use std::path::PathBuf;
 
 use git2::Repository;
@@ -39,7 +39,19 @@ impl super::CommandRunner<UploadArgs> for UploadCommand {
 
         for name in args.sub_command.artifact_names() {
             match config.artifact.get(&name) {
-                Some(artifact) => artifacts.push(artifact.clone()),
+                Some(artifact) => {
+                    info!(
+                        "Searching for artifact named {} with files {}",
+                        name,
+                        artifact
+                            .paths
+                            .values()
+                            .map(String::to_string)
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    );
+                    artifacts.push(artifact.clone())
+                }
                 None => {
                     error!("Could not find artifact {} in .crom.toml", &name);
                     bail!(ErrorKind::ArtifactMissing(name.to_string()))
@@ -48,8 +60,8 @@ impl super::CommandRunner<UploadArgs> for UploadCommand {
         }
 
         upload_artifacts(
-            &owner,
-            &repo,
+            owner,
+            repo,
             &version,
             artifacts,
             artifact_path,
@@ -85,7 +97,7 @@ async fn upload_artifacts(
     for art in artifacts {
         let res = match art.target {
             ProjectArtifactTarget::GitHub => {
-                let client = github::GithubClient::new(&owner, &repo, &auth);
+                let client = github::GithubClient::new(owner, repo, &auth);
                 client
                     .make_upload_request(version, art, root_artifact_path.clone())
                     .await

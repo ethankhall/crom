@@ -33,7 +33,7 @@ impl super::CommandRunner<TagArgs> for TagCommand {
             let (owner, repo) = match &remote {
                 git_repo::RepoRemote::GitHub { owner, repo } => (owner, repo),
             };
-            tag_github(&head, &owner, &repo, &version, &message, &github_token).await?;
+            tag_github(&head, owner, repo, &version, &message, github_token).await?;
         }
 
         if args.sub_command.target_local() {
@@ -81,7 +81,7 @@ pub async fn tag_github(
 
     let body_text = body.dump();
 
-    let request = make_post(&url, make_github_auth_headers(&auth)?, body_text)?;
+    let request = make_post(&url, make_github_auth_headers(auth)?, body_text)?;
 
     trace!("Request {:?}", &request);
     let res = client().execute(request).await.unwrap();
@@ -108,7 +108,7 @@ pub async fn tag_github(
 fn tag_local(repo: &Repository, version: &Version, message: &str) -> CromResult<()> {
     use git2::*;
 
-    let head = git_repo::get_head_sha(&repo)?;
+    let head = git_repo::get_head_sha(repo)?;
     let sig = git2::Signature::now("crom", "cli@crom.tech")?;
 
     let head_obj = repo.find_object(Oid::from_str(&head)?, Some(ObjectType::Commit))?;

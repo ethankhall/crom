@@ -89,9 +89,9 @@ fn default_propery_file_path() -> String {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum ProjectArtifactCompressionFormat {
     #[serde(alias = "zip", alias = "ZIP")]
-    ZIP,
-    #[serde(alias = "tgz", alias = "tar.gz")]
-    TGZ,
+    Zip,
+    #[serde(alias = "tgz", alias = "TGZ", alias = "tar.gz")]
+    Tgz,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -129,7 +129,7 @@ path = \"path/to/version.py\"
 path = \"path/to/property-file.properties\"
 ";
 
-    let config = toml::from_str::<CromConfig>(&example_text).unwrap();
+    let config = toml::from_str::<CromConfig>(example_text).unwrap();
     println!("config: {:?}", config);
     assert_eq!(Some(CargoConfig { directory: None }), config.project.cargo);
     assert_eq!(Some(MavenConfig {}), config.project.maven);

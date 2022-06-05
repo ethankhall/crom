@@ -25,7 +25,7 @@ async fn can_tag_version() {
     let tmp_dir = tmp_dir.path().to_owned();
     lib::checkout_repo(tmp_dir.clone());
 
-    let mut builder = tmp_dir.to_path_buf();
+    let mut builder = tmp_dir;
     builder.push("example-1");
 
     println!("Finished clone");

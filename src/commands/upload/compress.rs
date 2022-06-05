@@ -22,8 +22,8 @@ pub fn compress_files(
 ) -> CromResult<()> {
     debug!("Compressing {:?} into {:?}", root_path, output_file);
     match format {
-        ProjectArtifactCompressionFormat::ZIP => zip(output_file, root_path, artifacts),
-        ProjectArtifactCompressionFormat::TGZ => tgz(output_file, root_path, artifacts),
+        ProjectArtifactCompressionFormat::Zip => zip(output_file, root_path, artifacts),
+        ProjectArtifactCompressionFormat::Tgz => tgz(output_file, root_path, artifacts),
     }
 }
 
@@ -52,7 +52,7 @@ fn zip(
         if !art_path.exists() {
             bail!(ErrorKind::CompressionError(format!(
                 "Unable to find artifact at {}",
-                art_path.to_str().unwrap().to_string()
+                art_path.to_str().unwrap()
             )))
         }
 

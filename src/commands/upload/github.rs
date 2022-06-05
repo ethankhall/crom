@@ -69,7 +69,7 @@ impl<'a> GithubClient {
         let compressed_name = compresion.name.to_string();
         let file = tempfile::NamedTempFile::new()?;
 
-        super::compress::compress_files(&file, root_path, &artifacts, &compresion.format)?;
+        super::compress::compress_files(&file, root_path, artifacts, &compresion.format)?;
         let request =
             self.build_request(upload_url, &compressed_name, file.path().to_path_buf())?;
         file.close()?;
@@ -90,7 +90,7 @@ impl<'a> GithubClient {
             let mut path = root_path.clone();
             path.push(art_path);
 
-            let request = self.build_request(upload_url, &name, path)?;
+            let request = self.build_request(upload_url, name, path)?;
             upload_requests.push(ArtifactContainer::new(request, name.to_string()));
         }
 

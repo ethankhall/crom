@@ -2,7 +2,7 @@ use super::*;
 
 impl VersionMatcher {
     pub fn new(pattern: &str) -> Self {
-        let split: Vec<&str> = pattern.split('.').collect();
+        let split = pattern.split('.');
         let parts: Vec<VersionComponent> = split
             .into_iter()
             .map(|x| match x {

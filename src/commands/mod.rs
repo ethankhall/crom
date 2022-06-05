@@ -84,7 +84,7 @@ async fn create_version(request: VersionRequest) -> CromResult<(Version, PathBuf
     let mut head = git_repo::get_head_sha(&repo)?;
     head.truncate(7);
 
-    let version = build_version(request, head, &latest_version);
+    let version = build_version(request, head, latest_version);
 
     Ok((version, location, config))
 }
