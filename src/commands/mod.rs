@@ -71,7 +71,7 @@ async fn create_version(request: VersionRequest) -> CromResult<(Version, PathBuf
     let default_version = matcher.build_default_version();
     let latest_version = versions.last().unwrap_or(&default_version);
 
-    let mut head = git_repo::get_head_sha(&repo)?;
+    let mut head = git_repo::get_head_sha(location.clone(), &repo)?;
     head.truncate(7);
 
     let version = build_version(request, head, latest_version);

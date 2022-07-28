@@ -1,6 +1,9 @@
 use git2::*;
 use log::debug;
 use std::vec::Vec;
+use error_chain::bail;
+use crate::errors::ErrorKind;
+use std::path::PathBuf;
 
 use crate::errors::Error as CromError;
 use crate::version::{Version, VersionMatcher};
@@ -28,8 +31,14 @@ pub fn is_working_repo_clean(repo: &Repository) -> Result<bool> {
     Ok(statuses.is_empty())
 }
 
-pub fn get_head_sha(repo: &Repository) -> Result<String> {
-    let head = repo.head()?.peel_to_commit()?;
+pub fn get_head_sha(location: PathBuf, repo: &Repository) -> Result<String> {
+    let head = match repo.head()?.target() {
+        Some(head) => head,
+        None => bail!(ErrorKind::UnknownGitHead(location))
+    };
+
+    let head = repo.find_commit(head)?;
+
     let strs: Vec<String> = head
         .id()
         .as_bytes()
