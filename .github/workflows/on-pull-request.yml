@@ -41,6 +41,12 @@ jobs:
     with:
       version: ${{ needs.create-release.outputs.version }}
 
+  docker-publish:
+    uses: ./.github/workflows/docker-build.yml
+    needs: create-release
+    with:
+      version: ${{ needs.create-release.outputs.version }}
+
   check:
     name: Check
     runs-on: ubuntu-latest
