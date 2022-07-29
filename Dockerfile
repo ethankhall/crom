@@ -11,8 +11,10 @@ RUN rm src/*.rs
 
 ADD . ./
 
+ARG VERSION=0.0.1-dev
+
 RUN rm ./target/release/deps/crom*
-RUN cargo run --release --features gh-cli -- write-version next-release
+RUN cargo run --release --features gh-cli -- write-version custom ${VERSION}
 RUN cargo run --release  --features gh-cli -- gh --help
 RUN cargo build --release --features gh-cli
 
