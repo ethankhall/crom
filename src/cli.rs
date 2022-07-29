@@ -57,6 +57,8 @@ pub enum SubCommand {
     WriteVersion(WriteArgs),
     #[clap(name = "util", alias = "utility", alias = "utilities")]
     Utility(UtilityArgs),
+    #[clap(name = "gh")]
+    GitHub(GitHubCli)
 }
 
 /// Bootstrap a project
@@ -184,4 +186,12 @@ pub enum UtilitySubCommand {
     /// If there are any changes to tracked files, the CLI will return
     /// with a non-zero exit code.
     VerifyNoChanges,
+}
+
+/// Execute the official GitHub CLI
+#[derive(Parser, Debug)]
+#[clap(allow_missing_positional = true, disable_help_flag = true, disable_help_subcommand = true, allow_hyphen_values = true)]
+pub struct GitHubCli {
+    #[clap(multiple_values = true)]
+    pub args: Vec<String>
 }

@@ -23,6 +23,7 @@ use dotenv::dotenv;
 use human_panic::setup_panic;
 use log::error;
 use std::process;
+use std::process::Command;
 
 pub type CromResult<T> = Result<T, crate::errors::Error>;
 
@@ -42,6 +43,7 @@ async fn main() {
         SubCommand::Get(args) => crate::commands::run_get(args).await,
         SubCommand::WriteVersion(args) => crate::commands::run_write(args).await,
         SubCommand::Utility(args) => crate::commands::run_utils(args).await,
+        SubCommand::GitHub(gh) => run_gh(gh)
     };
 
     let exit_code = match result {
@@ -53,4 +55,9 @@ async fn main() {
     };
 
     process::exit(exit_code);
+}
+
+fn run_gh(gh: cli::GitHubCli) -> CromResult<i32> {
+    let exit_status = Command::new("gh").args(gh.args).spawn()?.wait()?;
+    Ok(exit_status.code().unwrap_or(1))
 }
