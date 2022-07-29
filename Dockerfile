@@ -13,10 +13,10 @@ ADD . ./
 
 RUN rm ./target/release/deps/crom*
 RUN cargo run --release --features gh-cli -- write-version next-release
-RUN cargo run --release  --features gh-cli-- gh --help
+RUN cargo run --release  --features gh-cli -- gh --help
 RUN cargo build --release --features gh-cli
 
-FROM alpine:3.16
+FROM alpine:3.16 as release
 
 RUN apk add --no-cache ca-certificates openssl tzdata github-cli
 COPY --from=builder /crom/target/release/crom /usr/bin/crom
@@ -25,4 +25,5 @@ WORKDIR /target
 
 ENTRYPOINT ["/usr/bin/crom"]
 
+# Run basic test
 RUN crom --help && crom gh --help
