@@ -35,4 +35,4 @@ jobs:
           context: .
           build-args: VERSION=${{ inputs.version }}
           push: true
-          tags: ${{ inputs.version }}
+          tags: ghcr.io/ethankhall/crom/cli:${{ inputs.version }}
