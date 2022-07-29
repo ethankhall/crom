@@ -1,9 +1,9 @@
+use crate::errors::ErrorKind;
+use error_chain::bail;
 use git2::*;
 use log::debug;
-use std::vec::Vec;
-use error_chain::bail;
-use crate::errors::ErrorKind;
 use std::path::PathBuf;
+use std::vec::Vec;
 
 use crate::errors::Error as CromError;
 use crate::version::{Version, VersionMatcher};
@@ -34,7 +34,7 @@ pub fn is_working_repo_clean(repo: &Repository) -> Result<bool> {
 pub fn get_head_sha(location: PathBuf, repo: &Repository) -> Result<String> {
     let head = match repo.head()?.target() {
         Some(head) => head,
-        None => bail!(ErrorKind::UnknownGitHead(location))
+        None => bail!(ErrorKind::UnknownGitHead(location)),
     };
 
     let head = repo.find_commit(head)?;

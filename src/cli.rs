@@ -57,8 +57,9 @@ pub enum SubCommand {
     WriteVersion(WriteArgs),
     #[clap(name = "util", alias = "utility", alias = "utilities")]
     Utility(UtilityArgs),
+    #[cfg(feature = "gh-cli")]
     #[clap(name = "gh")]
-    GitHub(GitHubCli)
+    GitHub(GitHubCli),
 }
 
 /// Bootstrap a project
@@ -188,10 +189,16 @@ pub enum UtilitySubCommand {
     VerifyNoChanges,
 }
 
+#[cfg(feature = "gh-cli")]
 /// Execute the official GitHub CLI
 #[derive(Parser, Debug)]
-#[clap(allow_missing_positional = true, disable_help_flag = true, disable_help_subcommand = true, allow_hyphen_values = true)]
+#[clap(
+    allow_missing_positional = true,
+    disable_help_flag = true,
+    disable_help_subcommand = true,
+    allow_hyphen_values = true
+)]
 pub struct GitHubCli {
     #[clap(multiple_values = true)]
-    pub args: Vec<String>
+    pub args: Vec<String>,
 }
