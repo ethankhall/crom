@@ -39,6 +39,11 @@ error_chain! {
             display("Unable to determine git repo from remote: {}", t)
         }
 
+        UnknownGitHead(t: ::std::path::PathBuf) {
+            description("Unable to decode head")
+            display("Unable to decode head from repo {}", t.display())
+        }
+
         FileNotFound(t: ::std::path::PathBuf) {
             description("File not found")
             display("File not found: {:?}", t)
